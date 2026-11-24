@@ -1,0 +1,128 @@
+CHAOS METER - 09 NONFUNCTIONAL REQUIREMENTS
+Planning baseline 0.1 - November 24, 2026
+Related: 06 (journey alerts), 08 (constrained networks), 11
+
+Delivery scope: test keyboard access, mobile layout and legible data states in Sprints 1-3. Recheck saved-data privacy in Sprint 4 and journey permissions in Sprint 8.
+
+Requirements are proposed unless marked otherwise.
+
+======================================================================
+1. ACCESSIBILITY
+======================================================================
+
+  Accessibility is part of the architecture, not a finishing touch.
+  [ACCEPTED]
+
+  Requirement                    Observable check
+  -----------------------------  -----------------------------------------
+  Keyboard use                   every essential action (navigate views,
+                                 filter, refresh, open vehicle details,
+                                 save, start/end tracking) works with
+                                 keyboard only; visible focus
+  Screen readers                 departures, alerts, scores, journey
+                                 progress announced as text; live
+                                 changes announced politely, not on
+                                 every vehicle tick
+  Non-map alternative            a list of vehicles (route, direction,
+                                 status, next stop) and of stations with
+                                 departures carries the same information
+                                 as the map
+  Not colour alone               route, severity, LIVE/SCHEDULED/STALE,
+                                 and score bands carry text or symbols
+  Reduced motion                 honours the system reduced-motion
+                                 setting; no animated marker movement
+                                 when set
+  Text scaling                   usable at 200% text size without lost
+                                 content
+  Accessible warnings            get-off and disruption warnings offer
+                                 visual, sound, and vibration where the
+                                 browser allows; rider chooses
+  Station accessibility          show facility info and elevator/
+                                 escalator outages where data exists
+  Step-free preference           optional; affects relevance and commute
+                                 scoring (06)
+
+======================================================================
+2. PRIVACY
+======================================================================
+
+  Keep personal journeys on the device. Collect public service observations centrally.
+
+  Data                          Handling
+  ----------------------------  ------------------------------------------
+  Saved stops and journeys      on the device                 [ACCEPTED]
+  Accessibility preferences     on the device
+  Current location              optional; used only when asked [ACCEPTED]
+  Journey history               optional; on the device
+  Public transit observations   central history (07)
+  Accounts                      not required                   [ACCEPTED]
+
+  - Riders can view, edit, and delete everything saved, in one place.
+  - Private journeys are never written into public transit history.
+  - No location history is collected by default.
+
+======================================================================
+3. SECURITY
+======================================================================
+
+  - MBTA API key (if used) never shipped to the browser; kept out of
+    source control.
+  - Validate all incoming MBTA data; sanitize all user input (search,
+    journey names).
+  - Any public endpoint we expose has rate limiting and abuse protection.
+  - HTTPS only.
+  - Least-privilege access to any database.
+  - Logs exclude personal data.
+  - Dependency vulnerability scanning.
+  - A short threat model listing risks, mitigations, and what remains.
+
+======================================================================
+4. CONSTRAINED NETWORKS AND COST
+======================================================================
+
+  - Someone on a weak phone connection should still get their next
+    departure: load departures before the map and analytics.
+  - Update individual entities instead of re-rendering whole views.
+  - Reduce background activity on mobile.
+  - External API usage stays roughly independent of user count (shared
+    ingestion, 02).
+  - Normal transit operation must not require paid AI calls.
+
+======================================================================
+5. MAINTAINABILITY                                        [PROPOSED]
+======================================================================
+
+  - Desktop and mobile share one data model and components; no
+    parallel, inconsistent models.
+  - Scoring model is versioned and swappable without redesigning the
+    app (03).
+  - Adding bus, commuter rail, or ferry must not require rewriting
+    subway logic; regression tests protect subway behaviour (08).
+  - Security controls are not described as implemented until verified.
+
+======================================================================
+6. PERFORMANCE TARGETS                                  [UNVALIDATED]
+======================================================================
+
+  Targets. They are device- and network-dependent
+  aspirations, not measured results.
+
+  Target                        Value        How to measure
+  ----------------------------  -----------  ------------------------------
+  Initial load                  < 2 s        lab test on a stated device
+                                             and throttled connection;
+                                             time to first useful content
+  Cached view switch            < 300 ms     from navigation input to
+                                             next view rendered, data
+                                             already held
+  Vehicle filtering             < 200 ms     from filter change to map and
+                                             list updated
+  Station search                < 300 ms     keystroke to results shown
+  Map interaction               60 FPS goal  frame timing during pan/zoom
+                                             with full vehicle load
+  Saved commute access          immediate    from local storage, no network
+                                             wait for the list itself
+  Live updates                  no full page reload
+
+  Each measurement must record device, browser, network profile, and
+  data volume. Report misses honestly.

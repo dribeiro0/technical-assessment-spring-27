@@ -1,0 +1,187 @@
+CHAOS METER - 02 FUNCTIONAL ARCHITECTURE
+Planning baseline 0.1 - November 24, 2026
+Related: 03-08, 11_visual_mapping.txt
+
+Delivery scope: Sprints 1-3 use live data and shared view state. Sprint 4 adds local preferences, Sprint 6 adds continuous history, and Sprint 7 uses that history for validation.
+
+These are logical responsibilities. They are not services, processes,
+frameworks, databases, or hosting choices. All of those are [DEFERRED]
+to engineering.
+
+======================================================================
+1. PIPELINE
+======================================================================
+
+  +------------------------------------------------------------------+
+  | OFFICIAL MBTA DATA (V3 API)                                       |
+  | routes, route_patterns, lines, stops, trips, shapes, schedules,  |
+  | services, vehicles, predictions, alerts, facilities,             |
+  | live_facilities, stop_events                                     |
+  +-------------------------------+----------------------------------+
+                                  |
+                                  v
+  +------------------------------------------------------------------+
+  | RETRIEVAL         one shared intake, not one per user or per view |
+  |                   respects rate limits, prioritizes live data     |
+  +-------------------------------+----------------------------------+
+                                  v
+  +------------------------------------------------------------------+
+  | VALIDATION        required fields, timestamps, ordering, IDs      |
+  |                   rejects or flags malformed / out-of-order data  |
+  +-------------------------------+----------------------------------+
+                                  v
+  +------------------------------------------------------------------+
+  | NORMALIZATION     common entity model, source + retrieval time,   |
+  |                   dedup of repeated observations                  |
+  +---------------+-------------------------------+------------------+
+                  |                               |
+                  v                               v
+  +-------------------------------+   +------------------------------+
+  | CURRENT STATE                 |   | HISTORY                      |
+  | latest known vehicles,        |   | raw observations (bounded),  |
+  | predictions, alerts, health   |   | significant events,          |
+  | + freshness per source        |   | aggregates, explicit gaps    |
+  +---------------+---------------+   +---------------+--------------+
+                  |                                   |
+                  +----------------+------------------+
+                                   v
+  +------------------------------------------------------------------+
+  | INTELLIGENCE                                                      |
+  |  Transit: vehicle <-> trip <-> route/branch <-> stop progress     |
+  |  Prediction: official first, schedule fallback, evaluation        |
+  |  Alerts: official notices + detected irregularities, lifecycle    |
+  |  Chaos: network / route / commute scores with confidence          |
+  |  Analytics: public trends, internal research metrics             |
+  |  Commute: matches the above to a person's saved journey          |
+  +-------------------------------+----------------------------------+
+                                  v
+  +------------------------------------------------------------------+
+  | SHARED VIEW STATE  filters, selection, followed vehicle, mode,    |
+  |                    freshness labels, connection status            |
+  +---------------+--------------------------------+-----------------+
+                  v                                v
+        COMMAND CENTER                     COMMUTER COMPANION
+                  ^                                ^
+                  +------- PRIVATE PREFERENCES ----+
+                   (device-local by default; never mixed into
+                    public history)
+
+Transit Intelligence [ACCEPTED] connects
+Prediction and Alerts by comparing expected with observed conditions.
+It is a responsibility inside INTELLIGENCE, not a separate service
+unless engineering decides so.
+
+======================================================================
+2. ENTITY RELATIONSHIPS
+======================================================================
+
+  LINE (e.g. Green Line)
+    1 -- * ROUTE (Green-B, Green-C, Green-D, Green-E)        branches
+             1 -- * ROUTE_PATTERN (typical / variant service)
+             1 -- 2 DIRECTION (direction_id 0 / 1, names per route)
+             1 -- * TRIP (one run in one direction on one service day)
+                      1 -- 1 SHAPE (geometry for the map)
+                      1 -- * SCHEDULED STOP TIME (/schedules)
+                      1 -- * PREDICTION (/predictions, per stop)
+                      0..1 VEHICLE currently running it (/vehicles)
+                      1 -- * STOP EVENT (observed arrival/departure,
+                                         /stop_events; coverage to verify)
+  STATION (parent stop)
+    1 -- * PLATFORM / CHILD STOP (direction- or branch-specific)
+    1 -- * FACILITY (elevator, escalator)  -- live status
+  ALERT
+    * -- * INFORMED ENTITY (route, route type, stop, trip, direction,
+                            facility, activities)
+    1 -- * ACTIVE PERIOD
+
+Key points:
+  - A vehicle's next stop comes from its trip and current stop sequence,
+    not from geometry. If the trip or sequence is missing, the next stop
+    is unknown, not guessed.
+  - Departures are asked for at a station but answered per platform and
+    direction. A station-level answer must not mix directions.
+  - Alerts attach to entities, not to text. Relevance is computed from
+    informed entities, never from keyword matching alone.
+
+======================================================================
+3. HOW A CHANGED INPUT REACHES THE SCREEN
+======================================================================
+
+  Example A: vehicle moves
+    /vehicles update for vehicle V (new lat/lon, current_status,
+    stop sequence, updated_at)
+      -> validate: updated_at newer than stored? else drop as stale/out
+         of order
+      -> current state: replace V's record; keep V's identity
+      -> transit: recompute next stop from trip + sequence
+      -> view state: if V is selected or followed, keep selection; do
+         not reset map
+      -> map marker V moves; popup (if open) updates next stop and
+         "updated N s ago"
+
+  Example B: prediction revised
+    /predictions update for trip T at stop S
+      -> store new prediction with its issue (retrieval) time; keep the
+         earlier one in history
+      -> departures list at S updates for that direction
+      -> commute companion: countdown and departure recommendation
+         recalculated
+      -> intelligence: revision added to the stability signal for T's
+         route (05)
+
+  Example C: alert becomes active
+    /alerts: alert A, active period now includes the current time
+      -> lifecycle upcoming -> active (05)
+      -> affected routes/stops/directions resolved from informed
+         entities
+      -> route and network Chaos inputs updated; scores recomputed only
+         for affected scopes (03)
+      -> alerts view reorders by passenger impact
+      -> saved commutes crossing the affected segment show the alert;
+         others do not
+
+  Example D: a source goes silent
+    no successful /predictions retrieval within the expected window
+      -> prediction health: delayed, then stale (08)
+      -> departures labeled stale with age; scheduled times shown only
+         when labeled "scheduled"
+      -> Chaos inputs that depend on predictions marked unavailable;
+         confidence drops; score never treats silence as "no problems"
+
+======================================================================
+4. THREE KINDS OF STATE                                   [ACCEPTED]
+======================================================================
+
+  CURRENT PUBLIC TRANSIT STATE
+    What is happening now. Shared by every viewer. Replaced as new data
+    arrives. Carries freshness.
+
+  HISTORICAL OBSERVATIONS
+    What has been observed. Collected continuously whether or not anyone
+    is visiting (07). Append-only events and aggregates. Carries source
+    time, retrieval time, coverage, and model version for derived
+    results. Contains no information about individual users.
+
+  PRIVATE USER PREFERENCES
+    Saved stops, journeys, directions, accessibility preferences,
+    selected mode. Stored on the person's device by default. No account
+    required. Never written into public history.
+
+======================================================================
+5. REFRESH EXPECTATIONS                                   [PROPOSED]
+======================================================================
+
+Proposed freshness targets. Polling intervals remain open.
+
+  Vehicle positions        every 5-15 s, subject to source updates
+  Predictions              every 10-20 s
+  Active alerts            every 30-60 s
+  Chaos scores             when relevant inputs change
+  Live analytics           every 30-60 s or on meaningful change
+  Routes, stops, schedules infrequently / on service change
+  User preferences         immediately on change
+
+Engineering must check MBTA update frequency, rate limits (requests
+without an API key are limited per IP; responses carry x-ratelimit-*
+headers), and whether streaming is suitable. Navigating between views
+should not refetch data already held.

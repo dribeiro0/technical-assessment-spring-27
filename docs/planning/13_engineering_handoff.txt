@@ -1,0 +1,20 @@
+Chaos Meter | Engineering handoff
+Planning baseline 0.1 | November 24, 2026 | Draft for review
+
+Release scope
+Deliver a responsive, single-page MBTA dashboard for commuters and transit enthusiasts. Sprints 1–3 form the complete assessment. Sprint 4 may add a saved stop, direction and official departures once the core passes its checks. Sprints 5–9 cover the longer-term product. Historical collection, custom scoring and journey monitoring have no dependencies that must ship in the assessment release.
+
+Sprint 1 — Live Map
+Open on an interactive Greater Boston map on both desktop and phone. Show a title, a short description and live subway vehicle markers from the official MBTA V3 /vehicles endpoint. Use a wide desktop toolbar and a compact phone control row. Each marker must correspond to a vehicle with usable coordinates.
+
+Sprint 2 — Vehicle details and controls
+Selecting a marker shows route, direction, status and next stop where known. Distinguish “At [stop]” from “Approaching [stop]” using evidence from the feed. Show “Next stop unavailable” when the next stop cannot be established. Provide a line filter, manual refresh and last successful update time. Distinguish an empty filter result from a failed refresh. On failure, retain the last successful data and timestamp if available.
+
+Sprint 3 — Analytics and submission
+Switch between Live Map and Analytics without a full browser reload. Preserve the map’s filter on return. The chart, “Active vehicles by subway line,” compares all in-scope subway lines regardless of that filter. Combine Green branches into one bar. Verify keyboard operation and phone layout. Deploy the frontend and any backend used. Submit the fork-based PR with working deployment and screen-recording links and the completed template by November 29, 2026 at 11:59 p.m. Boston time.
+
+Engineering design requested for review
+Recommend a stack, map and chart libraries, application structure, shared state, refresh behavior, deployment and tests. Explain how each major choice serves this release. Address the mapping-library wording in both assessment files. Include a compact data-flow diagram and trace one real MBTA vehicle through its marker, popup and contribution to the chart. Identify any additional records needed to resolve the route, direction or stop. Define vehicle inclusion, deduplication and freshness so the counts can be reproduced. Document missing-field and first-load failure behavior. Flag assumptions that still need a live-data check.
+
+Acceptance and review
+Map the technical design to R1–R10 in 10_assessment_audit.txt. Review that design before implementation. The root README.md defines the assessment, pr_template.md defines the submission fields, and section 5 of 00_master_plan.txt records the accepted interface behavior.

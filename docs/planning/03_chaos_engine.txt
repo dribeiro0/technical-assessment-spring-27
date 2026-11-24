@@ -1,0 +1,361 @@
+CHAOS METER - 03 CHAOS ENGINE
+Planning baseline 0.1 - November 24, 2026
+Related: 05_alerts_and_intelligence.txt, 07_analytics_and_data.txt,
+         08_reliability_and_recovery.txt, 12_decision_log.txt DEC-006
+
+Delivery scope: Sprint 7, after Sprint 6 establishes historical observations. The Sprint 3 vehicle-count chart is independent of scoring.
+
+No weight, threshold, or band in this file is calibrated. Every number
+below is a [PROPOSED] starting point or a [MOCK] example. None of the
+cited sources established any of the candidate percentages.
+
+======================================================================
+1. WHAT "CHAOS" MEANS                                     [ACCEPTED]
+======================================================================
+
+Chaos measures how unreliable and disruptive the system is for
+passengers, not how many things are going wrong.
+
+  - Ten minor delays should not automatically outweigh one suspension.
+  - Fewer trains at midnight is not chaos if that is the scheduled
+    service.
+  - Missing data is not good service.
+
+
+The scoring method requires research and empirical validation. All candidate weights remain provisional.
+
+======================================================================
+2. HOW THE MODEL EVOLVED
+======================================================================
+
+Candidate A - early illustrative simulator                 [MOCK]
+
+    Factor                       Weight   Simulator value
+    Disruption severity            35%       40/100
+    Affected network coverage      20%       25/100
+    Measurable delays              25%       30/100
+    Service suspensions            20%        0/100
+    Displayed result: 27/100, labelled "Moderate chaos"
+    (0.35x40 + 0.20x25 + 0.25x30 + 0.20x0 = 26.5)
+
+  Purpose: show what an explainable score could look like.
+  Weakness: almost entirely alert-driven; coverage and severity overlap;
+  "measurable delays" undefined.
+  Note: its "Moderate" label at 27 disagrees with the later bands below
+  (20-39 = "Minor chaos"). Severity labels remain open.
+
+Candidate B - five pillars                                 [PROPOSED]
+
+    Pillar                 Weight  Measures
+    Service disruptions      30%   suspensions, closures, shuttles, detours
+    Schedule deviation       25%   predicted/observed vs scheduled
+    Service frequency        20%   long gaps and bunching
+    Disruption coverage      15%   share of network/route affected
+    Service availability     10%   expected service actually operating
+
+  Simulator example [MOCK]: 40, 30, 50, 20, 10 -> about 34/100.
+  Change from A: moves from "count alerts" to "measure service the
+  passenger receives", and introduces time-of-day expectations and the
+  idea that bunching can be chaotic without any official alert.
+  Disruption type ranking proposed: suspension (critical) > station
+  closure (very high) > shuttle / significant delay (high) > detour
+  (moderate-high) > minor delay (low) > informational (minimal).
+  Planned future disruptions do not count until active.
+
+Candidate C - research-informed starting proposal          [PROPOSED]
+  Candidate weights require calibration against passenger outcomes.
+
+    Factor                     Weight
+    Excess waiting time          30%
+    Service disruptions          25%
+    Excess travel time           20%
+    Service unpredictability     15%
+    Service availability         10%
+
+  Disruption coverage is removed as a weighted factor. It becomes an
+  exposure modifier: it scales how much an individual disruption
+  contributes to a route or network score. This reduces double
+  counting (a suspension is already "severe"; counting its coverage
+  separately counts it twice).
+  Change from B: reframes the core around time lost by passengers
+  (waiting and riding), which is what both the MBTA's Excess Trip Time
+  metric and Furth & Muller's work measure.
+
+Factor definitions for candidate C [PROPOSED; measurability per input
+UNVALIDATED]. Each factor is normalized to 0-100 before weighting.
+
+  Excess waiting     extra waiting vs expected service. Inputs: scheduled
+                     and observed headways, headway variability, gaps,
+                     missing departures, prediction changes.
+  Service disruptions impact of suspensions, partial closures, shuttles,
+                     station closures, detours, significant delays,
+                     accessibility disruptions. Alert count alone is not
+                     a measure.
+  Excess travel time extra in-vehicle or journey time vs expected.
+                     Inputs: scheduled and typical travel time, observed
+                     movement, long dwells, segment delays.
+  Unpredictability   how hard service is to anticipate. Inputs: headway
+                     variability, prediction revisions and errors,
+                     irregular spacing, unexpected service changes.
+  Availability       whether expected service is running. Inputs:
+                     expected vs observed trips, suspended segments,
+                     frequency reductions, geographic gaps.
+
+  Conceptual combination (candidate C, not validated):
+    score = 0.30 W + 0.25 D + 0.20 T + 0.15 U + 0.10 A
+  Note the overlap: headway variability feeds both W and U, and one
+  incident can raise all five. Section 5 (correlated evidence) applies.
+
+Why it evolved, in one line: from a demo of explainability (A), to a
+passenger-service view (B), to a time-lost view grounded in published
+reliability measures (C).
+
+======================================================================
+3. HOW TO COMPARE CANDIDATES                              [PROPOSED]
+======================================================================
+
+  1. Freeze each candidate as a versioned model (A, B, C, later ones).
+  2. Replay the same historical periods through all of them.
+  3. Compare against a passenger-relevant outcome measured
+     independently of the score (for example observed excess wait or
+     excess trip time for the same scope and period).
+  4. Report agreement (rank correlation, error by band), behaviour on
+     the scenario tests in section 9, and sensitivity (section 8).
+  5. Prefer the simpler model when performance is similar.
+  A candidate cannot be compared until history exists. Until then the
+  live score must be labelled experimental.
+
+======================================================================
+4. SCOPES                                                 [ACCEPTED]
+======================================================================
+
+  NETWORK   whole MBTA (or the modes in scope)
+  ROUTE     one route or branch, optionally one direction
+  COMMUTE   one saved journey: boarding stop, destination, direction,
+            time window, transfers, optional accessibility needs
+
+  [PROPOSED] Compute route scores first; build network from routes
+  weighted by expected service/importance; build commute scores from
+  the journey's own segments.
+
+  Network aggregation may consider [UNVALIDATED]: expected service,
+  route importance, passenger exposure where reliable data exists,
+  geographic scope, time of day, direction, branch, available
+  alternatives. Coverage acts through aggregation, not as its own
+  factor.
+
+  A critical route-level event must make that route critical. It must
+  not by itself make the whole network critical. [ACCEPTED principle;
+  method UNVALIDATED]
+
+  Illustrative contrast [MOCK]:
+    BU Central -> Park Street (Green B), normal service ........ 12
+    Harvard -> Alewife (Red), suspension on the journey ........ 92
+    Central -> Kendall (Red), outside suspended section ........ 34
+  Same line, very different personal impact.
+
+======================================================================
+5. RULES THE ENGINE MUST FOLLOW
+======================================================================
+
+  Rule                          Status       Behaviour
+  ----------------------------  -----------  ------------------------------
+  Severe suspension handling    [ACCEPTED]   An active suspension in scope
+                                             sets a minimum score/band; normal
+                                             values elsewhere cannot hide it.
+                                             Floor value [OPEN].
+  Time-of-day expectations      [ACCEPTED]   Compare against scheduled
+                                             service for that time and day.
+  Mode-specific expectations    [ACCEPTED]   Subway headway logic is not
+                                             applied to timetable service.
+  Direction awareness           [ACCEPTED]   Inbound problems do not raise
+                                             an outbound commute score.
+  Geographic awareness          [ACCEPTED]   Beyond-destination problems
+                                             count as indirect at most.
+  Correlated evidence           [ACCEPTED]   One incident seen as an alert,
+                                             a gap, and missing departures
+                                             counts once at full weight.
+  Duplicate alerts              [ACCEPTED]   Several alerts for one incident
+                                             do not inflate the score.
+  Gradual recovery              [ACCEPTED]   Short fluctuations do not swing
+                                             the score. Whether a new severe
+                                             event bypasses smoothing [OPEN].
+  Confidence separate from      [ACCEPTED]   A high score can be low
+  severity                                   confidence and vice versa.
+  Explainability                [ACCEPTED]   Every score lists its factors.
+
+  Not direct inputs without context [PROPOSED]: raw vehicle counts, raw
+  alert counts, speed alone, weather alone, traffic alone, AI-generated
+  judgements. The engine should be deterministic and testable.
+
+======================================================================
+6. MISSING DATA                                           [ACCEPTED]
+======================================================================
+
+  - A missing feed never becomes a healthy zero.
+  - Missing factor weights are never silently redistributed to the
+    remaining factors.
+  - Each factor reports: available | partial | unavailable.
+  - If enough evidence remains, return a PROVISIONAL score with reduced
+    confidence and name the missing factors. Otherwise return UNKNOWN.
+  - The threshold for "enough evidence" is [OPEN]; it must be stated in
+    the model version, not hidden.
+
+  Example [MOCK]: predictions lost
+    Excess waiting ........ unavailable
+    Disruptions ........... available
+    Excess travel time .... unavailable
+    Unpredictability ...... partial
+    Availability .......... available
+    -> provisional or unknown, never "smooth".
+
+======================================================================
+7. SCALE, BANDS, AND OUTPUT
+======================================================================
+
+  Scale 0-100, higher = worse.                             [PROPOSED]
+  Illustrative bands                                       [PROPOSED]
+    0-19   Smooth          service close to expectations
+    20-39  Minor chaos     some disruption, generally reliable
+    40-59  Moderate chaos  noticeable degradation
+    60-79  High chaos      significant travel disruption
+    80-100 Critical chaos  severe service failure
+  Final wording and thresholds require validation.
+
+  What a rider can see behind any result                   [ACCEPTED]
+    - score and band (or UNKNOWN)
+    - scope (network / route+direction / commute)
+    - contributing factors with their values and status
+    - observation time of the newest input and score computation time
+    - confidence level and why
+    - limitations (e.g. "no prediction data for 6 min")
+    - model version (e.g. "candidate C, experimental")
+  [PROPOSED] A "How we measure chaos" page with method, formulas,
+  sources, and limitations.
+
+======================================================================
+8. RESEARCH PROCESS                                       [PROPOSED]
+======================================================================
+
+  1. Verify literature: confirm each source exists and says what we
+     cite it for.
+  2. Define measurable features from data we can actually obtain
+     (V3 API now; historical sets if compatible).
+  3. Collect historical observations continuously (07).
+  4. Calibrate against passenger-relevant outcomes.
+  5. Validate on time periods not used for calibration.
+  6. Test sensitivity: small weight or input changes should not cause
+     unreasonable jumps.
+  7. Publish a documented, versioned model.
+
+  Questions the evaluation must answer: do severe disruptions score
+  high and normal service low; does the score follow passenger impact;
+  do correlated factors exaggerate incidents; is it stable under small
+  data fluctuations; do modes need separate normalization; does missing
+  data mislead; does it generalize to unseen periods.
+
+  A model is not called "validated" until its factor definitions are
+  documented, data sources verified, weights have a defensible basis,
+  behaviour is checked against real observations, sensitivity is
+  examined, limitations are written down, and it is tested on held-out
+  data. The same standard applies to anomaly detection and any
+  independent prediction model.
+
+======================================================================
+9. BEHAVIOUR TESTS                                        [PROPOSED]
+======================================================================
+
+  Scenario                                  Expected
+  ----------------------------------------  --------------------------
+  Normal scheduled late-night service       low chaos
+  Regular rush-hour service                 low chaos
+  Severe bunching, no alert                 elevated route chaos
+  Entire route suspended                    critical route chaos
+  Minor delay on one bus route              limited network impact
+  Several major subway closures             high network chaos
+  Disruption outside a saved commute        limited commute impact
+  Data feed unavailable                     unknown / reduced confidence
+  Several alerts for one incident           no inflation
+  Alert expires but gaps persist            not yet "smooth" (05)
+
+======================================================================
+10. WAITING TIME UNDER IRREGULAR HEADWAYS
+======================================================================
+
+  E[W] = E[H] x (1 + CV(H)^2) / 2
+
+  H       time between consecutive vehicles at a stop (minutes)
+  E[H]    mean headway (minutes)
+  CV(H)   coefficient of variation of H = standard deviation / mean
+          (dimensionless)
+  E[W]    expected passenger wait (minutes)
+  Assumption: passengers arrive uniformly at random, independent of the
+  timetable. Then E[W] = E[H^2] / (2 E[H]), which rearranges to the
+  formula above. Perfectly regular service (CV = 0) gives E[H]/2.
+
+  Simulated example [MOCK]: E[H] = 6 min, CV = 0.8
+    regular service wait 3.0 min; with irregularity 3.0 x 1.64 = 4.9 min
+    (+64%). Not an observed MBTA value.
+
+  Where it does not fit: timetable-based service (commuter rail, ferry,
+  long-headway bus). Riders time their arrival to the schedule, so wait
+  depends on schedule deviation, not on headway variance. Furth & Muller
+  make this distinction: for long headways, actual and budgeted waits
+  relate to the extremes of the schedule-deviation distribution. The
+  headway threshold at which to switch models is [OPEN].
+
+  Furth and Muller (2006), equation 2, gives the mean-wait relationship.
+
+======================================================================
+11. SOURCES
+======================================================================
+
+  Verified (checked November 24, 2026):
+
+  - Furth, P. G. and Muller, T. H. J. (2006). "Service Reliability and
+    Hidden Waiting Time: Insights from Automatic Vehicle Location Data."
+    Transportation Research Record 1955, 79-87.
+    DOI: 10.1177/0361198106195500110.
+    Supports: traditional measures underestimate the cost of waiting;
+    passengers budget waiting time from an extreme of the wait
+    distribution (e.g. 95th percentile); short- vs long-headway waiting
+    behaves differently.
+    Does not support: any specific Chaos Meter weight.
+
+  - MBTA OPMI, "Introducing Excess Trip Time" (December 19, 2024).
+    ETT = (actual wait + actual travel) - (baseline wait + baseline
+    travel), passenger-weighted, for heavy rail (Red, Orange, Blue)
+    under the December 2024 Service Delivery Policy. Actual wait is
+    headway/2 per trip under a random-arrival assumption; passenger
+    loads and wait come from an origin-destination model built on fare
+    card validations, which the V3 API does not expose. The dashboard
+    shows the share of riders within 5 and within 20 minutes of expected
+    trip time; OPMI treats 5 minutes as the primary target.
+    Use: an AGENCY BENCHMARK for validating our outcome measure. It is
+    not a Chaos Meter scoring threshold, and "within 5 minutes" is not a
+    band boundary.
+
+  - MBTA transit-performance (github.com/mbta/transit-performance).
+    MIT-licensed, archived March 4, 2026. Computes headways, travel
+    times, schedule adherence, passenger-weighted wait and travel times,
+    dwell times, and prediction accuracy from GTFS / GTFS-realtime.
+    Use: methodology reference. Not a dependency (archived).
+
+  - MBTA V3 API (api-v3.mbta.com). Source of live inputs.
+    /stop_events ("actual arrival and departure times") may supply
+    observed arrivals; subway coverage and latency are [UNVALIDATED].
+
+
+======================================================================
+12. ACCEPTANCE CRITERIA FOR ANY SHIPPED SCORE
+======================================================================
+
+  - With the alerts feed disconnected, no score shows "Smooth"; the UI
+    shows UNKNOWN or PROVISIONAL with the missing factor named.
+  - With an active suspension on route R, route R's band is at or above
+    the agreed floor regardless of other inputs.
+  - Three alerts sharing one incident produce the same score as one.
+  - Every displayed score opens an explanation listing scope, factors,
+    observation time, confidence, and model version.
+  - The score is labelled experimental until section 8 steps 4-6 are
+    done.

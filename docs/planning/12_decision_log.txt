@@ -1,0 +1,18 @@
+CHAOS METER - PRODUCT DECISIONS
+Planning baseline 0.1 - November 24, 2026
+
+DEC-001  Explain MBTA service conditions in terms of disruptions, vehicle locations and the effects on a rider's trip.
+DEC-002  Serve both everyday commuters and transit enthusiasts.
+DEC-003  Open the assessment dashboard on Live Map on desktop and phone. In the longer-term product, offer both network exploration and personal commute views on either device, with the network overview emphasized on desktop and saved departures on mobile.
+DEC-005  Model the MBTA network across modes. Deliver Red, Orange, Blue and Green subway coverage first.
+DEC-006  Base the experimental Chaos Score on passenger impact. Version the method and calibrate its weights against observations before fixing them.
+DEC-007  Evaluate service conditions at network, route and commute levels.
+DEC-008  Use official MBTA predictions first and clearly label scheduled fallback times.
+DEC-009  Distinguish official alerts from irregularities detected in observed service. Track recovery and count correlated evidence once.
+DEC-010  Design My Commute around familiar journeys, including saved departures, relevant alerts and monitoring while waiting and riding.
+DEC-011  Provide rider-facing analytics and separate internal research analysis. Publish historical trends only where observations support them.
+DEC-012  Collect historical observations on a schedule independent of site visits.
+DEC-013  Centralize ingestion so features share the same underlying transit observations.
+DEC-014  Track subsystem health separately, retain usable data during failures, recover automatically and record gaps.
+DEC-015  Allow use without an account and make location access optional.
+DEC-019  Preserve the map's line filter when switching views. Use feed evidence for stop labels, distinguish empty results from failed refreshes and retain the last successful data and timestamp on failure. Compare all in-scope subway lines in Analytics and combine the Green branches into one bar.

@@ -1,0 +1,213 @@
+CHAOS METER - 11 VISUAL MAPPING (FUNCTIONAL)
+Planning baseline 0.1 - November 24, 2026
+Related: 01, 06, 09, 10 (R1, R2)
+
+Delivery scope: Sprints 1-3 share Live Map and Analytics inside one page. Desktop uses a wide map and toolbar; phone uses a compact filter row and tappable markers. Switching views preserves the selected line. Sprint 4 adds My Commute on both devices; returning phone users can open on saved departures. Sprint 5 adds the network overview and official alerts. The tracking screens below belong to Sprint 8.
+
+This is a functional map: what appears, in what priority, and where each
+action leads. It does not decide appearance.
+
+  [DEFERRED] Palette, typography, branding, motion, and detailed styling.
+  The assessment still requires a polished UI (10, R2), so these
+  decisions must be made before submission.
+
+
+======================================================================
+1. INFORMATION HIERARCHY
+======================================================================
+
+  1  Is anything wrong right now?   network status + major disruptions
+  2  What about my trip?            saved departures, relevant alerts
+  3  Where is everything?           live map / list
+  4  Why?                           score breakdown, alert detail
+  5  How does this compare?         analytics
+
+  Everything important is clickable. "Nothing important should be a
+  dead-end statistic." [ACCEPTED]
+
+======================================================================
+2. SITE STRUCTURE
+======================================================================
+
+  Chaos Meter
+  |
+  +-- Command Center (desktop emphasis)
+  |     Overview | Live Map | Service Alerts | Analytics | My Commute
+  |
+  +-- Commuter Companion (mobile emphasis)
+  |     Home | Map | Alerts | Saved | (Tracking mode)
+  |
+  +-- Shared
+        Vehicle details | Station details | Route details
+        Search | Settings | Mode switch | Score explanation
+
+  Same components and facts in both; no feature built twice.
+
+======================================================================
+3. COMMAND CENTER - FUNCTIONAL LAYOUT (desktop)
+======================================================================
+
+  +---------------------------------------------------------------+
+  | Chaos Meter - <description>     [search]  [mode]  [refresh]   |
+  |                                 status: LIVE, updated 8s ago  |
+  +-----------+---------------------------------------------------+
+  | Overview  |  NETWORK STATUS (score or UNKNOWN, confidence)    |
+  | Live Map  |  +---------------------+  +----------------------+ |
+  | Alerts    |  | map preview         |  | line status list     | |
+  | Analytics |  |                     |  | Red / Orange / Blue /| |
+  | My Commute|  |                     |  | Green B C D E ...    | |
+  |           |  +---------------------+  +----------------------+ |
+  |           |  vehicles: N   alerts: N   saved commutes: quick  |
+  |           |  major disruptions feed                            |
+  +-----------+--------------------------------------+------------+
+                                                     | details    |
+                                                     | side panel |
+                                                     +------------+
+
+======================================================================
+4. COMMUTER COMPANION - FUNCTIONAL LAYOUT (mobile)
+======================================================================
+
+  +---------------------------+     +---------------------------+
+  | Chaos Meter    [mode]     |     | TRACKING                  |
+  | network: compact status   |     | Green B to Gov't Center   |
+  |---------------------------|     | arrives BU Central 3 min  |
+  | MY DEPARTURES             |     | 2 stops away              |
+  |  Green B  BU Central  E   |     | alerts on this trip: none |
+  |    3 min  LIVE            |     | [I'm on this train]       |
+  |    9 min  LIVE            |     | [End tracking]            |
+  | [find a station]          |     +---------------------------+
+  |---------------------------|        simulated example [MOCK]
+  | Home  Map  Alerts  Saved  |
+  +---------------------------+
+  Details open as a bottom sheet instead of a side panel.
+
+  Mobile Home leads with the commute; desktop lands on the network
+  overview (01 section 4, DEC-003). [ACCEPTED]
+
+  Live Map, desktop (functional):
+
+  +----------------------------------------------------------+
+  | Search              Route filters       Refresh / auto   |
+  +-------------+-----------------------------+--------------+
+  | Navigation  |                             | Selected     |
+  |             |      Interactive map        | vehicle      |
+  |             |      live vehicles          | route        |
+  |             |      route shapes           | direction    |
+  |             |      stations               | status       |
+  |             |                             | next stop    |
+  |             |                             | prediction   |
+  |             |                             | alerts       |
+  +-------------+-----------------------------+--------------+
+
+  Mobile active journey (functional):
+
+  +----------------------------+
+  | Active journey             |
+  | route and destination      |
+  +----------------------------+
+  | current / next station     |
+  | estimated arrival          |
+  +----------------------------+
+  | origin                     |
+  |   |                        |
+  | previous station           |
+  |   |                        |
+  | current position           |
+  |   |                        |
+  | next station               |
+  |   |                        |
+  | destination                |
+  +----------------------------+
+  | relevant disruption        |
+  | approaching-stop warning   |
+  +----------------------------+
+  | end or change journey      |
+  +----------------------------+
+
+======================================================================
+5. VIEW BY VIEW
+======================================================================
+
+  OVERVIEW
+    First:   network status, line status, major disruptions
+    Can:     open score explanation; open a line; open an alert; open a
+             saved commute; change mode filter (subway/bus/...)
+    Leads:   score -> explanation; vehicle count -> Live Map filtered;
+             alert count -> Alerts; line -> Route details;
+             disruption item -> that alert
+
+  LIVE MAP
+    First:   map of Greater Boston with live vehicle markers
+    Can:     filter by mode/line/direction; search station or vehicle;
+             click marker; follow vehicle; switch to list view
+    Leads:   marker -> Vehicle details (popup / panel);
+             station -> Station details; follow -> tracking
+    List alternative carries the same data (09).
+
+  SERVICE ALERTS
+    First:   active alerts ordered by passenger impact
+    Can:     filter by severity, route, "my routes", upcoming
+    Leads:   alert -> affected route/stops on map; -> Route details
+
+  ANALYTICS
+    First:   live distribution chart (assessment chart, 07)
+    Can:     choose mode/line scope
+    Leads:   bar -> Route details; trends only once history exists,
+             otherwise "collecting since <date>"
+
+  MY COMMUTE
+    First:   saved commutes with next departures and relevance
+    Can:     add, rename, reverse, delete; start tracking
+    Leads:   departure -> Tracking; alert -> alert detail
+
+======================================================================
+6. DETAIL PANELS (proposed contents)                      [PROPOSED]
+======================================================================
+
+  Vehicle            Station                  Route
+  -----------------  -----------------------  ------------------------
+  route + branch     name                     route score (labelled)
+  destination        routes served            active disruptions
+  vehicle label      departures by direction  active vehicles
+  direction          relevant alerts          map of route
+  current status     accessibility / outages  stations served
+  current/next stop  save station             direction selector
+  upcoming arrivals
+  last updated
+  [track]
+
+======================================================================
+7. NAVIGATION AND JOURNEYS
+======================================================================
+
+  Global search
+     +--> Station details -> departures | save station | start journey
+     +--> Route details   -> route score | route map | alerts | analytics
+     +--> Vehicle details -> predictions | follow | associated route
+
+  Mobile flow:
+    open -> personal commute overview -> (search | saved station |
+    nearby, optional) -> direction -> upcoming departures -> select
+    train -> waiting/tracking -> confirm boarding -> active journey ->
+    approaching destination -> get-off alert -> journey complete
+
+  Global: search finds any station, route, or vehicle from anywhere.
+  Deep links to a route, station, or vehicle [PROPOSED].
+  Mode switch always reachable; choice remembered on the device.
+
+  Journey A - enthusiast checks a bad day
+    Overview -> Red Line status "High" -> Route details -> sees
+    suspension alert -> opens map at affected segment -> opens a
+    stranded vehicle -> back to Overview
+
+  Journey B - commuter leaving class [MOCK]
+    open app -> Saved: BU Central Green B eastbound, 3 min LIVE ->
+    tap -> Tracking (3 min, 2 stops away) -> "I'm on this train" ->
+    onboard (next stop, 9 min to Park Street) -> "Your stop is next"
+    -> End
+
+  Journey C - first-time mobile user, no location
+    Home (no saved) -> "find a station" -> types "Kenmore" -> Station
+    details -> departures -> save -> becomes a saved stop
+

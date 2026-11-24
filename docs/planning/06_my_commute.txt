@@ -1,0 +1,171 @@
+CHAOS METER - 06 MY COMMUTE
+Planning baseline 0.1 - November 24, 2026
+Related: 04, 05, 03 (commute scope), 09 (privacy, accessibility), 11
+
+My Commute is a high-priority product capability [ACCEPTED]. In the
+assessment it is an Extra Feature ("saved commutes"), not a core
+requirement (10).
+
+======================================================================
+1. WHAT IT ANSWERS                                         [ACCEPTED]
+======================================================================
+
+  1. When should I leave for the station?
+  2. When will my train arrive?
+  3. When should I get off?
+
+
+  Direction [ACCEPTED]: monitor journeys the rider already knows. Full
+  route planning between any two places is not in scope now.
+
+======================================================================
+2. LEVELS OF PERSONALIZATION                               [ACCEPTED]
+======================================================================
+
+  Saved stop       upcoming departures at one stop, chosen direction
+                   e.g. BU Central, eastbound
+  Saved journey    conditions between two stops on a route
+                   e.g. BU Central -> Park Street (Green B)
+  Active journey   following one specific vehicle now
+
+  A rider must not have to build a full commute just to see the next
+  train.
+
+  A saved journey holds: name, origin stop, optional destination,
+  route/branch, direction, optional walking time, optional buffer,
+  optional accessibility preference (step-free). Riders can save
+  several, rename, reverse direction, and delete them. No account.
+
+======================================================================
+3. THE JOURNEY, STEP BY STEP
+======================================================================
+
+  [1] SAVE
+      pick station -> pick route/branch -> pick direction -> optional
+      destination -> optional walk time and buffer -> name it
+      No location permission needed: station search works by name.
+
+  [2] BEFORE LEAVING
+      sees: next departures (LIVE / SCHEDULED labels), DIRECT/INDIRECT
+      alerts, commute Chaos Score (if shipped, with confidence), and a
+      departure recommendation:
+
+         T_leave = T_arrival - T_walk - T_buffer
+
+      Example [MOCK]: train in 15 min, 6-min walk, 3-min buffer
+                      -> "Leave in 6 minutes"
+      If T_leave < 0: "You may miss this one" and show the next.
+      Uses the official prediction. If only a scheduled time exists,
+      the recommendation says it is based on the schedule.
+
+  [3] WAITING
+      tracking view: countdown, where the train is, stops away,
+      destination/headsign, relevant alerts, next departure after it.
+
+  [4] BOARDING
+      rider taps "I'm on this train". Explicit confirmation is the
+      baseline. [ACCEPTED: automatic boarding detection is later]
+
+  [5] ONBOARD
+      next stop, stops remaining, estimated arrival at destination,
+      disruptions ahead on the remaining segment.
+
+  [6] APPROACHING DESTINATION
+      "Your stop is next - get off at Park Street", shown in-app when
+      the vehicle's stop progress is reliable. Optional sound and
+      vibration where the browser allows (09). If progress is not
+      reliable, say so rather than guess.
+
+  [7] END
+      arrives at destination, or rider taps "End tracking" at any time.
+      Tracking stops immediately. Optional local record of the trip.
+
+  Lifecycle names: Planning -> Waiting -> Boarding ->
+  Onboard -> (Transferring) -> Completed. Transfers are architecturally
+  allowed for later; single-route journeys come first.
+
+======================================================================
+4. FAILURE AND EDGE CASES
+======================================================================
+
+  Situation                            Behaviour
+  -----------------------------------  ---------------------------------
+  Train cannot be identified           show departures without "track";
+  (no vehicle/trip match)              say "live tracking not available
+                                       for this departure"
+  Rider boards a different train       let them pick the vehicle manually
+  Train changes destination / short-   warn; if destination no longer on
+  turns                                remaining stops, say so and offer
+                                       next suitable departure
+  Destination stop skipped or closed   show the relevant alert; warn
+                                       before the previous stop
+  Rider passes destination             warn only when reliably detected
+  Data goes stale                      freeze countdown, show "last
+                                       updated N min ago", no get-off
+                                       alert based on stale data
+  Vehicle disappears                   "tracking uncertain", keep last
+                                       known stop and time
+  Prediction changes                   recalculate countdown and T_leave
+  Missed train                         offer next departure
+  Connection drops                     keep saved journeys; show last
+                                       known information with its age
+  Notification permission denied       in-app alert still works; explain
+                                       that background alerts are off
+  Location permission denied           everything works via search
+  Rider ends tracking                  stop all tracking updates and
+                                       alerts for that journey at once
+  No saved commutes                    nearby (if allowed) or search,
+                                       plus a short onboarding
+
+======================================================================
+5. COMMUTE-SPECIFIC SCORING
+======================================================================
+
+  Commute Chaos uses only the journey's boarding stop, destination,
+  direction, time window, segments, and (later) transfers (03).
+
+  Accessibility-aware scoring [PROPOSED]: the same elevator outage can
+  matter a lot to a rider who needs step-free access and not at all to
+  another. Example [MOCK]: Passenger A 12/100, Passenger B (needs
+  step-free) 90/100. Applies only where facility data supports it.
+
+======================================================================
+6. SCOPE
+======================================================================
+
+  Feature                                   Status
+  ----------------------------------------  -----------------------------
+  Saved stops and journeys                  [ACCEPTED] core
+  Departures with LIVE/SCHEDULED labels     [ACCEPTED] core
+  Relevant alerts (DIRECT/INDIRECT)         [ACCEPTED] core
+  Commute Chaos Score                       [ACCEPTED] core, experimental
+  Waiting and onboard tracking              [ACCEPTED] core
+  Approaching-stop / get-off alert          [ACCEPTED] core, in-app,
+                                            only when reliable
+  Departure recommendation (fixed buffer)   [ACCEPTED] core
+  Optional accessibility preference         [PROPOSED]
+  Dynamic, reliability-based buffers        [DEFERRED] later
+  Automatic boarding detection              [DEFERRED] later
+  Background push delivery                  [DEFERRED] later, needs
+                                            feasibility testing
+  Full journey planner                      [DEFERRED] future
+
+  Smallest useful version for delivery (00 Sprint 4) [PROPOSED]:
+  saved stop + direction and labeled departures. Relevant official alerts follow in Sprint 5.
+
+
+======================================================================
+7. ACCEPTANCE CRITERIA
+======================================================================
+
+  - With location permission denied, a rider can save a stop and see
+    its departures.
+  - Saved journeys survive a page reload on the same device without an
+    account.
+  - A departure without a live prediction is labelled "Scheduled" and so
+    is any recommendation based on it.
+  - "Your stop is next" appears in-app before the destination when the
+    vehicle's stop progress is fresh; it does not appear when data is
+    stale.
+  - Tapping "End tracking" stops updates and alerts for that journey.
+  - With notifications denied, the in-app alert still appears.

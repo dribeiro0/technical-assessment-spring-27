@@ -1,0 +1,145 @@
+CHAOS METER - 08 RELIABILITY AND RECOVERY
+Planning baseline 0.1 - November 24, 2026
+Related: 02, 03 (missing data), 04, 05, 06, 07
+
+Delivery scope: check missing and stale live data during Sprints 1-3. Add collector recovery in Sprint 6 and lost-trip handling in Sprint 8.
+
+Principle [ACCEPTED]: uncertainty is better than false certainty.
+Reliability and graceful degradation are release requirements, not
+polish.
+
+Mechanisms (retry policy, process supervision, storage, monitoring
+tools) are [DEFERRED] to engineering. This file defines outcomes.
+
+======================================================================
+1. INDEPENDENT CAPABILITY HEALTH                           [ACCEPTED]
+======================================================================
+
+  Each capability reports its own health. One failing does not take
+  down the others.
+
+  Capability        Depends on                 Health states
+  ----------------  -------------------------  ---------------------------
+  Vehicles          /vehicles                  LIVE / DELAYED / STALE /
+  Predictions       /predictions, /schedules   UNAVAILABLE
+  Alerts            /alerts                    (thresholds per source,
+  Map               vehicles + reference data  based on its normal update
+  Scoring           alerts + service metrics   rate)
+  History           collector + storage
+  Personalization   device storage + the above
+
+  Example [MOCK]: predictions DEGRADED, Chaos Engine
+  REDUCED CONFIDENCE, everything else operational.
+
+  Freshness and confidence are separate:
+    freshness   how recently it was updated
+    confidence  how much evidence supports it
+  A fresh prediction can be unreliable; an older schedule can still be
+  valid.
+
+======================================================================
+2. FAILURE -> VISIBLE BEHAVIOUR -> RECOVERY -> TEST
+======================================================================
+
+  F1 MBTA API unavailable (all)
+     Visible: last known data with timestamps and a stale banner; no
+              "live" labels.
+     Recovery: retry with backoff; reconcile; banner clears on fresh data.
+     Test: block the API; within one refresh cycle every "live" label
+           becomes stale/age; restore; labels return.
+
+  F2 One feed down (e.g. predictions)
+     Visible: departures show SCHEDULED or UNAVAILABLE; map and alerts
+              unaffected; scores provisional/unknown.
+     Recovery: as F1, for that feed only.
+     Test: block /predictions only; map keeps updating.
+
+  F3 Alerts feed unavailable
+     Visible: "Alerts unavailable" - never "No disruptions".
+     Test: block /alerts; alert count shows unavailable, not 0.
+
+  F4 Stale records (vehicle not updated)
+     Visible: marker styled stale with age; excluded from live counts.
+     Test: fixture with old updated_at -> stale styling and exclusion.
+
+  F5 Malformed record
+     Visible: record skipped; others shown; error counted internally.
+     Test: inject a vehicle without coordinates -> no crash, no marker,
+           listed as "location unknown" if identity is valid.
+
+  F6 Out-of-order update
+     Visible: none; current state keeps the newer record.
+     Test: deliver t2 then t1 -> state shows t2.
+
+  F7 Rate limited
+     Visible: slower updates with "updates delayed"; essential data
+              (vehicles, predictions for saved stops) prioritized.
+     Recovery: respect reset time; resume normal rate.
+     Test: simulate 429 -> request rate drops; no error loop.
+
+  F8 Client offline
+     Visible: saved journeys still listed; last data with age;
+              "offline" status.
+     Recovery: resume on reconnect without page reload.
+     Test: toggle network off/on in the browser.
+
+  F9 Collector restart
+     Visible (internal): gap recorded from last checkpoint to restart.
+     Recovery: resume from checkpoint; no duplicate events.
+     Test: kill and restart collector -> one GAP event, no duplicates.
+
+  F10 Interrupted persistence (storage write fails)
+     Visible: live features continue; history marked incomplete.
+     Recovery: retry or record gap; never fabricate.
+     Test: fail writes for a period -> gap recorded.
+
+  F11 Replay of already-seen data
+     Visible: no duplicate alerts, no duplicate in-app notifications.
+     Test: replay the same alert payload twice -> one alert shown.
+
+  F12 Chaos Engine error
+     Visible: score UNKNOWN; transit information remains usable.
+     Test: force engine error -> map, alerts, departures still work.
+
+  F13 After a service suspension ends
+     Visible: RECOVERY state until observed service is normal (05);
+              score eases down gradually, not instantly to "Smooth".
+     Test: replay a suspension-and-recovery history; score stays
+           elevated while gaps persist after the notice closes.
+
+  F14 Location denied
+     Visible: manual station search.
+
+======================================================================
+3. AUTOMATIC RECOVERY FLOW                                 [ACCEPTED]
+======================================================================
+
+  normal -> failure detected (which source/capability)
+         -> degraded operation (unaffected parts keep working)
+         -> controlled retry (backoff, rate-limit aware)
+         -> reconciliation (validate new data, restore consistent state)
+         -> normal, with the incident recorded
+
+  Operational independence [ACCEPTED]: the system should run without
+  someone's terminal open - automatic restarts, resumable collection,
+  persistent checkpoints, health monitoring, failure reporting,
+  reproducible deployment.
+
+======================================================================
+4. OBSERVABILITY OUTCOMES                                 [PROPOSED]
+======================================================================
+
+  Know, at any time: API response times and failure rates, freshness
+  per source, collection coverage and gaps, processing latency, storage
+  growth, engine errors, prediction-to-vehicle match rate, share of
+  scopes with a computable score. A private health view or structured
+  logs is enough initially; no public admin dashboard required.
+
+======================================================================
+5. TESTING EXPECTATIONS                                   [PROPOSED]
+======================================================================
+
+  Deliberately simulate: outages, malformed responses, duplicate events,
+  missing fields, out-of-order updates, rate limits, storage failures,
+  lost connectivity, suspensions. Add regression tests so later bus,
+  commuter rail, and ferry support cannot break subway behaviour.
