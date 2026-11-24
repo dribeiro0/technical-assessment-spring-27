@@ -1,0 +1,192 @@
+CHAOS METER - MASTER PLAN
+Planning baseline 0.1 - November 24, 2026
+Status labels: see readme.md. Nothing described here is implemented yet.
+
+======================================================================
+1. WHAT CHAOS METER IS
+======================================================================
+
+Working tagline [PROPOSED]: "Know the T before you go."
+
+Chaos Meter is a real-time Boston transit product built on the official
+MBTA V3 API. It is meant to answer four questions [ACCEPTED as product
+direction]:
+
+  1. How is the MBTA performing right now?
+  2. Where are the trains and buses?
+  3. What disruptions should I know about?
+  4. How will this affect my commute?
+
+The difference from an ordinary MBTA dashboard is interpretation. An
+ordinary tracker answers "where is my train and when will it arrive?"
+Chaos Meter also tries to answer "how reliable is my journey, what is
+going wrong, how does it affect me, and what should I do?" [ACCEPTED as
+the guiding distinction]
+
+It serves two audiences through one shared set of facts [ACCEPTED]:
+  - everyday commuters deciding whether and when to travel
+  - transit enthusiasts exploring how the network is behaving
+
+  Detail: 01_product_vision.txt
+
+======================================================================
+2. THE PRODUCT END TO END
+======================================================================
+
+    MBTA V3 API (vehicles, routes, stops, trips, predictions,
+                 schedules, alerts, shapes, facilities)
+          |
+          v
+    Retrieval -> validation -> normalization          (02, 08)
+          |
+          +--> CURRENT STATE ------------------------------+
+          |      vehicles, predictions, alerts            |
+          |                                               |
+          +--> HISTORY (continuous collection) ------+    |
+                 observations, events, aggregates    |    |
+                                                     v    v
+                              INTELLIGENCE
+                   Chaos scoring (03) | prediction handling (04)
+                   alerts + detected irregularities (05)
+                   analytics (07)
+                                     |
+                                     v
+                          SHARED VIEW STATE
+                 filters, selection, freshness, mode
+                                     |
+               +---------------------+---------------------+
+               v                                           v
+        COMMAND CENTER                            COMMUTER COMPANION
+        (desktop emphasis)                        (mobile emphasis)
+        Overview, Live Map, Alerts,               Home, Map, Alerts,
+        Analytics, My Commute                     Saved, tracking mode
+               ^                                           ^
+               +------------ PRIVATE PREFERENCES ----------+
+                      saved stops/journeys, settings (06, 09)
+
+Both experiences read the same facts. They differ in what they put
+first, not in what is true. [ACCEPTED]
+
+======================================================================
+3. DELIVERY ORDER
+======================================================================
+
+The deadline is Sunday, November 29, 2026, 11:59 p.m. Boston time. The
+assessment is the first gate. "Core to the product" and "mandatory for
+the assessment" are different lists, and the second one comes first.
+
+STAGE 0 - Assessment core (mandatory)                  [ACCEPTED order]
+  Single-page app with client-side navigation, responsive polished UI
+  with a title and description, real MBTA V3 data, interactive Greater
+  Boston map with live /vehicles markers, clickable marker popup (route,
+  direction, current status, next stop where available), search or
+  filter, manual refresh or auto-refresh toggle, at least one chart from
+  API data, deployed frontend (and backend if one exists).
+  Exit check: every row in 10_assessment_audit.txt marked VERIFIED.
+
+STAGE 1 - Recording and submission (mandatory)
+  Screen-recorded walkthrough, fork-based PR filled from pr_template.md,
+  before the deadline. David writes the reflections and personal fields.
+
+STAGE 2 - Smallest useful My Commute (core to the product)  [PROPOSED scope]
+  Save a stop with route and direction, see upcoming official departures
+  (scheduled times clearly labeled), see alerts that touch that stop and
+  direction. Works without location or notification permission.
+  Note: the README lists saved commutes as an Extra Feature, so this
+  stage can be shown in the submission if it is ready, but it is not
+  required.
+
+STAGE 3 - Product identity
+  Overview with an experimental, clearly labeled network/route Chaos
+  Score (03), service alerts view with passenger-impact ordering (05),
+  route overlays from /shapes (README extra), Command Center /
+  Commuter Companion switching (01, 11).
+
+STAGE 4 - Full journey monitoring
+  Waiting, boarding confirmation, onboard progress, approaching-stop
+  alert when reliable, departure recommendation (06).
+
+STAGE 5 - Intelligence and research (ongoing, after the assessment)
+  Continuous collection independent of visitors (07), detected
+  irregularities (05), prediction evaluation (04), score calibration
+  (03), bus/commuter rail/ferry extension (01).
+
+The planning conversation's own priority table said the same thing in
+different words: "P0 - Assessment" first, then differentiation,
+intelligence, research, expansion. It described this as "an
+implementation sequence, not a reduction of our overall vision."
+
+======================================================================
+4. DEPENDENCIES
+======================================================================
+
+  Feature                     Depends on
+  -------------------------   -----------------------------------------
+  Live map markers            /vehicles retrieval, route reference data
+  Marker popup next stop      vehicle -> trip -> stop sequence -> stop
+  Filters / search            route + stop reference data
+  Assessment chart            current vehicles grouped by route
+  Departures (My Commute)     /predictions + /schedules, stop/platform
+                              and direction resolution
+  Relevant alerts             /alerts informed entities matched to
+                              route, stop, direction
+  Chaos Score (any scope)     alerts + some measure of service quality;
+                              confidence model; missing-input rules
+  Detected irregularities     expected service (schedules) + observed
+                              service (vehicles or stop events) + history
+  Prediction evaluation       continuous history of predictions and
+                              observed arrivals
+  Score calibration           months of history + passenger-relevant
+                              outcome measure
+  Approaching-stop alert      onboard vehicle identity + reliable stop
+                              progress; notification permission is
+                              optional, in-app alert is the baseline
+
+======================================================================
+5. WHAT GETS DEFERRED IF THE DEADLINE IS AT RISK
+======================================================================
+
+Cut in this order, latest stage first. Never cut a Stage 0 or 1 item to
+save a later one.
+
+  1. Independent prediction research, forecasting, full journey planner
+  2. Continuous collection and anything that needs history
+  3. Detected irregularities (keep official alerts only)
+  4. Onboard tracking and approaching-stop alerts
+  5. Chaos Score (if shipped at all, label it experimental, show its
+     inputs, never show a healthy zero for missing data)
+  6. Mode switching (keep a responsive single layout)
+  7. Route shapes overlay
+
+Keep: everything in Stage 0 and Stage 1.
+
+======================================================================
+6. PLANNING STATUS AT THIS BASELINE
+======================================================================
+
+  Decided at functional level: product vision, audiences, desktop and
+  mobile experiences, functional architecture, Chaos Engine direction,
+  transit and prediction approach, alerts and transit intelligence,
+  My Commute, analytics, data management, reliability.
+  Partly done: performance, accessibility, privacy, security (09).
+  Not done: visual design, formal per-subsystem acceptance criteria,
+  development roadmap at engineering level, engineering handoff.
+  Implementation: none. No application code exists.
+
+======================================================================
+7. WHAT IS STILL OPEN
+======================================================================
+
+  - Visual identity: palette, typography, branding, motion [DEFERRED]
+  - Technology stack, hosting, storage, polling vs. streaming [DEFERRED
+    to engineering]
+  - Mapping library: README allows "React Leaflet (or a similar mapping
+    library)"; template checkbox names React Leaflet [OPEN, see 10]
+  - Final Chaos Score weights and thresholds [UNVALIDATED]
+  - Detailed acceptance criteria per subsystem beyond those recorded in
+    files 03-10 [OPEN]
+  - Engineering handoff (13_engineering_handoff.txt is intentionally
+    empty) [DEFERRED]
+  - Crowdsourced reports: assistant leaned "no"; never decided [OPEN]
+
+  Full list with source anchors: 12_decision_log.txt

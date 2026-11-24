@@ -1,0 +1,188 @@
+CHAOS METER - 05 ALERTS AND INTELLIGENCE
+Planning baseline 0.1 - November 24, 2026
+Related: 03_chaos_engine.txt, 04, 06_my_commute.txt, 07, 08
+
+======================================================================
+1. TWO KINDS OF DISRUPTION INFORMATION                     [ACCEPTED]
+======================================================================
+
+  OFFICIAL NOTICES (from MBTA /alerts)
+    suspensions, station closures, shuttles, detours, planned work,
+    elevator/escalator outages, delay notices
+
+  DETECTED IRREGULARITIES (our own analysis)
+    unusually long gaps, bunching, large schedule deviation, unstable
+    predictions, less service than scheduled (when verifiable), abnormal
+    waits
+
+  Rule: a detected irregularity is never presented as an MBTA
+  announcement. Labels, wording, and placement keep the two apart.
+
+  Planning called this the hybrid Alert Engine: unlike predictions,
+  alerts combine official and independent evidence, keeping origins
+  visible.
+
+======================================================================
+2. PROCESSING FLOW
+======================================================================
+
+  /alerts
+     |
+     v
+  validate (active_period, informed_entity, lifecycle, updated_at)
+     |
+     v
+  resolve informed entities -> routes, branches, stops/platforms,
+                               directions, facilities
+     |
+     v
+  deduplicate / associate related notices (same incident)
+     |
+     v
+  classify: upcoming | active | updated | resolved   (+ ours: recovery,
+                                                      archived)
+     |
+     v
+  passenger-impact ranking  -->  Alerts view order
+     |
+     +--> Chaos Engine (03): counted once per incident
+     +--> My Commute (06): relevance per saved journey
+     +--> Live Map: affected segments / stops highlighted
+     +--> History (07): lifecycle events
+
+======================================================================
+3. PASSENGER-IMPACT PRIORITY                               [ACCEPTED]
+======================================================================
+
+Order by impact, not publication time. Suspensions and closures first,
+minor delays and informational notices last.
+
+Impact factors [PROPOSED; weights UNVALIDATED]:
+  disruption type; share of route affected; duration so far;
+  replacement service available; passenger exposure; accessibility
+  impact (an elevator outage can block a journey entirely for some
+  riders); time of day.
+
+Relevance levels for a saved journey:
+  DIRECT     the journey's segment, stop, or direction is affected
+  INDIRECT   same route, outside the journey's segment, may cause delay
+  NONE       unrelated route with no connecting effect
+  UNKNOWN    the data needed to judge relevance is missing; never shown
+             as NONE
+
+======================================================================
+4. LIFECYCLE
+======================================================================
+
+  UPCOMING --start--> ACTIVE --change--> UPDATED --+
+                         |                         |
+                         +<------------------------+
+                         |
+                     notice ends
+                         v
+                     RESOLVED (notice closed)
+                         |
+                 observed service back to expected?
+                    no -> RECOVERY (still degraded per our metrics)
+                    yes ->
+                         v
+                     ARCHIVED (kept for history)
+
+  - UPCOMING notices are shown but do not count toward current chaos.
+  - A notice expiring does not prove headways recovered. RECOVERY lasts
+    until observed service is back within its normal range. Without
+    enough observation to judge, show "recovery not confirmed" rather
+    than "normal".
+  - Every transition is stored with its time (07) so recovery durations
+    can be studied later.
+
+======================================================================
+5. EXPECTED VS OBSERVED (TRANSIT INTELLIGENCE)            [ACCEPTED]
+======================================================================
+
+  Source anchor (David): "Pairing it with the brainstorm about us
+  creating our own predictions, because the robot's given to us and
+  what we find changes, right?" - then "I agree." to the resulting
+  plan.
+
+  EXPECTED                         OBSERVED
+  schedules                        vehicle positions / stop events
+  official predictions             observed arrivals and gaps
+  official alerts                  travel times between stops
+          \                         /
+           v                       v
+        COMPARISON: discrepancies, gaps, bunching, prediction drift
+                       |
+          +------------+-------------+
+          v            v             v
+     detected     prediction     Chaos Engine
+     irregularity reliability    inputs
+          |
+          v
+     history -> better thresholds, confidence, future research
+
+  Detect only where evidence supports it. Each detection records the
+  evidence used (e.g. "observed gap 14 min vs scheduled 6 min at Park
+  Street northbound, 3 consecutive vehicles") and a confidence level.
+
+  Staged ambition [PROPOSED]:
+    1 show official info  2 compare with observations  3 detect
+    unreported irregularities  4 learn prediction error  5 statistical
+    confidence  6 experiment with independent predictions  7 forecast
+    disruptions. Stages 6-7 only if earlier stages show real benefit.
+
+======================================================================
+6. ILLUSTRATIVE DISRUPTION                                     [MOCK]
+======================================================================
+
+  Red Line disruption between Harvard and Alewife (hypothetical).
+
+    Alewife -> Park Street    crosses the affected section  DIRECT
+    Central -> Kendall        same line, outside it         INDIRECT
+                              (possible knock-on delays)
+    BU Central -> Park St     Green Line, unrelated          NONE
+    (Green B)
+
+  The same notice appears at the top of the first commute, as a quieter
+  "possible delays" note on the second, and not at all on the third.
+
+======================================================================
+7. DEDUPLICATION AND DOUBLE COUNTING                       [ACCEPTED]
+======================================================================
+
+  One incident may produce a suspension notice, a shuttle notice, an
+  elevator notice, long gaps, and missing departures. These are linked
+  into one incident where evidence supports it (shared entities,
+  overlapping times, explicit references). The Chaos Engine counts the
+  incident's passenger impact once (03 section 5). Replaying the same
+  feed must not create duplicate history entries or repeat in-app
+  alerts (08).
+
+======================================================================
+8. DELIVERY: IN-APP VS PUSH
+======================================================================
+
+  In-app alerts (while the page is open)                 [ACCEPTED, core]
+  Background push notifications                          [DEFERRED, later]
+    Needs feasibility testing on mobile browsers; must not be promised
+    before that.
+  Predicting disruptions before they happen              [DEFERRED, future]
+  Crowdsourced rider reports                             [OPEN]
+    The assistant leaned toward keeping Chaos Meter data-driven because
+    of moderation and false-report problems. David did not decide.
+
+======================================================================
+9. ACCEPTANCE CRITERIA
+======================================================================
+
+  - An active suspension is listed above an active minor delay.
+  - An upcoming notice is shown as upcoming and does not change the
+    current score.
+  - A detected irregularity is labelled as Chaos Meter's own detection,
+    with its evidence, and never with MBTA wording or branding.
+  - A saved commute shows a notice only if relevance is DIRECT or
+    INDIRECT, and shows which.
+  - After a notice closes, the route shows "recovery not confirmed"
+    until observed headways return to normal or data is insufficient.
+  - If /alerts is unavailable, the UI says alerts are unavailable; it
+    never says "no disruptions".

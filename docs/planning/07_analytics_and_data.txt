@@ -1,0 +1,144 @@
+CHAOS METER - 07 ANALYTICS AND DATA
+Planning baseline 0.1 - November 24, 2026
+Related: 02, 03, 04 (prediction evaluation), 05, 08, 10 (chart row)
+
+======================================================================
+1. TWO LAYERS OF ANALYTICS                                 [ACCEPTED]
+======================================================================
+
+  PUBLIC (riders, enthusiasts)            INTERNAL (research, quality)
+  ------------------------------------    -------------------------------
+  current service distribution            prediction accuracy
+    (vehicles by line, alerts by type)    anomaly-detection accuracy
+  route comparisons                       Chaos Score calibration
+  reliability trends over time            data coverage / completeness
+  best and worst travel periods           model drift between versions
+  disruption history and recovery         feature collection for research
+                                          entity association quality
+                                          collection reliability
+
+  Questions riders could eventually answer [PROPOSED]: when is my
+  commute usually most reliable; which line has the most disruption;
+  how accurate are predictions at my station; how long does recovery
+  usually take; is today unusually bad.
+
+  Rule [ACCEPTED]: historical charts use recorded or sourced history
+  only. Until history exists, the UI says data is being collected. No
+  fabricated trends.
+
+======================================================================
+2. THE ASSESSMENT CHART (Stage 0)
+======================================================================
+
+  The README requires at least one chart from API data. Simplest
+  compliant chart [PROPOSED]:
+
+    "Active vehicles by line, right now"
+     source:   /vehicles, grouped by route -> line
+     unit:     count of vehicles reporting a position
+     scope:    stated on the chart (e.g. subway: Red, Orange, Blue,
+               Green B/C/D/E; or the modes selected in the filter)
+     time:     "Updated 8:42:10 AM" from the newest retrieval
+     notes:    stale vehicles excluded and counted separately
+
+  This is a description of current service distribution. It is not a
+  chaos score and must not be labelled as one. More vehicles is not
+  "better" without the scheduled count for comparison.
+  Other README-suggested options: alerts by severity; headway or delay
+  trends (only with real history).
+
+  Planning used mock chart data such as "Green 64, Red 28, Orange 21,
+  Blue 15" and a "Chaos Score over time" curve. Those were [MOCK] and
+  must never appear in the app as data.
+
+======================================================================
+3. CONTINUOUS COLLECTION                                   [ACCEPTED]
+======================================================================
+
+  Source anchor (David): "Let's continue with continuous collection."
+
+  Collect transit observations on a schedule whether or not anyone is
+  using the site.
+
+  Why visitor-triggered capture is not enough:
+    - it samples only when people look, which over-represents busy
+      times and disruptions people check on, and under-represents
+      nights, weekends, and quiet normal service;
+    - disruption lifecycles are cut off (start seen, end missed);
+    - "normal" baselines come out biased, so every score built on them
+      is biased.
+
+  Trade-off: higher running cost and storage. Mitigations [PROPOSED]:
+  shared ingestion, deduplication, mode-specific frequencies, reduced
+  collection when no service is scheduled, retention limits.
+
+  Start with subway as early as possible in development.
+  Existing public historical datasets may give a head start; their
+  availability and compatibility are [UNVALIDATED].
+
+======================================================================
+4. RECORD TYPES
+======================================================================
+
+  RAW OBSERVATIONS   each retrieved vehicle position / prediction /
+                     alert version. Detailed, short retention.
+  SIGNIFICANT EVENTS arrivals, departures, alert lifecycle changes,
+                     detected irregularities, score changes, collection
+                     gaps. Long retention.
+  AGGREGATES         per route/stop/period summaries (headways, waits,
+                     prediction error, score distribution). Long
+                     retention, cheap to query.
+  REFERENCE DATA     routes, stops, shapes, schedules, facilities.
+                     Versioned by service period.
+  PERSONAL PREFS     saved journeys, settings. On the device only. Never
+                     mixed into the above (09).
+
+  Metadata on every observation and derived result [ACCEPTED]:
+    source                 which API resource
+    source time            when the source says it happened (updated_at)
+    retrieval time         when we received it
+    entity identity        vehicle / trip / route / stop / alert id
+    coverage               what share of expected entities was seen
+    confidence             how well measured or inferred
+    model version          for any derived value (score, detection)
+
+======================================================================
+5. DATA QUALITY RULES
+======================================================================
+
+  Duplicate observations  same entity + same source time = one record
+  Out-of-order updates    older source time than stored -> keep in raw
+                          history, do not overwrite current state
+  Interrupted collection  write an explicit GAP event with start and end;
+                          never interpolate fake observations across it;
+                          analytics show gaps as gaps
+  Coverage                every aggregate stores how complete its input
+                          was; low-coverage periods are flagged or
+                          excluded
+  Model versions          scores from different versions are not mixed
+                          in one trend line without a marker; recompute
+                          history under the new version where possible
+
+======================================================================
+6. RETENTION AND COST                                     [PROPOSED]
+======================================================================
+
+  Raw observations have a limited retention window; events and
+  aggregates are kept much longer. Exact windows are [DEFERRED] to
+  engineering and depend on volume and hosting cost. Monitor storage
+  growth (08). No paid AI calls are needed for any of this.
+
+======================================================================
+7. ACCEPTANCE CRITERIA
+======================================================================
+
+  - The assessment chart is built from a live /vehicles response,
+    states its scope and unit, and shows an update time that matches
+    the retrieval.
+  - With no stored history, trend views show "collecting data since
+    <date>" instead of a chart.
+  - Stopping the collector for 10 minutes produces a recorded gap, and
+    trend charts show the gap.
+  - Replaying the same batch of observations twice does not change any
+    aggregate.
+  - Every stored score carries its model version.

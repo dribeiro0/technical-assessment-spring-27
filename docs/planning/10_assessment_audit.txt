@@ -1,0 +1,230 @@
+CHAOS METER - 10 ASSESSMENT AUDIT
+Planning baseline 0.1 - November 24, 2026
+Sources: README.md and pr_template.md at commit 8381263 (read directly;
+unchanged). Where this file and those files disagree, those files win.
+
+Verification status values: NOT STARTED | IN PROGRESS | VERIFIED.
+At this baseline every row is NOT STARTED. No application code exists.
+
+======================================================================
+1. CORE REQUIREMENTS MATRIX
+======================================================================
+
+R1  Single-page app, no full reloads when switching views
+    Source: README core #1 (examples: Live Map, Service Alerts & Table,
+            Line Analytics); template "Built as a SPA".
+    Planned: client-side navigation across Overview, Live Map, Alerts,
+             Analytics, My Commute (11).
+    Depends: none.
+    Check: switch every view; browser shows no document reload
+           (network panel: no new document request); state such as
+           filters survives the switch.
+    Evidence: recording segment clicking through all views.
+    Status: NOT STARTED
+
+R2  Polished, responsive UI with catchy title and apt description
+    Source: README core #2 (also "cool fonts"; MBTA palette and subtle
+            motion "strongly encouraged"); template "beautiful frontend
+            ... catchy title, apt description, cool fonts/colors ...
+            any screen size".
+    Planned: Command Center / Commuter Companion layouts (01, 11).
+             Title "Chaos Meter"; description [OPEN]. Visual identity
+             [DEFERRED] but must be decided before submission.
+    Depends: R1.
+    Check: usable at phone (~375 px), tablet, desktop widths; title and
+           one-line description visible on landing.
+    Evidence: recording at desktop and narrow width; screenshots.
+    Status: NOT STARTED
+
+R3  Real MBTA V3 data
+    Source: README core #4 ("Successfully fetch and render live data");
+            template "fetches and renders data from an external MBTA
+            API".
+    Planned: shared retrieval layer (02).
+    Check: values on screen match a direct API response at the same
+           time; no mock data in production.
+    Evidence: recording with the network panel or a timestamp.
+    Status: NOT STARTED
+
+R4  Interactive map centred on Greater Boston with live /vehicles
+    markers
+    Source: README core #3; template "Uses React Leaflet to render an
+            interactive map".
+    Planned: Live Map (04, 11).
+    Depends: R3, route reference data.
+    Check: map opens centred on Greater Boston; pan/zoom work; marker
+           count equals vehicles with positions in the current response
+           (after filters).
+    Evidence: recording.
+    Status: NOT STARTED
+
+R5  Clicking a marker opens a popup: route, direction, current status,
+    next stop
+    Source: README core #3 ("such as its route, direction, current
+            status, and next stop"). Not in the template checklist.
+    Planned: vehicle details (04 section 1).
+    Depends: R4; vehicle -> trip -> stop sequence -> stop.
+    Check: popup shows all four; next stop says "unavailable" when the
+           data is missing; values match /vehicles for that id.
+    Evidence: recording of at least two vehicles on different lines.
+    Status: NOT STARTED
+
+R6  Search bar or filter controls
+    Source: README core #4 (by line, route, or stop name). Not in the
+            template checklist.
+    Planned: line/route filters on map and lists; station search (11).
+    Check: choosing "Red" leaves only Red vehicles; search finds a stop
+           by name.
+    Evidence: recording.
+    Status: NOT STARTED
+
+R7  Manual refresh button or auto-refresh toggle
+    Source: README core #4. Not in the template checklist.
+    Planned: both [PROPOSED]: auto-refresh on by default with an
+             on/off toggle, plus a manual refresh; "updated N s ago".
+    Note: background or continuous collection does not satisfy this
+          by itself. The rider needs a visible control.
+    Check: toggle off -> data stops changing; manual refresh -> update
+           time changes.
+    Evidence: recording.
+    Status: NOT STARTED
+
+R8  At least one chart from API data
+    Source: README core #5 (Chart.js, Recharts, D3 given as examples);
+            template "Includes at least one chart or graph".
+    Planned: active vehicles by line, live, with scope, unit, update
+             time (07 section 2). Vehicle counts are not a chaos score.
+    Check: chart values match a count of the current /vehicles response.
+    Evidence: recording.
+    Status: NOT STARTED
+
+R9  Deploy frontend (and backend, if applicable)
+    Source: README core #6 ("free deployment tools we talked about in
+            the workshops" - which tools is not stated in the repo);
+            template "Deployed the frontend" (no backend checkbox).
+    Planned: [DEFERRED] to engineering. If a backend or collector
+             exists, it must be deployed too.
+    Check: public URL loads in a fresh browser with live data.
+    Evidence: link in PR "Live Deployment".
+    Status: NOT STARTED
+
+R10 Submission: fork, completed app, PR, screen recording, by deadline
+    Source: README intro and closing; template sections.
+    Deadline: Sunday, November 29, 2026, 11:59 p.m. Boston time.
+    Planned: 00 Stage 1.
+    Check: PR open against the assessment repository from David's fork,
+           template filled, recording link works without sign-in.
+    Evidence: PR URL.
+    Status: NOT STARTED
+
+======================================================================
+2. EXTRA FEATURES (optional)
+======================================================================
+
+  README extra                           Template box          Plan
+  -------------------------------------  --------------------  -------------
+  /shapes route lines under vehicles     Routes on the map     Stage 3
+  SSE (text/event-stream) streaming      Real time streaming   [DEFERRED]
+  instead of polling                                           engineering
+  Backend or local-storage persistence;  Saved commutes        Stage 2 (06)
+  bookmarked stops; "My Commute" with
+  live arrival countdowns
+
+======================================================================
+3. DISCREPANCIES BETWEEN README AND TEMPLATE
+======================================================================
+
+  D1  Mapping library: README says "React Leaflet (or a similar mapping
+      library)"; the template checkbox says "Uses React Leaflet". The
+      engineering choice stays open. If another library is used, the
+      PR should say so next to that checkbox.
+  D2  The template's short checklist omits details the README still
+      requires: search/filters (R6), refresh control (R7), live markers
+      from /vehicles (R4), and popup fields (R5). Build to the README.
+  D3  README asks for "cool fonts"; template asks for "cool
+      fonts/colors". Same intent; visual identity still [DEFERRED].
+  D4  Deployment: README "frontend (and backend, if applicable)";
+      template only "Deployed the frontend".
+
+======================================================================
+4. WHAT THE PR TEMPLATE ASKS FOR (David's answers, not filled here)
+======================================================================
+
+  Full name; date; email; class year; favourite MBTA line; core and
+  extra checkboxes; screen-recording link; live deployment link;
+  written answers to:
+    1. How did the project go? What did you most enjoy / find yourself
+       good at?
+    2. Was this what you expected? With two more weeks, what would you
+       add or change?
+  These are intentionally left blank in planning.
+
+======================================================================
+5. OTHER RULES FROM THE README
+======================================================================
+
+  - Partial submissions are considered. Submit on time over submitting
+    complete.
+  - LLMs are allowed, but the applicant must understand the code and may
+    be asked about it in an interview.
+  - Going beyond the JDT workshops is valued.
+  - The deadline is strict.
+
+======================================================================
+6. FEATURE RATIONALE AND ASSESSMENT ROLE
+======================================================================
+
+  Feature              Why / value                         Assessment role
+  -------------------  ----------------------------------  ---------------
+  Network overview     conditions at a glance, with        core: SPA,
+                       context instead of raw counts       responsive UI
+  Live map             transit is geographic; links        core: R4, R5,
+                       vehicles, stops, alerts, journeys   R6
+  Chaos Engine         alerts and positions do not         beyond core;
+                       explain service quality             analytical depth
+  Predictions          riders need arrivals; we also       core data use;
+                       measure how reliable they are       extra countdowns
+  Alerts               disruptions drive decisions;        beyond core
+                       relevance to a specific trip
+  Transit intelligence expected vs observed can differ     beyond core
+  My Commute           people care about their own trip    extra: saved
+                                                           commutes
+  Journey monitoring   help continues after boarding       beyond core
+  Analytics            today vs normal; model improvement  core: R8
+  Continuous collection history needs data when nobody is  beyond core
+                       looking
+  Desktop / mobile     exploring and commuting differ      core: R2
+  Accessibility        disruptions affect riders           part of R2
+                       differently
+  Reliability          external feeds are imperfect        demo quality
+
+  These are product positioning statements, not claims that no other
+  transit app does the same.
+
+======================================================================
+7. RISKS
+======================================================================
+
+  - Scope: the product plan is far larger than five days allows.
+    Mitigation: 00 delivery order and cut list.
+  - Deployment unknowns: hosting choice and any backend or collector
+    are not decided. Deploy something early.
+  - Map library vs template wording (D1).
+  - Data gaps: next stop or predictions missing for some vehicles.
+    Popups must show "unavailable" instead of failing.
+  - Rate limits without an API key.
+  - Recording and PR left too late: budget time before the deadline.
+  - Understanding: the applicant must be able to explain all code.
+
+======================================================================
+8. PLANNING DOCS VS. SUBMISSION
+======================================================================
+
+  - Pushing docs/planning/ to David's repository
+    (dribeiro0/technical-assessment-spring-27) is not the submission.
+  - The submission is a PR from the fork to the assessment repository,
+    with the completed app and template filled.
+  - Whether docs/planning/ is included in that PR is David's choice.
+  - Nothing in this audit is evidence that a feature works. Status
+    changes to VERIFIED only after the check above is done on the
+    deployed app.

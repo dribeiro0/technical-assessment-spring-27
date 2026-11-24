@@ -1,0 +1,169 @@
+CHAOS METER - 01 PRODUCT VISION
+Planning baseline 0.1 - November 24, 2026
+Related: 00_master_plan.txt, 06_my_commute.txt, 11_visual_mapping.txt
+
+======================================================================
+1. PROBLEM
+======================================================================
+
+The assessment README frames it: anyone who relies on the T lives with
+"the daily suspense" of whether a train is two minutes away or stuck,
+and BU students know the Green Line is down "every few days." The
+official data exists, but raw positions and alert text do not tell a
+rider whether to leave now, wait, or take something else.
+
+Product aim [ACCEPTED]: an actual product someone in Boston would use
+before leaving the house, not just another MBTA data dashboard. (This
+wording is from the assistant's opening reply, which restated
+decisions from earlier context; David built on it throughout.)
+
+Three principles every feature should serve at least one of [PROPOSED,
+not objected to]:
+  Understand - know how the MBTA is performing
+  Explore     - investigate any route, station, or vehicle
+  Act         - make a better decision about a trip
+
+======================================================================
+2. AUDIENCES                                              [ACCEPTED]
+======================================================================
+
+  Everyday commuter
+    Decision: Do I leave now? Which departure? Is my line OK? When do I
+    get off?
+    Needs: fast answer on a phone, poor connection tolerated, no setup
+    required before the first useful answer.
+
+  Transit enthusiast
+    Decision: What is the network doing right now? Where are the gaps?
+    How does today compare with normal?
+    Needs: the whole map, every line, analytics, explanations of scores.
+
+The product is a hybrid for both. Neither audience is secondary.
+
+======================================================================
+3. TWO EXPERIENCES, ONE SET OF FACTS                      [ACCEPTED]
+======================================================================
+
+  Source anchor (David): "We have a different mobile view option so that
+  when they're on their phone trying to take a look and track the
+  train, it's a more convenient view."
+
+  +-----------------------------+     +-----------------------------+
+  | COMMAND CENTER              |     | COMMUTER COMPANION          |
+  | emphasized on desktop       |     | emphasized on mobile        |
+  |                             |     |                             |
+  | Explore the network         |     | Make a decision on the go   |
+  | Overview, Live Map, Alerts, |     | Home, Map, Alerts, Saved,   |
+  | Analytics, My Commute       |     | dedicated tracking mode     |
+  +-------------+---------------+     +--------------+--------------+
+                |                                    |
+                +------------ same facts ------------+
+                  vehicles, predictions, alerts, scores,
+                  freshness, saved preferences
+
+  - Either mode can be opened manually on any device. [ACCEPTED]
+  - Device type sets the default emphasis, not a lock.
+  - A fact (an arrival time, an alert, a score) must read the same in
+    both modes at the same moment. Only layout and priority differ.
+
+Decisions each experience supports:
+
+  Command Center
+    - Is the network healthy? Which lines are worst right now?
+    - Where are vehicles bunched or missing?
+    - Which alerts have the biggest passenger impact?
+    - How does service today compare with what has been observed before?
+      (only once real history exists)
+
+  Commuter Companion
+    - When is my next train at my stop, in my direction?
+    - Is anything affecting my trip specifically?
+    - Where is the train I am waiting for?
+    - When should I get off?
+
+======================================================================
+4. LANDING EXPERIENCE                                      [ACCEPTED]
+======================================================================
+
+Desktop (Command Center) lands on the network overview: network
+condition, route-level reliability, major disruptions, data freshness,
+and a way into saved commutes. [ACCEPTED]
+
+Mobile (Commuter Companion) Home leads with the person's commute:
+saved or recent station, next departures, personal conditions, relevant
+alerts, any active journey, and station search. A compact network status
+stays visible. [ACCEPTED: matches the planning conversation's "Mobile
+default: Commute Home" and David's master prompt, which puts "Personal
+commute overview" first on mobile and the network overview first on
+desktop.]
+
+A mobile user can still open the full network overview, and a desktop
+user can still open My Commute. See 12_decision_log.txt DEC-003.
+
+======================================================================
+5. NETWORK COVERAGE                                        [ACCEPTED]
+======================================================================
+
+  Source anchor (David): "Let's support the entire MBA network
+  architecturally and make sure that Subway works perfectly, and then
+  we transition to the entire MBA MBTA once everything else is flushed
+  out."
+
+  Architecture: whole MBTA network (subway, bus, commuter rail, ferry).
+  Proven first: Red, Orange, Blue, Green (all branches).
+
+  The planning conversation phrased this as "build horizontally in
+  architecture but vertically in implementation."
+
+  Expansion order after subway [PROPOSED]:
+    Phase 2 bus -> Phase 3 commuter rail -> Phase 4 ferry
+  David agreed to expand "once everything else is flushed out" but did
+  not separately confirm this order.
+
+  Subway release criteria proposed in planning [PROPOSED]:
+    live vehicle tracking; route and branch recognition; station and
+    direction selection; real-time arrivals; waiting and onboard
+    tracking; Chaos Engine; alert integration; personal commute scoring;
+    analytics and historical collection; desktop and mobile; data
+    failure handling; testing.
+
+  Architectural safeguards so subway-first does not hard-code subway:
+    - Vehicles, routes, stops, and alerts modelled generically (branches,
+      platforms, street stops, terminals, service patterns).
+    - Scoring and "expected service" are mode-specific. Example from
+      planning: a 15-minute gap is poor for subway and may be normal for
+      commuter rail.
+    - The assessment chart and filters must not assume four lines only.
+      The README itself lists Silver and Commuter Rail among /routes.
+
+======================================================================
+6. WHAT CHAOS METER IS NOT (FOR NOW)
+======================================================================
+
+  - Not a full journey planner competing with general navigation apps.
+    [ACCEPTED: monitoring first; planner later if ever]
+  - Not a replacement for MBTA predictions. [ACCEPTED: MBTA-first]
+  - Not an AI service. Normal operation should need no paid model calls.
+    [PROPOSED requirement, carried in 09]
+  - Not crowdsourced. [OPEN; assistant leaned "data-driven only"]
+  - No mandatory account. [ACCEPTED in planning: "No mandatory account
+    creation." listed among decisions kept]
+
+======================================================================
+7. DIFFERENTIATION (WHY THIS IS MORE THAN A TRACKER)
+======================================================================
+
+Planning named three reinforcing differentiators [PROPOSED framing]:
+
+  1. An explainable Chaos Score with stated inputs, scope, confidence,
+     and model version (03).
+  2. Comparing expected service with observed service to surface
+     problems that have no official alert yet (05).
+  3. A commute companion that covers the whole trip, including "when
+     should I get off" (06).
+
+  History improves intelligence; intelligence improves scores; scores
+  improve the commuter's decision. These are claims about intent. None
+  is built yet, and the planning conversation itself noted they are
+  "general product comparisons, not claims that no existing transit
+  application offers these features."

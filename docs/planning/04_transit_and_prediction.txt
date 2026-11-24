@@ -1,0 +1,205 @@
+CHAOS METER - 04 TRANSIT AND PREDICTION
+Planning baseline 0.1 - November 24, 2026
+Related: 02_functional_architecture.txt, 05, 06_my_commute.txt, 08
+
+======================================================================
+1. VEHICLES AS TRANSIT ENTITIES                            [ACCEPTED]
+======================================================================
+
+A vehicle is not just a dot. Each one is tied to a trip, route,
+direction, and progress along stops.
+
+  Field                Use                          If missing
+  -------------------  ---------------------------  ---------------------
+  vehicle id           keep identity across updates  cannot track; show
+                                                    position only
+  lat / lon, bearing   map placement, marker angle   no marker; list entry
+                                                    says "location unknown"
+  route (+ branch)     colour, filters, popup        "route unknown"
+  trip                 destination, stop sequence    no next stop, no
+                                                    onboard tracking
+  direction_id         direction name per route      "direction unknown"
+  current_status       INCOMING_AT / STOPPED_AT /    popup omits status
+                       IN_TRANSIT_TO
+  current stop seq.    current / next stop           "next stop unavailable"
+  updated_at           freshness label               treat as stale
+  (also available: label, speed, occupancy, revenue_status, carriages)
+
+Rule: show a field only when it is present or reliably derived. Never
+guess a next stop from geometry alone.
+
+Assessment popup requirement (route, direction, current status, next
+stop): all four come from this table. "Next stop" is shown "where
+available", with an explicit "unavailable" otherwise.
+
+======================================================================
+2. TRACKING LEVELS AND MODES                               [ACCEPTED]
+======================================================================
+
+  Level 1  Network   all supported vehicles, filter by mode/route
+  Level 2  Route     one route/branch, both directions, gaps visible
+  Level 3  Vehicle   follow one train or bus
+
+  Waiting mode (before boarding): when will it arrive, where is it, how
+  many stops away, what is the next one after it.
+  Onboard mode (after boarding): when do I reach my destination, how
+  many stops remain, anything ahead, where am I.
+
+Tracking behaviour [ACCEPTED]:
+  - keep vehicle identity across updates; do not reset the map on refresh
+  - mark stale positions as stale, not live
+  - handle vehicles entering or leaving service
+  - never silently switch the user to a different train
+  - smoothing between reported positions is allowed for display, but an
+    interpolated position must not be presented as a GPS reading
+
+======================================================================
+3. SUBWAY SPECIFICS
+======================================================================
+
+  Branches: Green B/C/D/E share a trunk. Red has Ashmont and Braintree
+  branches. A "Red Line" departure board must say which branch.
+
+  Direction and destination:
+    direction_id is 0/1 and its name differs by route. Always show the
+    route's direction name plus the trip's destination (headsign), e.g.
+    "Eastbound - to Government Center". Prefer the prediction's
+    trip_headsign when it differs from the original.
+
+  Silver Line and other edge cases:
+    Classify routes by official MBTA route metadata (route type, line),
+    not by name or colour assumptions. Silver Line routes are classified
+    however the API classifies them. Mattapan likewise.
+
+  Station vs platform:
+    A station (parent stop) has child stops per platform/direction. A
+    user picks a station; departures are grouped by platform/direction.
+    Never merge both directions into one countdown.
+
+  Different service patterns:
+    Short-turns, express, or diversions change which stops a trip
+    serves. Use the trip's own stop list. If the user's destination is
+    not on the trip's remaining stops, say so (06).
+
+======================================================================
+4. PREDICTION APPROACH
+======================================================================
+
+Options compared in planning:
+
+  Approach            Advantage                     Limitation
+  ------------------  ----------------------------  ---------------------
+  Official only       official, simple, reliable    depends on MBTA
+                      when present                  coverage
+  Independent         control, differentiation      hard to beat MBTA,
+                                                    which has operational
+                                                    data we do not
+  Hybrid              official + own fallback and   complex; risk of
+                      reliability analysis          misleading riders
+
+The assistant first recommended hybrid. David asked:
+  "Why would we do a hybrid approach over just using the MBTA
+   predictions?"
+After the comparison he accepted the revised plan ("That sounds good.").
+
+DECISION [ACCEPTED]: official MBTA predictions first.
+  - Live prediction available -> show it.
+  - No live prediction -> show the scheduled time, explicitly labelled
+    "Scheduled".
+  - Prediction stale -> say live estimate unavailable / outdated, with age.
+  - Neither -> "Arrival time unavailable".
+  - Significant change -> update, and record the revision.
+  - No custom arrival algorithm unless future evidence justifies one.
+
+Display labels (must be distinguishable without colour):
+  LIVE        official prediction, fresh
+  SCHEDULED   timetable time, no live prediction
+  STALE       last live value, older than threshold, age shown
+  UNAVAILABLE nothing usable
+
+Research items [PROPOSED, later]:
+  - prediction accuracy by route and stop
+  - accuracy vs. lead time (does it improve as the train approaches?)
+  - effect of disruptions on accuracy
+  - how often estimates are revised
+  - statistical confidence shown to riders
+  - independent prediction models, only if evaluation shows a real gain
+  Note: the API exposes arrival/departure "uncertainty" fields described
+  for bus and commuter rail; usefulness for subway is [UNVALIDATED].
+
+======================================================================
+5. EVALUATING A PREDICTION AGAINST WHAT HAPPENED
+======================================================================
+
+A revised prediction is not ground truth. Only an observed arrival is.
+
+  Record each prediction as issued:
+    (trip, stop, stop_sequence, vehicle if known,
+     predicted_time, issued_at = retrieval time, source update time)
+
+  Record the observed arrival separately:
+    from /stop_events where available, otherwise inferred from vehicle
+    status STOPPED_AT for that trip and stop sequence. Inferred
+    arrivals carry lower confidence.
+
+  Match on (service date, trip, stop_sequence). Not on stop name alone
+  (a trip can visit a stop once per sequence; branches share stops).
+
+  Error = observed_arrival - predicted_time, analysed by lead time
+  (observed_arrival - issued_at) buckets.
+
+  Example [MOCK] from planning, one trip at one stop:
+    clock   minutes away shown   implied arrival
+    8:00    5                    8:05
+    8:02    5                    8:07
+    8:04    6                    8:10
+    8:06    7                    8:13
+    8:08    8                    8:16
+  The implied arrival drifted 11 minutes with no alert. If the train
+  then arrived at 8:17, the 8:00 prediction had a 12-minute error and
+  the 8:08 one a 1-minute error. The 8:08 prediction is still a
+  prediction, not the truth used to score the 8:00 one.
+
+======================================================================
+6. FAILURE CASES
+======================================================================
+
+  Case                          Visible behaviour
+  ----------------------------  -----------------------------------------
+  Missing next stop             popup "Next stop unavailable"; no
+                                onboard progress for that vehicle
+  Missing prediction            scheduled time labelled SCHEDULED, or
+                                UNAVAILABLE
+  Stale position                marker styled stale (not colour only)
+                                with "last seen N min ago"; not counted
+                                as live in charts
+  Ambiguous trip match          do not attach the vehicle to a departure;
+                                show the departure without "track" option
+  Vehicle disappears mid-track  "Tracking unavailable"; keep last known
+                                position and time; never switch trains
+  Different service pattern     warn if the user's stop is not on the
+                                trip's remaining stops
+  Vehicle with no trip          shown on map, excluded from next-stop and
+                                prediction features
+  Changed assignment            vehicle switches trip: treat as a new
+                                trip; a tracked journey is not moved with
+                                it without the rider confirming
+  Duplicate observations        same vehicle and updated_at: ignored
+  Stopped vs unknown            STOPPED_AT with fresh data means "known
+                                to be stopped". No data means "tracking
+                                unavailable". The two look different.
+
+======================================================================
+7. ACCEPTANCE CRITERIA
+======================================================================
+
+  - Clicking any live vehicle marker shows route, direction name,
+    current status, and next stop or "unavailable"; values match the
+    /vehicles record for that id.
+  - Selecting a vehicle and waiting through three refreshes keeps the
+    same vehicle selected and the map view unchanged.
+  - A departure with no live prediction is shown with the word
+    "Scheduled".
+  - Departures at a station are grouped by direction and branch.
+  - A vehicle whose updated_at exceeds the freshness threshold is
+    visibly marked stale and excluded from "live" counts.
