@@ -2,6 +2,8 @@ CHAOS METER - 01 PRODUCT VISION
 Planning baseline 0.1 - November 24, 2026
 Related: 00_master_plan.txt, 06_my_commute.txt, 11_visual_mapping.txt
 
+Delivery scope: Sprints 1-3 open on Live Map on both devices. Sprint 4 adds a saved-commute entry point. The full network overview arrives in Sprint 5.
+
 ======================================================================
 1. PROBLEM
 ======================================================================
@@ -12,13 +14,9 @@ and BU students know the Green Line is down "every few days." The
 official data exists, but raw positions and alert text do not tell a
 rider whether to leave now, wait, or take something else.
 
-Product aim [ACCEPTED]: an actual product someone in Boston would use
-before leaving the house, not just another MBTA data dashboard. (This
-wording is from the assistant's opening reply, which restated
-decisions from earlier context; David built on it throughout.)
+Product aim [ACCEPTED]: help a Boston rider decide when to leave, which departure to take, and whether a disruption affects the trip.
 
-Three principles every feature should serve at least one of [PROPOSED,
-not objected to]:
+Three principles every feature should serve at least one of [PROPOSED]:
   Understand - know how the MBTA is performing
   Explore     - investigate any route, station, or vehicle
   Act         - make a better decision about a trip
@@ -44,9 +42,6 @@ The product is a hybrid for both. Neither audience is secondary.
 3. TWO EXPERIENCES, ONE SET OF FACTS                      [ACCEPTED]
 ======================================================================
 
-  Source anchor (David): "We have a different mobile view option so that
-  when they're on their phone trying to take a look and track the
-  train, it's a more convenient view."
 
   +-----------------------------+     +-----------------------------+
   | COMMAND CENTER              |     | COMMUTER COMPANION          |
@@ -92,10 +87,7 @@ and a way into saved commutes. [ACCEPTED]
 Mobile (Commuter Companion) Home leads with the person's commute:
 saved or recent station, next departures, personal conditions, relevant
 alerts, any active journey, and station search. A compact network status
-stays visible. [ACCEPTED: matches the planning conversation's "Mobile
-default: Commute Home" and David's master prompt, which puts "Personal
-commute overview" first on mobile and the network overview first on
-desktop.]
+stays visible.
 
 A mobile user can still open the full network overview, and a desktop
 user can still open My Commute. See 12_decision_log.txt DEC-003.
@@ -104,23 +96,16 @@ user can still open My Commute. See 12_decision_log.txt DEC-003.
 5. NETWORK COVERAGE                                        [ACCEPTED]
 ======================================================================
 
-  Source anchor (David): "Let's support the entire MBA network
-  architecturally and make sure that Subway works perfectly, and then
-  we transition to the entire MBA MBTA once everything else is flushed
-  out."
 
   Architecture: whole MBTA network (subway, bus, commuter rail, ferry).
   Proven first: Red, Orange, Blue, Green (all branches).
 
-  The planning conversation phrased this as "build horizontally in
-  architecture but vertically in implementation."
 
   Expansion order after subway [PROPOSED]:
     Phase 2 bus -> Phase 3 commuter rail -> Phase 4 ferry
-  David agreed to expand "once everything else is flushed out" but did
-  not separately confirm this order.
 
-  Subway release criteria proposed in planning [PROPOSED]:
+
+  Subway release criteria [PROPOSED]:
     live vehicle tracking; route and branch recognition; station and
     direction selection; real-time arrivals; waiting and onboard
     tracking; Chaos Engine; alert integration; personal commute scoring;
@@ -130,8 +115,7 @@ user can still open My Commute. See 12_decision_log.txt DEC-003.
   Architectural safeguards so subway-first does not hard-code subway:
     - Vehicles, routes, stops, and alerts modelled generically (branches,
       platforms, street stops, terminals, service patterns).
-    - Scoring and "expected service" are mode-specific. Example from
-      planning: a 15-minute gap is poor for subway and may be normal for
+    - Scoring and "expected service" are mode-specific. Example: a 15-minute gap is poor for subway and may be normal for
       commuter rail.
     - The assessment chart and filters must not assume four lines only.
       The README itself lists Silver and Commuter Rail among /routes.
@@ -145,15 +129,13 @@ user can still open My Commute. See 12_decision_log.txt DEC-003.
   - Not a replacement for MBTA predictions. [ACCEPTED: MBTA-first]
   - Not an AI service. Normal operation should need no paid model calls.
     [PROPOSED requirement, carried in 09]
-  - Not crowdsourced. [OPEN; assistant leaned "data-driven only"]
-  - No mandatory account. [ACCEPTED in planning: "No mandatory account
-    creation." listed among decisions kept]
+  - Crowdsourced reports remain open. Basic access requires no account.
 
 ======================================================================
 7. DIFFERENTIATION (WHY THIS IS MORE THAN A TRACKER)
 ======================================================================
 
-Planning named three reinforcing differentiators [PROPOSED framing]:
+Three product capabilities [PROPOSED framing]:
 
   1. An explainable Chaos Score with stated inputs, scope, confidence,
      and model version (03).
@@ -163,7 +145,4 @@ Planning named three reinforcing differentiators [PROPOSED framing]:
      should I get off" (06).
 
   History improves intelligence; intelligence improves scores; scores
-  improve the commuter's decision. These are claims about intent. None
-  is built yet, and the planning conversation itself noted they are
-  "general product comparisons, not claims that no existing transit
-  application offers these features."
+  improve the commuter's decision.

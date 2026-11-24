@@ -10,11 +10,10 @@ At this baseline every row is NOT STARTED. No application code exists.
 1. CORE REQUIREMENTS MATRIX
 ======================================================================
 
-R1  Single-page app, no full reloads when switching views
+R1  Single-page app, no full reloads when switching views [Sprint 3]
     Source: README core #1 (examples: Live Map, Service Alerts & Table,
             Line Analytics); template "Built as a SPA".
-    Planned: client-side navigation across Overview, Live Map, Alerts,
-             Analytics, My Commute (11).
+    Planned: client-side navigation between Live Map and Analytics.
     Depends: none.
     Check: switch every view; browser shows no document reload
            (network panel: no new document request); state such as
@@ -22,21 +21,21 @@ R1  Single-page app, no full reloads when switching views
     Evidence: recording segment clicking through all views.
     Status: NOT STARTED
 
-R2  Polished, responsive UI with catchy title and apt description
+R2  Polished, responsive UI with catchy title and apt description [Sprint 1; recheck in Sprint 3]
     Source: README core #2 (also "cool fonts"; MBTA palette and subtle
             motion "strongly encouraged"); template "beautiful frontend
             ... catchy title, apt description, cool fonts/colors ...
             any screen size".
-    Planned: Command Center / Commuter Companion layouts (01, 11).
+    Planned: one responsive map and chart interface on desktop and phone.
              Title "Chaos Meter"; description [OPEN]. Visual identity
              [DEFERRED] but must be decided before submission.
-    Depends: R1.
+    Depends: responsive app shell.
     Check: usable at phone (~375 px), tablet, desktop widths; title and
            one-line description visible on landing.
     Evidence: recording at desktop and narrow width; screenshots.
     Status: NOT STARTED
 
-R3  Real MBTA V3 data
+R3  Real MBTA V3 data [Sprint 1]
     Source: README core #4 ("Successfully fetch and render live data");
             template "fetches and renders data from an external MBTA
             API".
@@ -46,7 +45,7 @@ R3  Real MBTA V3 data
     Evidence: recording with the network panel or a timestamp.
     Status: NOT STARTED
 
-R4  Interactive map centred on Greater Boston with live /vehicles
+R4  Interactive map centred on Greater Boston with live /vehicles [Sprint 1]
     markers
     Source: README core #3; template "Uses React Leaflet to render an
             interactive map".
@@ -58,7 +57,7 @@ R4  Interactive map centred on Greater Boston with live /vehicles
     Evidence: recording.
     Status: NOT STARTED
 
-R5  Clicking a marker opens a popup: route, direction, current status,
+R5  Clicking a marker opens a popup: route, direction, current status, [Sprint 2]
     next stop
     Source: README core #3 ("such as its route, direction, current
             status, and next stop"). Not in the template checklist.
@@ -69,27 +68,25 @@ R5  Clicking a marker opens a popup: route, direction, current status,
     Evidence: recording of at least two vehicles on different lines.
     Status: NOT STARTED
 
-R6  Search bar or filter controls
+R6  Search bar or filter controls [Sprint 2]
     Source: README core #4 (by line, route, or stop name). Not in the
             template checklist.
-    Planned: line/route filters on map and lists; station search (11).
-    Check: choosing "Red" leaves only Red vehicles; search finds a stop
-           by name.
+    Planned: one line filter on the live map.
+    Check: choosing "Red" leaves only Red vehicles; clearing it restores all lines in scope.
     Evidence: recording.
     Status: NOT STARTED
 
-R7  Manual refresh button or auto-refresh toggle
+R7  Manual refresh button or auto-refresh toggle [Sprint 2]
     Source: README core #4. Not in the template checklist.
-    Planned: both [PROPOSED]: auto-refresh on by default with an
-             on/off toggle, plus a manual refresh; "updated N s ago".
+    Planned: a manual refresh button and last successful update time.
     Note: background or continuous collection does not satisfy this
           by itself. The rider needs a visible control.
-    Check: toggle off -> data stops changing; manual refresh -> update
-           time changes.
+    Check: manual refresh requests current data and preserves the line filter.
+           A failed request leaves the previous success time visible.
     Evidence: recording.
     Status: NOT STARTED
 
-R8  At least one chart from API data
+R8  At least one chart from API data [Sprint 3]
     Source: README core #5 (Chart.js, Recharts, D3 given as examples);
             template "Includes at least one chart or graph".
     Planned: active vehicles by line, live, with scope, unit, update
@@ -98,7 +95,7 @@ R8  At least one chart from API data
     Evidence: recording.
     Status: NOT STARTED
 
-R9  Deploy frontend (and backend, if applicable)
+R9  Deploy frontend (and backend, if applicable) [Sprint 3]
     Source: README core #6 ("free deployment tools we talked about in
             the workshops" - which tools is not stated in the repo);
             template "Deployed the frontend" (no backend checkbox).
@@ -108,11 +105,11 @@ R9  Deploy frontend (and backend, if applicable)
     Evidence: link in PR "Live Deployment".
     Status: NOT STARTED
 
-R10 Submission: fork, completed app, PR, screen recording, by deadline
+R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3]
     Source: README intro and closing; template sections.
     Deadline: Sunday, November 29, 2026, 11:59 p.m. Boston time.
-    Planned: 00 Stage 1.
-    Check: PR open against the assessment repository from David's fork,
+    Planned: 00 Sprint 3.
+    Check: PR open against the assessment repository from the applicant's fork,
            template filled, recording link works without sign-in.
     Evidence: PR URL.
     Status: NOT STARTED
@@ -123,10 +120,10 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline
 
   README extra                           Template box          Plan
   -------------------------------------  --------------------  -------------
-  /shapes route lines under vehicles     Routes on the map     Stage 3
+  /shapes route lines under vehicles     Routes on the map     Unscheduled
   SSE (text/event-stream) streaming      Real time streaming   [DEFERRED]
   instead of polling                                           engineering
-  Backend or local-storage persistence;  Saved commutes        Stage 2 (06)
+  Backend or local-storage persistence;  Saved commutes        Sprint 4 (06)
   bookmarked stops; "My Commute" with
   live arrival countdowns
 
@@ -147,7 +144,7 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline
       template only "Deployed the frontend".
 
 ======================================================================
-4. WHAT THE PR TEMPLATE ASKS FOR (David's answers, not filled here)
+4. WHAT THE PR TEMPLATE ASKS FOR
 ======================================================================
 
   Full name; date; email; class year; favourite MBTA line; core and
@@ -165,7 +162,7 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline
 
   - Partial submissions are considered. Submit on time over submitting
     complete.
-  - LLMs are allowed, but the applicant must understand the code and may
+  - The applicant must understand the code and may
     be asked about it in an interview.
   - Going beyond the JDT workshops is valued.
   - The deadline is strict.
@@ -176,21 +173,21 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline
 
   Feature              Why / value                         Assessment role
   -------------------  ----------------------------------  ---------------
-  Network overview     conditions at a glance, with        core: SPA,
-                       context instead of raw counts       responsive UI
+  Network overview     conditions at a glance, with        future: Sprint 5
+                       context instead of raw counts
   Live map             transit is geographic; links        core: R4, R5,
                        vehicles, stops, alerts, journeys   R6
   Chaos Engine         alerts and positions do not         beyond core;
                        explain service quality             analytical depth
-  Predictions          riders need arrivals; we also       core data use;
-                       measure how reliable they are       extra countdowns
+  Predictions          riders need arrivals; we also       optional: Sprint 4
+                       measure how reliable they are       evaluation: Sprint 7
   Alerts               disruptions drive decisions;        beyond core
                        relevance to a specific trip
   Transit intelligence expected vs observed can differ     beyond core
   My Commute           people care about their own trip    extra: saved
                                                            commutes
   Journey monitoring   help continues after boarding       beyond core
-  Analytics            today vs normal; model improvement  core: R8
+  Analytics            current vehicle counts by line      core: R8
   Continuous collection history needs data when nobody is  beyond core
                        looking
   Desktop / mobile     exploring and commuting differ      core: R2
@@ -214,17 +211,11 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline
     Popups must show "unavailable" instead of failing.
   - Rate limits without an API key.
   - Recording and PR left too late: budget time before the deadline.
-  - Understanding: the applicant must be able to explain all code.
 
 ======================================================================
-8. PLANNING DOCS VS. SUBMISSION
+8. SUBMISSION EVIDENCE
 ======================================================================
 
-  - Pushing docs/planning/ to David's repository
-    (dribeiro0/technical-assessment-spring-27) is not the submission.
-  - The submission is a PR from the fork to the assessment repository,
-    with the completed app and template filled.
-  - Whether docs/planning/ is included in that PR is David's choice.
-  - Nothing in this audit is evidence that a feature works. Status
-    changes to VERIFIED only after the check above is done on the
-    deployed app.
+  Submit the completed application through a pull request from the fork
+  to the assessment repository. Include the recording and deployment links.
+  Mark a requirement VERIFIED only after its acceptance check passes.

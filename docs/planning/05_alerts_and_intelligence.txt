@@ -18,7 +18,7 @@ Related: 03_chaos_engine.txt, 04, 06_my_commute.txt, 07, 08
   Rule: a detected irregularity is never presented as an MBTA
   announcement. Labels, wording, and placement keep the two apart.
 
-  Planning called this the hybrid Alert Engine: unlike predictions,
+  Alert processing combines two sources:
   alerts combine official and independent evidence, keeping origins
   visible.
 
@@ -100,10 +100,6 @@ Relevance levels for a saved journey:
 5. EXPECTED VS OBSERVED (TRANSIT INTELLIGENCE)            [ACCEPTED]
 ======================================================================
 
-  Source anchor (David): "Pairing it with the brainstorm about us
-  creating our own predictions, because the robot's given to us and
-  what we find changes, right?" - then "I agree." to the resulting
-  plan.
 
   EXPECTED                         OBSERVED
   schedules                        vehicle positions / stop events
@@ -125,11 +121,11 @@ Relevance levels for a saved journey:
   evidence used (e.g. "observed gap 14 min vs scheduled 6 min at Park
   Street northbound, 3 consecutive vehicles") and a confidence level.
 
-  Staged ambition [PROPOSED]:
+  Research sequence [PROPOSED; numbers below are local to this list]:
     1 show official info  2 compare with observations  3 detect
     unreported irregularities  4 learn prediction error  5 statistical
     confidence  6 experiment with independent predictions  7 forecast
-    disruptions. Stages 6-7 only if earlier stages show real benefit.
+    disruptions. Research steps 6-7 depend on evidence of benefit.
 
 ======================================================================
 6. ILLUSTRATIVE DISRUPTION                                     [MOCK]
@@ -168,8 +164,7 @@ Relevance levels for a saved journey:
     before that.
   Predicting disruptions before they happen              [DEFERRED, future]
   Crowdsourced rider reports                             [OPEN]
-    The assistant leaned toward keeping Chaos Meter data-driven because
-    of moderation and false-report problems. David did not decide.
+    Rider reports would require moderation and independent verification.
 
 ======================================================================
 9. ACCEPTANCE CRITERIA

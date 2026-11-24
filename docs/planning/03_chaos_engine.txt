@@ -3,6 +3,8 @@ Planning baseline 0.1 - November 24, 2026
 Related: 05_alerts_and_intelligence.txt, 07_analytics_and_data.txt,
          08_reliability_and_recovery.txt, 12_decision_log.txt DEC-006
 
+Delivery scope: Sprint 7, after Sprint 6 establishes historical observations. The Sprint 3 vehicle-count chart is independent of scoring.
+
 No weight, threshold, or band in this file is calibrated. Every number
 below is a [PROPOSED] starting point or a [MOCK] example. None of the
 cited sources established any of the candidate percentages.
@@ -19,21 +21,14 @@ passengers, not how many things are going wrong.
     service.
   - Missing data is not good service.
 
-Source anchors (David):
-  "What do you think chaos should be determined by?"
-  "We can probably use the weights in comparison to real research and
-   to create a more accurate result, right?"
-David accepted the research-backed direction. He did not approve any
-specific set of weights. The planning roadmap at that point recorded
-the Chaos Engine as "Direction decided", not "Decided".
+
+The scoring method requires research and empirical validation. All candidate weights remain provisional.
 
 ======================================================================
-2. HOW THE MODEL EVOLVED (verified against the transcript)
+2. HOW THE MODEL EVOLVED
 ======================================================================
 
 Candidate A - early illustrative simulator                 [MOCK]
-  Appeared in the "full architecture" reply as a slider widget labelled
-  "Experimental weighting model for planning purposes."
 
     Factor                       Weight   Simulator value
     Disruption severity            35%       40/100
@@ -47,10 +42,9 @@ Candidate A - early illustrative simulator                 [MOCK]
   Weakness: almost entirely alert-driven; coverage and severity overlap;
   "measurable delays" undefined.
   Note: its "Moderate" label at 27 disagrees with the later bands below
-  (20-39 = "Minor chaos"). The labels were not reconciled in planning.
+  (20-39 = "Minor chaos"). Severity labels remain open.
 
 Candidate B - five pillars                                 [PROPOSED]
-  Given in answer to "What do you think chaos should be determined by?"
 
     Pillar                 Weight  Measures
     Service disruptions      30%   suspensions, closures, shuttles, detours
@@ -69,9 +63,7 @@ Candidate B - five pillars                                 [PROPOSED]
   Planned future disruptions do not count until active.
 
 Candidate C - research-informed starting proposal          [PROPOSED]
-  Given after David asked to compare weights with research. Labelled
-  "Provisional weights informed by research, not yet statistically
-  calibrated."
+  Candidate weights require calibration against passenger outcomes.
 
     Factor                     Weight
     Excess waiting time          30%
@@ -82,7 +74,7 @@ Candidate C - research-informed starting proposal          [PROPOSED]
 
   Disruption coverage is removed as a weighted factor. It becomes an
   exposure modifier: it scales how much an individual disruption
-  contributes to a route or network score. Reason given: reduces double
+  contributes to a route or network score. This reduces double
   counting (a suspension is already "severe"; counting its coverage
   separately counts it twice).
   Change from B: reframes the core around time lost by passengers
@@ -209,7 +201,7 @@ reliability measures (C).
   - The threshold for "enough evidence" is [OPEN]; it must be stated in
     the model version, not hidden.
 
-  Example from planning [MOCK]: predictions lost
+  Example [MOCK]: predictions lost
     Excess waiting ........ unavailable
     Disruptions ........... available
     Excess travel time .... unavailable
@@ -228,9 +220,7 @@ reliability measures (C).
     40-59  Moderate chaos  noticeable degradation
     60-79  High chaos      significant travel disruption
     80-100 Critical chaos  severe service failure
-  Labels are as written in the planning conversation. David's master
-  prompt words them "Minor/Moderate/High/Critical disruption". Final
-  wording is [OPEN]; thresholds need calibration either way.
+  Final wording and thresholds require validation.
 
   What a rider can see behind any result                   [ACCEPTED]
     - score and band (or UNKNOWN)
@@ -303,7 +293,7 @@ reliability measures (C).
   timetable. Then E[W] = E[H^2] / (2 E[H]), which rearranges to the
   formula above. Perfectly regular service (CV = 0) gives E[H]/2.
 
-  Simulated example from planning [MOCK]: E[H] = 6 min, CV = 0.8
+  Simulated example [MOCK]: E[H] = 6 min, CV = 0.8
     regular service wait 3.0 min; with irregularity 3.0 x 1.64 = 4.9 min
     (+64%). Not an observed MBTA value.
 
@@ -314,9 +304,7 @@ reliability measures (C).
   relate to the extremes of the schedule-deviation distribution. The
   headway threshold at which to switch models is [OPEN].
 
-  Source note: the conversation attributed this formula to an unnamed
-  Springer source. That attribution is unverified. The formula itself
-  follows from the random-arrival assumption shown above.
+  Furth and Muller (2006), equation 2, gives the mean-wait relationship.
 
 ======================================================================
 11. SOURCES
@@ -327,7 +315,7 @@ reliability measures (C).
   - Furth, P. G. and Muller, T. H. J. (2006). "Service Reliability and
     Hidden Waiting Time: Insights from Automatic Vehicle Location Data."
     Transportation Research Record 1955, 79-87.
-    DOI as supplied: 10.1177/0361198106195500110.
+    DOI: 10.1177/0361198106195500110.
     Supports: traditional measures underestimate the cost of waiting;
     passengers budget waiting time from an extreme of the wait
     distribution (e.g. 95th percentile); short- vs long-headway waiting
@@ -345,8 +333,7 @@ reliability measures (C).
     trip time; OPMI treats 5 minutes as the primary target.
     Use: an AGENCY BENCHMARK for validating our outcome measure. It is
     not a Chaos Meter scoring threshold, and "within 5 minutes" is not a
-    band boundary. (The planning chat's wording "a trip is reliable if
-    ETT <= 5 minutes" is a simplification of this.)
+    band boundary.
 
   - MBTA transit-performance (github.com/mbta/transit-performance).
     MIT-licensed, archived March 4, 2026. Computes headways, travel
@@ -358,16 +345,6 @@ reliability measures (C).
     /stop_events ("actual arrival and departure times") may supply
     observed arrivals; subway coverage and latency are [UNVALIDATED].
 
-  Unresolved leads (not to be cited as evidence until identified):
-  - "Transportation Research Part A (2022)" on waiting-time models
-    underestimating impact.
-  - "Transit congestion research (2018)" valuing waiting at 2-2.5x
-    in-vehicle time. No universal multiplier is assumed.
-  - Transit Capacity and Quality of Service Manual, as cited for
-    "punctuality and regular spacing".
-  - TransitMatters data dashboard and MBTA Open Data Portal: named as
-    possible historical sources; availability and compatibility not
-    checked.
 
 ======================================================================
 12. ACCEPTANCE CRITERIA FOR ANY SHIPPED SCORE

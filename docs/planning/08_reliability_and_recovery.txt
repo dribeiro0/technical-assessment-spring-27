@@ -2,9 +2,11 @@ CHAOS METER - 08 RELIABILITY AND RECOVERY
 Planning baseline 0.1 - November 24, 2026
 Related: 02, 03 (missing data), 04, 05, 06, 07
 
+Delivery scope: check missing and stale live data during Sprints 1-3. Add collector recovery in Sprint 6 and lost-trip handling in Sprint 8.
+
 Principle [ACCEPTED]: uncertainty is better than false certainty.
 Reliability and graceful degradation are release requirements, not
-polish. (David: "I agree. What's next?")
+polish.
 
 Mechanisms (retry policy, process supervision, storage, monitoring
 tools) are [DEFERRED] to engineering. This file defines outcomes.
@@ -26,7 +28,7 @@ tools) are [DEFERRED] to engineering. This file defines outcomes.
   History           collector + storage
   Personalization   device storage + the above
 
-  Example [MOCK] from planning: predictions DEGRADED, Chaos Engine
+  Example [MOCK]: predictions DEGRADED, Chaos Engine
   REDUCED CONFIDENCE, everything else operational.
 
   Freshness and confidence are separate:

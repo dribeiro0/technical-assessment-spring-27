@@ -75,46 +75,54 @@ The deadline is Sunday, November 29, 2026, 11:59 p.m. Boston time. The
 assessment is the first gate. "Core to the product" and "mandatory for
 the assessment" are different lists, and the second one comes first.
 
-STAGE 0 - Assessment core (mandatory)                  [ACCEPTED order]
-  Single-page app with client-side navigation, responsive polished UI
-  with a title and description, real MBTA V3 data, interactive Greater
-  Boston map with live /vehicles markers, clickable marker popup (route,
-  direction, current status, next stop where available), search or
-  filter, manual refresh or auto-refresh toggle, at least one chart from
-  API data, deployed frontend (and backend if one exists).
-  Exit check: every row in 10_assessment_audit.txt marked VERIFIED.
+SPRINT ROADMAP [PROPOSED] | Baseline 0.1
+Assessment IDs refer to the release criteria in file 10.
 
-STAGE 1 - Recording and submission (mandatory)
-  Screen-recorded walkthrough, fork-based PR filled from pr_template.md,
-  before the deadline. David writes the reflections and personal fields.
+1. App shell and live map | R2, R3, R4
+   The responsive landing view shows the title, description and an interactive
+   Greater Boston map. Each in-scope vehicle with usable coordinates
+   appears at the position associated with its source ID.
 
-STAGE 2 - Smallest useful My Commute (core to the product)  [PROPOSED scope]
-  Save a stop with route and direction, see upcoming official departures
-  (scheduled times clearly labeled), see alerts that touch that stop and
-  direction. Works without location or notification permission.
-  Note: the README lists saved commutes as an Extra Feature, so this
-  stage can be shown in the submission if it is ready, but it is not
-  required.
+2. Vehicle details and controls | R5, R6, R7
+   Add marker popups with route, direction, status and next stop when
+   available. Add a line filter, manual refresh and last-updated time.
+   Refresh preserves the selected line. Missing next-stop data has an explicit unavailable state.
 
-STAGE 3 - Product identity
-  Overview with an experimental, clearly labeled network/route Chaos
-  Score (03), service alerts view with passenger-impact ordering (05),
-  route overlays from /shapes (README extra), Command Center /
-  Commuter Companion switching (01, 11).
+3. Analytics, polish and submission | R1, R8, R9, R10; recheck R2
+   Add an Analytics view with vehicle counts grouped by subway line.
+   Use one page with shared selection across views. Finish responsive
+   styling and keyboard access. Deploy the frontend and any backend.
+   Map and chart use consistent route identities. Switching views preserves the line selection without reloading the document. Release requires R1-R10 in file 10.
 
-STAGE 4 - Full journey monitoring
-  Waiting, boarding confirmation, onboard progress, approaching-stop
-  alert when reliable, departure recommendation (06).
+4. Basic My Commute | optional assessment stretch
+   Save one stop and direction on the device and show official upcoming
+   departures. Label any timetable fallback. Offer the saved commute
+   on either device, with a commute-first phone view for return visits.
+   Saved preferences survive a reload. Departures carry their source and update time.
 
-STAGE 5 - Intelligence and research (ongoing, after the assessment)
-  Continuous collection independent of visitors (07), detected
-  irregularities (05), prediction evaluation (04), score calibration
-  (03), bus/commuter rail/ferry extension (01).
+5. Service alerts and overview | personal app
+   Add the network overview, official alerts and journey relevance.
+   Alert relevance follows the affected journey segment. Detected irregularities follow in Sprint 7.
 
-The planning conversation's own priority table said the same thing in
-different words: "P0 - Assessment" first, then differentiation,
-intelligence, research, expansion. It described this as "an
-implementation sequence, not a reduction of our overall vision."
+6. Continuous collection and public trends | personal app
+   Collect service observations independently of visits; record gaps.
+   Recorded gaps remain distinct from observed periods with no service.
+
+7. Transit Intelligence and experimental scoring | personal app
+   Compare expected and observed service; evaluate prediction accuracy.
+   Keep validation separate from public analytics. Introduce network,
+   route and commute scores only where the evidence supports them.
+   Each score includes contributing evidence; insufficient observations yield an unknown state.
+
+8. Active journey monitoring | personal app
+   Confirm boarding, follow onboard progress and offer destination alerts
+   when trip identity, data freshness and rider settings support them.
+   Loss of reliable stop progress suppresses the approaching-destination alert.
+
+9. Expansion beyond subway | personal app
+   Extend validated features mode by mode. Check service patterns and
+   coverage before reusing any reliability measure.
+   Existing subway behavior remains a release criterion for each additional mode.
 
 ======================================================================
 4. DEPENDENCIES
@@ -136,7 +144,7 @@ implementation sequence, not a reduction of our overall vision."
                               service (vehicles or stop events) + history
   Prediction evaluation       continuous history of predictions and
                               observed arrivals
-  Score calibration           months of history + passenger-relevant
+  Score calibration           representative history + passenger-relevant
                               outcome measure
   Approaching-stop alert      onboard vehicle identity + reliable stop
                               progress; notification permission is
@@ -146,20 +154,22 @@ implementation sequence, not a reduction of our overall vision."
 5. WHAT GETS DEFERRED IF THE DEADLINE IS AT RISK
 ======================================================================
 
-Cut in this order, latest stage first. Never cut a Stage 0 or 1 item to
-save a later one.
+Sprint 3 covers the complete assessment. Sprint 4 is optional once the core
+meets its release criteria and the submission deadline is secure. Route
+overlays and streaming remain optional and unscheduled.
 
-  1. Independent prediction research, forecasting, full journey planner
-  2. Continuous collection and anything that needs history
-  3. Detected irregularities (keep official alerts only)
-  4. Onboard tracking and approaching-stop alerts
-  5. Chaos Score (if shipped at all, label it experimental, show its
-     inputs, never show a healthy zero for missing data)
-  6. Mode switching (keep a responsive single layout)
-  7. Route shapes overlay
-
-Keep: everything in Stage 0 and Stage 1.
-
+ACCEPTED RELEASE BEHAVIOR
+- Sprint 1: Live Map opens on desktop and phone. Use a desktop toolbar
+  and a compact phone control row. Sprint 2 adds filter and refresh.
+- Sprint 2: use "At [stop]" or "Approaching [stop]" when supported.
+  Show "Next stop unavailable" if a reliable next stop cannot be identified.
+- Sprint 2: distinguish an empty successful filter result from a failed
+  refresh. Keep the last successful data and timestamp on refresh failure.
+- Sprint 3: the map remembers its line selection across view changes.
+  "Active vehicles by subway line" compares all in-scope subway lines
+  independently of the map filter. Combine Green branches into one bar.
+- Sprint 4 (optional): returning phone users with a saved commute may
+  start on departures. My Commute remains accessible on desktop.
 ======================================================================
 6. PLANNING STATUS AT THIS BASELINE
 ======================================================================
@@ -170,7 +180,7 @@ Keep: everything in Stage 0 and Stage 1.
   My Commute, analytics, data management, reliability.
   Partly done: performance, accessibility, privacy, security (09).
   Not done: visual design, formal per-subsystem acceptance criteria,
-  development roadmap at engineering level, engineering handoff.
+  engineering design and implementation roadmap.
   Implementation: none. No application code exists.
 
 ======================================================================
@@ -185,8 +195,7 @@ Keep: everything in Stage 0 and Stage 1.
   - Final Chaos Score weights and thresholds [UNVALIDATED]
   - Detailed acceptance criteria per subsystem beyond those recorded in
     files 03-10 [OPEN]
-  - Engineering handoff (13_engineering_handoff.txt is intentionally
-    empty) [DEFERRED]
-  - Crowdsourced reports: assistant leaned "no"; never decided [OPEN]
+  - Engineering design review is pending. See 13_engineering_handoff.txt.
+  - Crowdsourced rider reports [OPEN]
 
-  Full list with source anchors: 12_decision_log.txt
+  Decision register: 12_decision_log.txt

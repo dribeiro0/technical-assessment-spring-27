@@ -2,6 +2,8 @@ CHAOS METER - 04 TRANSIT AND PREDICTION
 Planning baseline 0.1 - November 24, 2026
 Related: 02_functional_architecture.txt, 05, 06_my_commute.txt, 08
 
+Delivery scope: map and vehicle details in Sprints 1-2, official departures in Sprint 4, historical evaluation in Sprint 7 and onboard tracking in Sprint 8.
+
 ======================================================================
 1. VEHICLES AS TRANSIT ENTITIES                            [ACCEPTED]
 ======================================================================
@@ -85,7 +87,7 @@ Tracking behaviour [ACCEPTED]:
 4. PREDICTION APPROACH
 ======================================================================
 
-Options compared in planning:
+Prediction options:
 
   Approach            Advantage                     Limitation
   ------------------  ----------------------------  ---------------------
@@ -97,10 +99,6 @@ Options compared in planning:
   Hybrid              official + own fallback and   complex; risk of
                       reliability analysis          misleading riders
 
-The assistant first recommended hybrid. David asked:
-  "Why would we do a hybrid approach over just using the MBTA
-   predictions?"
-After the comparison he accepted the revised plan ("That sounds good.").
 
 DECISION [ACCEPTED]: official MBTA predictions first.
   - Live prediction available -> show it.
@@ -148,7 +146,7 @@ A revised prediction is not ground truth. Only an observed arrival is.
   Error = observed_arrival - predicted_time, analysed by lead time
   (observed_arrival - issued_at) buckets.
 
-  Example [MOCK] from planning, one trip at one stop:
+  Example [MOCK] for one trip at one stop:
     clock   minutes away shown   implied arrival
     8:00    5                    8:05
     8:02    5                    8:07

@@ -27,7 +27,7 @@ Related: 02, 03, 04 (prediction evaluation), 05, 08, 10 (chart row)
   fabricated trends.
 
 ======================================================================
-2. THE ASSESSMENT CHART (Stage 0)
+2. THE ASSESSMENT CHART (Sprint 3)
 ======================================================================
 
   The README requires at least one chart from API data. Simplest
@@ -36,8 +36,7 @@ Related: 02, 03, 04 (prediction evaluation), 05, 08, 10 (chart row)
     "Active vehicles by line, right now"
      source:   /vehicles, grouped by route -> line
      unit:     count of vehicles reporting a position
-     scope:    stated on the chart (e.g. subway: Red, Orange, Blue,
-               Green B/C/D/E; or the modes selected in the filter)
+     scope: all in-scope subway lines regardless of map filter; Green B/C/D/E share one bar
      time:     "Updated 8:42:10 AM" from the newest retrieval
      notes:    stale vehicles excluded and counted separately
 
@@ -47,7 +46,7 @@ Related: 02, 03, 04 (prediction evaluation), 05, 08, 10 (chart row)
   Other README-suggested options: alerts by severity; headway or delay
   trends (only with real history).
 
-  Planning used mock chart data such as "Green 64, Red 28, Orange 21,
+  Illustrative chart values include "Green 64, Red 28, Orange 21,
   Blue 15" and a "Chaos Score over time" curve. Those were [MOCK] and
   must never appear in the app as data.
 
@@ -55,7 +54,6 @@ Related: 02, 03, 04 (prediction evaluation), 05, 08, 10 (chart row)
 3. CONTINUOUS COLLECTION                                   [ACCEPTED]
 ======================================================================
 
-  Source anchor (David): "Let's continue with continuous collection."
 
   Collect transit observations on a schedule whether or not anyone is
   using the site.

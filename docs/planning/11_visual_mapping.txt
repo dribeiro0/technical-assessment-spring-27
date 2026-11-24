@@ -2,20 +2,15 @@ CHAOS METER - 11 VISUAL MAPPING (FUNCTIONAL)
 Planning baseline 0.1 - November 24, 2026
 Related: 01, 06, 09, 10 (R1, R2)
 
+Delivery scope: Sprints 1-3 share Live Map and Analytics inside one page. Desktop uses a wide map and toolbar; phone uses a compact filter row and tappable markers. Switching views preserves the selected line. Sprint 4 adds My Commute on both devices; returning phone users can open on saved departures. Sprint 5 adds the network overview and official alerts. The tracking screens below belong to Sprint 8.
+
 This is a functional map: what appears, in what priority, and where each
 action leads. It does not decide appearance.
 
-  Source anchor (David): "we will decide visuals later"
-  [DEFERRED] palette, typography, branding, styling, motion, exact
-  layouts. Earlier in planning the assistant proposed a dark-first look
-  with specific hex colours and a purple accent; that proposal was put
-  on hold by the line above and is not a decision.
+  [DEFERRED] Palette, typography, branding, motion, and detailed styling.
   The assessment still requires a polished UI (10, R2), so these
   decisions must be made before submission.
 
-  Reference image "Chaos Meter MBTA Dashboard Flow.png" was not
-  available for this baseline and was not compared. Its times, alerts,
-  colours, fonts, and layouts would in any case be illustrative only.
 
 ======================================================================
 1. INFORMATION HIERARCHY
@@ -206,7 +201,7 @@ action leads. It does not decide appearance.
     suspension alert -> opens map at affected segment -> opens a
     stranded vehicle -> back to Overview
 
-  Journey B - commuter leaving class (from planning) [MOCK]
+  Journey B - commuter leaving class [MOCK]
     open app -> Saved: BU Central Green B eastbound, 3 min LIVE ->
     tap -> Tracking (3 min, 2 stops away) -> "I'm on this train" ->
     onboard (next stop, 9 min to Park Street) -> "Your stop is next"
@@ -216,7 +211,3 @@ action leads. It does not decide appearance.
     Home (no saved) -> "find a station" -> types "Kenmore" -> Station
     details -> departures -> save -> becomes a saved stop
 
-  Journey D - assessment walkthrough path
-    Overview -> Live Map -> filter Red -> click marker (popup fields)
-    -> toggle auto-refresh / manual refresh -> Alerts -> Analytics
-    chart -> My Commute (if built) -> resize to mobile width

@@ -14,9 +14,6 @@ requirement (10).
   2. When will my train arrive?
   3. When should I get off?
 
-  Source anchor (David): "I like the monitoring, and I also like the
-  idea of whether they're able to find out when they leave the train as
-  well, once they get on."
 
   Direction [ACCEPTED]: monitor journeys the rider already knows. Full
   route planning between any two places is not in scope now.
@@ -83,7 +80,7 @@ requirement (10).
       arrives at destination, or rider taps "End tracking" at any time.
       Tracking stops immediately. Optional local record of the trip.
 
-  Lifecycle names from planning: Planning -> Waiting -> Boarding ->
+  Lifecycle names: Planning -> Waiting -> Boarding ->
   Onboard -> (Transferring) -> Completed. Transfers are architecturally
   allowed for later; single-route journeys come first.
 
@@ -153,14 +150,9 @@ requirement (10).
                                             feasibility testing
   Full journey planner                      [DEFERRED] future
 
-  Smallest useful version for delivery (00 Stage 2) [PROPOSED]:
-  saved stop + direction, departures with labels, DIRECT alerts.
+  Smallest useful version for delivery (00 Sprint 4) [PROPOSED]:
+  saved stop + direction and labeled departures. Relevant official alerts follow in Sprint 5.
 
-  Open item [OPEN]: after the My Commute plan was presented, David
-  wrote "It's not how it is, okay." and then "sorry okay". The assistant
-  asked whether the plan was misunderstood and the conversation moved
-  on. It is not recorded what, if anything, was wrong. Confirm before
-  building.
 
 ======================================================================
 7. ACCEPTANCE CRITERIA
