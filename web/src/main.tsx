@@ -1,4 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+// Monaspace Neon is bundled with the app; Mona Sans loads from Google Fonts in index.html.
+import '@fontsource/monaspace-neon/400.css'
+import '@fontsource/monaspace-neon/500.css'
 import 'leaflet/dist/leaflet.css'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'

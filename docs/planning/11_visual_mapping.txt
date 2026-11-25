@@ -228,7 +228,8 @@ action leads. It does not decide appearance.
     Emphasised text (next stop, times)    #A84B2A
     Lines                                 Red #DA291C, Orange #BF6900,
                                           Blue #003DA5, Green #00843D
-  Type: IBM Plex Sans; JetBrains Mono for times, counts and IDs.
+  Type: Mona Sans; Monaspace Neon for times, counts and IDs (GitHub's
+  open-source typefaces).
   Shapes: square frame; 6-12 px rounded floating cards, popups and zoom.
   Motion: trains glide between updates, the live dot pulses, the train
   card slides in. All of it stops under reduced motion.

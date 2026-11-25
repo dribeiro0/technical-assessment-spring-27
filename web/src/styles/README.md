@@ -25,6 +25,6 @@
 | Blue   | `#003DA5` | Official MBTA                                                     |
 | Green  | `#00843D` | Official MBTA                                                     |
 
-**Fonts:** IBM Plex Sans for the interface, JetBrains Mono for times, counts and IDs.
+**Fonts:** GitHub's Mona Sans for the interface (Google Fonts) and Monaspace Neon for times, counts and IDs (bundled from `@fontsource/monaspace-neon`).
 
 **Rules:** usable from 375 px up and at 200% text, visible focus everywhere, every text pair at least 4.5:1, and the reduced-motion setting is respected.

@@ -4,8 +4,9 @@
    paper-white panels, a cream map and burnt orange. Each token becomes a Tailwind class,
    e.g. --color-chrome -> bg-chrome, --color-fg-muted -> text-fg-muted. */
 @theme {
-  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', monospace;
+  /* GitHub's open-source typefaces: Mona Sans for text, Monaspace Neon for times and IDs. */
+  --font-sans: 'Mona Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Monaspace Neon', ui-monospace, 'Cascadia Mono', monospace;
 
   /* The navy frame and the text on it. */
   --color-chrome: #1d2b44;
