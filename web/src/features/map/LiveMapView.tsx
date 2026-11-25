@@ -7,7 +7,6 @@ import { getLine, type LineId } from '../../domain/lines'
 import type { Vehicle } from '../../domain/vehicle'
 import { useLiveData } from '../../hooks/liveData'
 import { useNetwork } from '../../hooks/useNetwork'
-import { useNow } from '../../hooks/useNow'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
 import { useViewParams } from '../../hooks/useViewParams'
 import { RouteLayer } from './RouteLayer'
@@ -30,13 +29,14 @@ const TILE_ATTRIBUTION =
 
 /** Live Map view (R4): the interactive map with live vehicle markers. */
 export function LiveMapView() {
-  const { vehicles, status } = useLiveData()
+  const { vehicles, status, freshnessReference } = useLiveData()
+  const reducedMotion = useReducedMotion()
   const { line, vehicleId, selectVehicle } = useViewParams()
-  const now = useNow(5000)
 
   const shown = line ? vehicles.filter((v) => v.line === line) : vehicles
   const onSelect = useCallback((v: Vehicle) => selectVehicle(v.id, v.line), [selectVehicle])
-  const hasData = status !== 'loading' && status !== 'error'
+  // Only say a line has no trains when the data is current; otherwise the banner explains why.
+  const dataIsCurrent = status === 'live' || status === 'refresh-failed'
 
   return (
     <div className="relative h-full w-full">
@@ -45,6 +45,10 @@ export function LiveMapView() {
         zoom={BOSTON_ZOOM}
         // Lines and station dots are drawn on a canvas, which stays smooth with hundreds of shapes.
         preferCanvas
+        // No zoom or fade animation when the system asks for reduced motion.
+        zoomAnimation={!reducedMotion}
+        fadeAnimation={!reducedMotion}
+        markerZoomAnimation={!reducedMotion}
         minZoom={10}
         maxZoom={18}
         zoomControl={false}
@@ -67,7 +71,7 @@ export function LiveMapView() {
             key={v.id}
             vehicle={v}
             selected={v.id === vehicleId}
-            aging={vehicleFreshness(v.updatedAt, now) === 'aging'}
+            aging={vehicleFreshness(v.updatedAt, freshnessReference) === 'aging'}
             onSelect={onSelect}
           />
         ))}
@@ -78,7 +82,7 @@ export function LiveMapView() {
       <ErrorPanel />
 
       {/* An empty filter result is not a failure (DEC-019), so it gets its own message. */}
-      {hasData && line && shown.length === 0 && (
+      {dataIsCurrent && line && shown.length === 0 && (
         <div className="pointer-events-none absolute inset-x-0 bottom-10 z-[1000] flex justify-center px-3">
           <p
             role="status"

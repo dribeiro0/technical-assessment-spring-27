@@ -26,6 +26,11 @@ export interface LiveData {
   errorMessage: string | null
   /** For rate limiting: when requests resume (epoch ms). */
   retryAt: number | null
+  /**
+   * The time train ages are judged against: the last successful fetch (or now, before
+   * the first). Use it for the faded "aging" state so it agrees with which trains are kept.
+   */
+  freshnessReference: number
   isFetching: boolean
   /** Manual refresh. Ignored while throttled (once per 5 s) or rate limited. */
   refresh: () => void

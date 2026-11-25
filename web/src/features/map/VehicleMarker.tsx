@@ -67,6 +67,13 @@ export const VehicleMarker = memo(function VehicleMarker({
     [vehicle.line, vehicle.headsign, vehicle.branch, vehicle.status, bearing, selected, aging],
   )
 
+  // Leaflet reads a marker's title only when it is created, so keep it current here.
+  // It is the marker's accessible name for keyboard and screen-reader users.
+  const title = `${line.name} to ${destinationLabel(vehicle)}: ${stopLabel(vehicle)}`
+  useEffect(() => {
+    markerRef.current?.getElement()?.setAttribute('title', title)
+  }, [title])
+
   // When selected from the list, open this vehicle's popup (which also pans the map to it).
   useEffect(() => {
     if (selected) markerRef.current?.openPopup()
@@ -77,10 +84,17 @@ export const VehicleMarker = memo(function VehicleMarker({
       ref={markerRef}
       position={initialPosition}
       icon={icon}
-      title={`${line.name} to ${destinationLabel(vehicle)}: ${stopLabel(vehicle)}`}
+      title={title}
       zIndexOffset={selected ? 1000 : aging ? -100 : 0}
       riseOnHover
-      eventHandlers={{ click: () => onSelect(vehicle) }}
+      eventHandlers={{
+        click: () => onSelect(vehicle),
+        // Enter on a focused marker: Leaflet opens the popup on "keypress", not "click",
+        // so select the train here too, or keyboard users would never get its card.
+        keypress: (e) => {
+          if ((e.originalEvent as KeyboardEvent).key === 'Enter') onSelect(vehicle)
+        },
+      }}
     >
       <Popup className="vehicle-popup" closeButton>
         <VehiclePopup vehicle={vehicle} />

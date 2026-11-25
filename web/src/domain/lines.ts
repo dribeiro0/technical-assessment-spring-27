@@ -19,7 +19,7 @@ export const LINES: readonly LineInfo[] = [
   {
     id: 'Orange',
     name: 'Orange line',
-    color: '#C96F00',
+    color: '#BF6900',
     glyphColor: '#FFFFFF',
     routeIds: ['Orange'],
   },

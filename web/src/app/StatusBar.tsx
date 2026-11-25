@@ -18,10 +18,11 @@ const STATUS: Record<FeedStatus, { text: string; dot: string; pulse?: boolean }>
 
 /** The navy bottom bar: feed status, last update time and train count (R7). */
 export function StatusBar() {
-  const { status, lastSuccessAt, vehicles, alerts } = useLiveData()
+  const { status, lastSuccessAt, vehicles, alerts, retryAt } = useLiveData()
   const { line } = useViewParams()
   const now = useNow(1000)
-  const s = STATUS[status]
+  // A rate limit on the very first load shows the error panel, but the bar says why.
+  const s = status === 'error' && retryAt ? STATUS['rate-limited'] : STATUS[status]
   const shown = line ? vehicles.filter((v) => v.line === line).length : vehicles.length
 
   return (
@@ -44,7 +45,7 @@ export function StatusBar() {
           : '–'}
       </span>
       <span>
-        {shown} trains{line ? ` · ${getLine(line).name}` : ''}
+        {lastSuccessAt === null ? '–' : shown} trains{line ? ` · ${getLine(line).name}` : ''}
       </span>
       <span className="hidden sm:inline">{alerts.length} alerts</span>
       <span className="ml-auto hidden sm:inline">

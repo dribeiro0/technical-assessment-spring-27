@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import type { PredictionsDocument } from '../api/mbtaTypes'
-import { minutesAway, progressToNextStop, shortEta, stripStops, upcomingStops } from './predictions'
+import {
+  minutesAway,
+  progressToNextStop,
+  shortEta,
+  stillAhead,
+  stripStops,
+  upcomingStops,
+} from './predictions'
 
 function prediction(
   id: string,
@@ -54,8 +61,19 @@ describe('upcomingStops', () => {
 })
 
 describe('countdown text', () => {
-  it('rounds down to whole minutes', () => {
-    expect(minutesAway(NOW + 4.7 * 60_000, NOW)).toEqual({ value: '4', unit: 'min' })
+  it('rounds to the nearest minute', () => {
+    expect(minutesAway(NOW + 4.7 * 60_000, NOW)).toEqual({ value: '5', unit: 'min' })
+    expect(minutesAway(NOW + 4.2 * 60_000, NOW)).toEqual({ value: '4', unit: 'min' })
+  })
+
+  it('drops stops more than a minute in the past', () => {
+    const stops = [
+      { id: 'a', name: 'Gone', at: NOW - 90_000 },
+      { id: 'b', name: 'Due', at: NOW - 30_000 },
+      { id: 'c', name: 'Later', at: NOW + 60_000 },
+      { id: 'd', name: 'Unknown', at: null },
+    ]
+    expect(stillAhead(stops, NOW).map((s) => s.name)).toEqual(['Due', 'Later', 'Unknown'])
   })
 
   it('says Now under a minute', () => {

@@ -42,11 +42,16 @@ export function upcomingStops(doc: PredictionsDocument): UpcomingStop[] {
     .map(({ id, name, at }) => ({ id, name, at }))
 }
 
-/** "1", "4", or "Now" when the train is under a minute away. */
+/** "1", "4", or "Now" when the train is under a minute away. Rounds to the nearest minute. */
 export function minutesAway(at: number, now: number): { value: string; unit: string } {
-  const minutes = Math.floor((at - now) / 60_000)
-  if (minutes < 1) return { value: 'Now', unit: '' }
-  return { value: String(minutes), unit: 'min' }
+  const seconds = (at - now) / 1000
+  if (seconds < 60) return { value: 'Now', unit: '' }
+  return { value: String(Math.round(seconds / 60)), unit: 'min' }
+}
+
+/** Predictions can lag behind a train; drop stops whose time is more than a minute past. */
+export function stillAhead(stops: readonly UpcomingStop[], now: number): UpcomingStop[] {
+  return stops.filter((s) => s.at === null || s.at > now - 60_000)
 }
 
 /** Short label under a stop on the strip: "4 min", "now", or "" when there's no estimate. */

@@ -8,8 +8,9 @@ import { StatusMark } from './StatusMark'
  * filter button: clicking one shows only that line, clicking it again shows all.
  */
 export function LineStatusBadges() {
-  const { lineStatus } = useLiveData()
-  const { line: activeLine, setLine } = useViewParams()
+  const { lineStatus, vehicles } = useLiveData()
+  const { line: activeLine, vehicleId, setLine } = useViewParams()
+  const selectedLine = vehicles.find((v) => v.id === vehicleId)?.line ?? null
 
   return (
     <section aria-label="Line status" className="px-4 pb-1">
@@ -24,7 +25,7 @@ export function LineStatusBadges() {
               key={line.id}
               type="button"
               aria-pressed={active}
-              onClick={() => setLine(active ? null : line.id)}
+              onClick={() => setLine(active ? null : line.id, selectedLine)}
               title={active ? 'Show all lines' : `Show only the ${line.name}`}
               className={`relative flex flex-col gap-0.5 overflow-hidden rounded-lg border py-2 pr-2 pl-3.5 text-left ${
                 active

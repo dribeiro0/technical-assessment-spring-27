@@ -25,6 +25,9 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
     queryFn: async ({ signal }) => normalizeVehicles(await fetchVehicles(signal)),
     refetchInterval: pollEvery(VEHICLE_POLL_MS, paused),
     retry: retryUnlessRateLimited,
+    // Coming back to the tab refreshes at once instead of waiting for the next 15 s tick.
+    // (Switching views never refetches: both views share this one query.)
+    refetchOnWindowFocus: !paused,
   })
 
   const alertsQuery = useQuery({
@@ -68,7 +71,13 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
     else if (latestFailed) status = 'refresh-failed'
     else status = 'live'
 
-    const vehicles = (data ?? []).filter((v) => vehicleFreshness(v.updatedAt, now) !== 'expired')
+    // Trains expire relative to the last successful fetch, not the wall clock. Otherwise a
+    // long pause or outage would age every train out and an empty map would look like
+    // "no trains running" instead of "no fresh data" (DEC-019, DEC-024).
+    const reference = lastSuccessAt ?? now
+    const vehicles = (data ?? []).filter(
+      (v) => vehicleFreshness(v.updatedAt, reference) !== 'expired',
+    )
     const alerts = alertsQuery.data ?? []
 
     return {
@@ -77,6 +86,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       lastSuccessAt,
       errorMessage: latestFailed ? describeError(error) : null,
       retryAt: stillWaiting ? retryAt : null,
+      freshnessReference: reference,
       isFetching,
       refresh,
       canRefresh: !throttled && !stillWaiting && !isFetching,

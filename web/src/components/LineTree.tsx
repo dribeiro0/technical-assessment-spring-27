@@ -30,11 +30,14 @@ export function LineTree({ onVehicleChosen }: Props) {
   const toggle = (id: LineId) => setOverrides((prev) => ({ ...prev, [id]: !isExpanded(id) }))
 
   const total = vehicles.length
+  // Before any data arrives, counts are unknown, not zero.
+  const noData = status === 'loading' || status === 'error'
+  const count = (n: number) => (noData ? '–' : n)
 
   return (
     <nav aria-label="Lines and trains" className="flex min-h-0 flex-1 flex-col">
       <h2 className="text-fg-muted px-4 pt-3.5 pb-2 text-[10.5px] font-semibold tracking-[0.08em] uppercase">
-        Trains · {status === 'loading' || status === 'error' ? '–' : total} live
+        Trains · {count(total)} live
       </h2>
 
       <button
@@ -46,7 +49,7 @@ export function LineTree({ onVehicleChosen }: Props) {
         }`}
       >
         <span>All lines</span>
-        <span className="text-fg-muted font-mono text-xs">{total}</span>
+        <span className="text-fg-muted font-mono text-xs">{count(total)}</span>
       </button>
 
       <ul className="min-h-0 flex-1 overflow-y-auto px-2.5 pb-3">
@@ -75,7 +78,7 @@ export function LineTree({ onVehicleChosen }: Props) {
                 <button
                   type="button"
                   aria-pressed={isActive}
-                  onClick={() => setLine(isActive ? null : line.id)}
+                  onClick={() => setLine(isActive ? null : line.id, selectedLine)}
                   title={isActive ? `Show all lines` : `Show only the ${line.name}`}
                   className="flex min-w-0 flex-1 items-center gap-2 py-1.5 pr-2 text-left text-[13px]"
                 >
@@ -88,7 +91,9 @@ export function LineTree({ onVehicleChosen }: Props) {
                     {line.name}
                   </span>
                   <StatusMark level={lineStatus?.[line.id].level ?? null} />
-                  <span className="text-fg-muted ml-auto font-mono text-xs">{onLine.length}</span>
+                  <span className="text-fg-muted ml-auto font-mono text-xs">
+                    {count(onLine.length)}
+                  </span>
                 </button>
               </div>
 

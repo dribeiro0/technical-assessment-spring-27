@@ -4,6 +4,7 @@ import { getLine } from '../domain/lines'
 import {
   minutesAway,
   progressToNextStop,
+  stillAhead,
   shortEta,
   stripStops,
   type UpcomingStop,
@@ -96,7 +97,8 @@ function Shell({
 function VehicleCard({ vehicle, onClose }: { vehicle: Vehicle; onClose: () => void }) {
   const now = useNow(1000)
   const { lineStatus } = useLiveData()
-  const { data: upcoming = [] } = useTripPredictions(vehicle.tripId)
+  const { data: predicted = [] } = useTripPredictions(vehicle.tripId)
+  const upcoming = stillAhead(predicted, now)
   const [expanded, setExpanded] = useState(false)
   const line = getLine(vehicle.line)
   const aging = vehicleFreshness(vehicle.updatedAt, now) === 'aging'

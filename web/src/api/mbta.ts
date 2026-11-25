@@ -11,7 +11,9 @@ import type {
 // Requests are anonymous: no API key is ever shipped to the browser (DEC-021).
 // The anonymous limit is 20 requests per minute per network address.
 
-const BASE_URL = 'https://api-v3.mbta.com'
+// Overridable at build time (VITE_MBTA_BASE_URL) so tests can point a build at a local
+// stand-in that fails on purpose. Production always uses the real MBTA API.
+const BASE_URL: string = import.meta.env.VITE_MBTA_BASE_URL || 'https://api-v3.mbta.com'
 
 /**
  * The MBTA does not expose its x-ratelimit-reset header to browsers (no
@@ -61,7 +63,18 @@ export function describeError(error: unknown): string {
   }
 }
 
+/**
+ * One shared "wait until" for every MBTA request. The limit is per network address,
+ * so once any request gets HTTP 429 all of them hold off until the wait is over,
+ * instead of each query discovering the limit on its own.
+ */
+let rateLimitedUntil = 0
+
 async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
+  if (Date.now() < rateLimitedUntil) {
+    throw new MbtaError('rate-limit', 'Rate limited', 429, rateLimitedUntil)
+  }
+
   let response: Response
   try {
     response = await fetch(`${BASE_URL}${path}`, {
@@ -75,7 +88,8 @@ async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   }
 
   if (response.status === 429) {
-    throw new MbtaError('rate-limit', 'Rate limited', 429, Date.now() + RATE_LIMIT_WAIT_MS)
+    rateLimitedUntil = Date.now() + RATE_LIMIT_WAIT_MS
+    throw new MbtaError('rate-limit', 'Rate limited', 429, rateLimitedUntil)
   }
   if (!response.ok) {
     throw new MbtaError('http', `HTTP ${response.status}`, response.status)
