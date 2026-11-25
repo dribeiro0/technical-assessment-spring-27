@@ -2,20 +2,21 @@ import { formatAgeLong } from '../domain/freshness'
 import { getLine } from '../domain/lines'
 import { type FeedStatus, useLiveData } from '../hooks/liveData'
 import { useNow } from '../hooks/useNow'
+import { VEHICLE_POLL_MS } from '../hooks/polling'
 import { useViewParams } from '../hooks/useViewParams'
-import { VEHICLE_POLL_MS } from './LiveDataProvider'
 
-const STATUS: Record<FeedStatus, { text: string; dot: string }> = {
-  loading: { text: 'loading', dot: 'bg-fg-muted' },
-  error: { text: 'offline', dot: 'bg-[#ff6b5e]' },
-  live: { text: 'live', dot: 'bg-green-line' },
-  'refresh-failed': { text: 'refresh failed', dot: 'bg-accent' },
-  stale: { text: 'stale', dot: 'bg-accent' },
-  'rate-limited': { text: 'rate limited', dot: 'bg-accent' },
-  paused: { text: 'paused', dot: 'bg-fg-muted' },
+// The dot shows state by colour and the word beside it says it, so it is never colour alone.
+const STATUS: Record<FeedStatus, { text: string; dot: string; pulse?: boolean }> = {
+  loading: { text: 'loading', dot: 'bg-chrome-muted' },
+  error: { text: 'offline', dot: 'bg-danger' },
+  live: { text: 'live', dot: 'bg-live', pulse: true },
+  'refresh-failed': { text: 'refresh failed', dot: 'bg-brand' },
+  stale: { text: 'stale', dot: 'bg-brand' },
+  'rate-limited': { text: 'rate limited', dot: 'bg-brand' },
+  paused: { text: 'paused', dot: 'bg-chrome-muted' },
 }
 
-/** The bottom bar: feed status, last update time and vehicle count (R7). */
+/** The navy bottom bar: feed status, last update time and train count (R7). */
 export function StatusBar() {
   const { status, lastSuccessAt, vehicles, alerts } = useLiveData()
   const { line } = useViewParams()
@@ -24,9 +25,12 @@ export function StatusBar() {
   const shown = line ? vehicles.filter((v) => v.line === line).length : vehicles.length
 
   return (
-    <footer className="bg-chrome border-border text-fg-muted flex h-6 shrink-0 items-center gap-4 overflow-hidden border-t px-3 font-mono text-[11px] whitespace-nowrap">
-      <span className="text-fg inline-flex items-center gap-1.5">
-        <span aria-hidden="true" className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
+    <footer className="bg-chrome border-chrome-border text-chrome-muted flex h-6 shrink-0 items-center gap-4 overflow-hidden border-t px-3 font-mono text-[11px] whitespace-nowrap">
+      <span className="text-chrome-fg inline-flex items-center gap-2">
+        <span
+          aria-hidden="true"
+          className={`h-1.5 w-1.5 rounded-full ${s.dot} ${s.pulse ? 'live-pulse' : ''}`}
+        />
         {s.text}
       </span>
       {/* Announced to screen readers only when the status changes, not every second. */}
@@ -40,7 +44,7 @@ export function StatusBar() {
           : '–'}
       </span>
       <span>
-        {shown} vehicles{line ? ` · ${getLine(line).name}` : ''}
+        {shown} trains{line ? ` · ${getLine(line).name}` : ''}
       </span>
       <span className="hidden sm:inline">{alerts.length} alerts</span>
       <span className="ml-auto hidden sm:inline">

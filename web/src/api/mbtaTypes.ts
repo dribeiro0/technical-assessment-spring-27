@@ -67,3 +67,12 @@ export type VehiclesDocument = Document<VehicleAttributes>
 export type StopsDocument = Document<StopAttributes>
 export type RoutePatternsDocument = Document<unknown>
 export type AlertsDocument = Document<AlertAttributes>
+
+export interface PredictionAttributes {
+  arrival_time?: string | null
+  departure_time?: string | null
+  stop_sequence?: number | null
+  schedule_relationship?: string | null
+}
+
+export type PredictionsDocument = Document<PredictionAttributes>

@@ -1,7 +1,7 @@
 import type L from 'leaflet'
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import { Marker, Popup } from 'react-leaflet'
-import { VEHICLE_POLL_MS } from '../../app/LiveDataProvider'
+import { VEHICLE_POLL_MS } from '../../hooks/polling'
 import { formatAgeLong } from '../../domain/freshness'
 import { getLine } from '../../domain/lines'
 import { destinationLabel, directionText, statusText, stopLabel } from '../../domain/stopLabel'

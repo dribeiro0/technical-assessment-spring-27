@@ -1,6 +1,7 @@
 import { IN_SCOPE_ROUTE_IDS, LINES } from '../domain/lines'
 import type {
   AlertsDocument,
+  PredictionsDocument,
   RoutePatternsDocument,
   StopsDocument,
   VehiclesDocument,
@@ -126,6 +127,18 @@ export function fetchAlerts(signal?: AbortSignal): Promise<AlertsDocument> {
   return getJson(
     `/alerts?filter[route]=${routeFilter}&filter[datetime]=NOW` +
       '&fields[alert]=header,effect,severity,lifecycle,informed_entity,updated_at',
+    signal,
+  )
+}
+
+/** Upcoming stops and arrival estimates for one trip, fetched when a train is selected. */
+export function fetchTripPredictions(
+  tripId: string,
+  signal?: AbortSignal,
+): Promise<PredictionsDocument> {
+  return getJson(
+    `/predictions?filter[trip]=${encodeURIComponent(tripId)}&include=stop` +
+      '&fields[prediction]=arrival_time,departure_time,stop_sequence,schedule_relationship&fields[stop]=name',
     signal,
   )
 }

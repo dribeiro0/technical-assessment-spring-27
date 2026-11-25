@@ -20,7 +20,10 @@ export function AlertList({ alerts, emptyText, unavailable = false }: Props) {
   return (
     <ul className="space-y-2">
       {alerts.map((alert) => (
-        <li key={alert.id} className="border-border border-l-2 pl-2.5">
+        <li
+          key={alert.id}
+          className={`border-l-[3px] pl-2.5 ${alert.level === 'major' ? 'border-danger' : 'border-warn'}`}
+        >
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
             <StatusMark level={alert.level} />
             <span className="text-fg-secondary font-medium">{effectText(alert.effect)}</span>

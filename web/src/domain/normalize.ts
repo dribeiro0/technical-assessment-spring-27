@@ -86,6 +86,7 @@ export function normalizeVehicles(doc: VehiclesDocument): Vehicle[] {
       status: STATUS_BY_FEED_VALUE[attrs.current_status ?? ''] ?? 'unknown',
       stopName: textOrNull(stop?.attributes?.name),
       headsign: textOrNull(trip?.attributes?.headsign),
+      tripId: tripRef?.id ?? null,
       directionId,
       updatedAt,
     }

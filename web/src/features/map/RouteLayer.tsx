@@ -3,8 +3,8 @@ import { CircleMarker, Pane, Polyline, Tooltip } from 'react-leaflet'
 import { getLine, type LineId } from '../../domain/lines'
 import { useNetwork } from '../../hooks/useNetwork'
 
-const TRANSFER_STATION_COLOR = '#DADADA'
-const MAP_BACKGROUND = '#141414'
+const TRANSFER_STATION_COLOR = '#1D2B44'
+const STATION_FILL = '#FFFFFF'
 
 /**
  * Line paths and hollow station dots from /shapes and /stops (Sprint 3, DEC-027).
@@ -49,7 +49,7 @@ export const RouteLayer = memo(function RouteLayer({ activeLine }: { activeLine:
               pathOptions={{
                 color: isTransfer ? TRANSFER_STATION_COLOR : getLine(station.lines[0]).color,
                 weight: 2,
-                fillColor: MAP_BACKGROUND,
+                fillColor: STATION_FILL,
                 fillOpacity: 1,
                 opacity: faded ? 0.25 : 1,
               }}

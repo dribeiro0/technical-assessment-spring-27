@@ -32,24 +32,24 @@ export function LineTree({ onVehicleChosen }: Props) {
   const total = vehicles.length
 
   return (
-    <nav aria-label="Lines and vehicles" className="flex min-h-0 flex-1 flex-col">
-      <p className="text-fg-muted px-4 pt-3 pb-2 text-[11px] font-medium tracking-wider uppercase">
-        Subway · {status === 'loading' || status === 'error' ? '–' : total} vehicles
-      </p>
+    <nav aria-label="Lines and trains" className="flex min-h-0 flex-1 flex-col">
+      <h2 className="text-fg-muted px-4 pt-3.5 pb-2 text-[10.5px] font-semibold tracking-[0.08em] uppercase">
+        Trains · {status === 'loading' || status === 'error' ? '–' : total} live
+      </h2>
 
       <button
         type="button"
         aria-pressed={activeLine === null}
         onClick={() => setLine(null)}
-        className={`mx-2 flex items-center justify-between rounded-sm px-2 py-1.5 text-left text-[13px] ${
-          activeLine === null ? 'bg-main text-fg' : 'text-fg-secondary hover:bg-main/60'
+        className={`mx-2.5 flex items-center justify-between rounded-md px-2 py-1.5 text-left text-[13px] ${
+          activeLine === null ? 'bg-chip text-fg font-medium' : 'text-fg-secondary hover:bg-chip/60'
         }`}
       >
         <span>All lines</span>
         <span className="text-fg-muted font-mono text-xs">{total}</span>
       </button>
 
-      <ul className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
+      <ul className="min-h-0 flex-1 overflow-y-auto px-2.5 pb-3">
         {LINES.map((line) => {
           const onLine = vehicles.filter((v) => v.line === line.id)
           const isOpen = isExpanded(line.id)
@@ -58,7 +58,7 @@ export function LineTree({ onVehicleChosen }: Props) {
           return (
             <li key={line.id}>
               <div
-                className={`flex items-center rounded-sm ${isActive ? 'bg-main' : 'hover:bg-main/60'}`}
+                className={`flex items-center rounded-md ${isActive ? 'bg-chip' : 'hover:bg-chip/60'}`}
               >
                 <button
                   type="button"
@@ -81,10 +81,12 @@ export function LineTree({ onVehicleChosen }: Props) {
                 >
                   <span
                     aria-hidden="true"
-                    className="h-2.5 w-2.5 shrink-0"
+                    className="h-2.5 w-2.5 shrink-0 rounded-[3px]"
                     style={{ background: line.color }}
                   />
-                  <span className={isActive ? 'text-fg font-medium' : 'text-fg'}>{line.name}</span>
+                  <span className={isActive ? 'text-fg font-semibold' : 'text-fg'}>
+                    {line.name}
+                  </span>
                   <StatusMark level={lineStatus?.[line.id].level ?? null} />
                   <span className="text-fg-muted ml-auto font-mono text-xs">{onLine.length}</span>
                 </button>
@@ -99,6 +101,7 @@ export function LineTree({ onVehicleChosen }: Props) {
                     <VehicleRow
                       key={v.id}
                       vehicle={v}
+                      color={line.color}
                       now={now}
                       selected={v.id === vehicleId}
                       onSelect={() => {
@@ -119,11 +122,13 @@ export function LineTree({ onVehicleChosen }: Props) {
 
 function VehicleRow({
   vehicle,
+  color,
   now,
   selected,
   onSelect,
 }: {
   vehicle: Vehicle
+  color: string
   now: number
   selected: boolean
   onSelect: () => void
@@ -146,18 +151,25 @@ function VehicleRow({
         onClick={onSelect}
         aria-current={selected ? 'true' : undefined}
         aria-label={`${destination}, ${label}`}
-        className={`grid w-full grid-cols-[1fr_auto] items-baseline gap-x-2 rounded-sm py-1 pr-2 pl-9 text-left ${
-          selected ? 'bg-main ring-accent ring-1 ring-inset' : 'hover:bg-main/60'
+        className={`my-px grid w-full grid-cols-[auto_1fr_auto] items-center gap-x-2.5 rounded-md py-1.5 pr-2 pl-7 text-left ${
+          selected ? 'bg-chip ring-select ring-[1.5px] ring-inset' : 'hover:bg-chip/60'
         }`}
       >
-        <span className={`truncate text-xs ${selected ? 'text-fg' : 'text-fg-secondary'}`}>
-          <span aria-hidden="true" className="text-fg-muted">
+        <span
+          aria-hidden="true"
+          className="row-span-2 h-1.5 w-1.5 rounded-full"
+          style={{ background: color }}
+        />
+        <span
+          className={`truncate text-[12.5px] font-medium ${selected ? 'text-fg' : 'text-fg-secondary'}`}
+        >
+          <span aria-hidden="true" className="text-fg-muted font-normal">
             →{' '}
           </span>
           {destination}
         </span>
         <span
-          className={`row-span-2 self-center font-mono text-[11px] ${aging ? 'text-accent' : 'text-fg-muted'}`}
+          className={`row-span-2 self-center font-mono text-[11px] ${aging ? 'text-warn' : 'text-fg-muted'}`}
           title={aging ? 'Not heard from in over 2 minutes' : 'Time since last report'}
         >
           {aging && <span aria-hidden="true">⧗ </span>}
