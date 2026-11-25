@@ -18,3 +18,24 @@ Recommend a stack, map and chart libraries, application structure, shared state,
 
 Acceptance and review
 Map the technical design to R1–R10 in 10_assessment_audit.txt. Review that design before implementation. The root README.md defines the assessment, pr_template.md defines the submission fields, and section 5 of 00_master_plan.txt records the accepted interface behavior.
+
+Engineering design | November 24, 2026
+Decisions DEC-020 to DEC-028 in 12_decision_log.txt answer the stack, hosting, refresh and freshness questions above.
+
+Mapping library: React Leaflet, which matches both the README and the PR template checkbox and resolves D1 in 10_assessment_audit.txt.
+
+Structure (web/src): api/ holds every MBTA request and the raw response types. domain/ holds plain, tested TypeScript: line scope and colours, normalization into a Vehicle model, stop labels, freshness rules and per-line counts. hooks/ wraps data fetching and the URL line filter. features/ holds the map, analytics and vehicle-list views. components/ holds shared controls. Raw API shapes do not pass beyond domain/normalize.ts.
+
+Data flow:
+  /vehicles?filter[route]=<in-scope routes>&include=trip,stop  (every 15 s + manual)
+    -> normalize: in-scope routes only, coordinates required, one record per vehicle ID,
+       stop label from current_status + included stop, direction from included trip headsign
+    -> query cache: last successful data, its time, current error
+       -> Live Map markers and popups (line filter applied)
+       -> Analytics "Active vehicles by subway line" (no filter; Green branches combined)
+
+Vehicle trace (live, November 24, 2026): vehicle R-548CD8D6 on route Red, current_status STOPPED_AT, stop "JFK/UMass", trip headsign "Alewife". Marker on the Red layer; popup "At JFK/UMass, toward Alewife"; adds 1 to the Red bar. Included trip and stop records resolve direction and next stop with no further requests.
+
+Live-data observations (November 24, 2026): anonymous limit 20 requests/min per IP; streaming returns 406 without a key; 1 of 108 subway vehicles had no stop; update ages p50 19 s, p90 55 s, max about 7 min, with every update older than 90 s belonging to a train at a terminal.
+
+Still to verify against live data: Green Line next-stop accuracy on surface branches; whether HTTP 304 responses count against the rate limit; vehicle counts during service changes and late at night.
