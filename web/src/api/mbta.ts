@@ -152,7 +152,19 @@ export function fetchTripPredictions(
 ): Promise<PredictionsDocument> {
   return getJson(
     `/predictions?filter[trip]=${encodeURIComponent(tripId)}&include=stop` +
-      '&fields[prediction]=arrival_time,departure_time,stop_sequence,schedule_relationship&fields[stop]=name',
+      '&fields[prediction]=arrival_time,departure_time,stop_sequence,schedule_relationship&fields[stop]=name,parent_station',
+    signal,
+  )
+}
+
+/** Trains expected at one station (all its platforms), with the headsign of each trip. */
+export function fetchStationPredictions(
+  stationId: string,
+  signal?: AbortSignal,
+): Promise<PredictionsDocument> {
+  return getJson(
+    `/predictions?filter[stop]=${encodeURIComponent(stationId)}&filter[route]=${routeFilter}&include=trip` +
+      '&fields[prediction]=arrival_time,departure_time,schedule_relationship&fields[trip]=headsign',
     signal,
   )
 }

@@ -68,10 +68,10 @@ describe('countdown text', () => {
 
   it('drops stops more than a minute in the past', () => {
     const stops = [
-      { id: 'a', name: 'Gone', at: NOW - 90_000 },
-      { id: 'b', name: 'Due', at: NOW - 30_000 },
-      { id: 'c', name: 'Later', at: NOW + 60_000 },
-      { id: 'd', name: 'Unknown', at: null },
+      { id: 'a', stationId: 'a', name: 'Gone', at: NOW - 90_000 },
+      { id: 'b', stationId: 'b', name: 'Due', at: NOW - 30_000 },
+      { id: 'c', stationId: 'c', name: 'Later', at: NOW + 60_000 },
+      { id: 'd', stationId: 'd', name: 'Unknown', at: null },
     ]
     expect(stillAhead(stops, NOW).map((s) => s.name)).toEqual(['Due', 'Later', 'Unknown'])
   })
@@ -87,7 +87,7 @@ describe('countdown text', () => {
 })
 
 describe('stripStops', () => {
-  const stop = (n: string) => ({ id: n, name: n, at: null })
+  const stop = (n: string) => ({ id: n, stationId: n, name: n, at: null })
   const trip = ['Central', 'Harvard', 'Porter', 'Davis', 'Alewife'].map(stop)
 
   it('shows every stop when they fit', () => {

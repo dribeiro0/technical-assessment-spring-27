@@ -31,7 +31,7 @@ const TILE_ATTRIBUTION =
 export function LiveMapView() {
   const { vehicles, status, freshnessReference } = useLiveData()
   const reducedMotion = useReducedMotion()
-  const { line, vehicleId, selectVehicle } = useViewParams()
+  const { line, vehicleId, stationId, selectVehicle, selectStation } = useViewParams()
 
   const shown = line ? vehicles.filter((v) => v.line === line) : vehicles
   const onSelect = useCallback((v: Vehicle) => selectVehicle(v.id, v.line), [selectVehicle])
@@ -64,8 +64,10 @@ export function LiveMapView() {
         <ZoomControl position="bottomright" />
         <TagVisibility />
         <FitToLine line={line} />
-        <ClearSelectionOnMapClick onClear={() => vehicleId && selectVehicle(null)} />
-        <RouteLayer activeLine={line} />
+        <ShowStation stationId={stationId} />
+        {/* Clicking empty map closes whichever card is open (selectVehicle clears both). */}
+        <ClearSelectionOnMapClick onClear={() => (vehicleId || stationId) && selectVehicle(null)} />
+        <RouteLayer activeLine={line} selectedStation={stationId} onSelectStation={selectStation} />
         {shown.map((v) => (
           <VehicleMarker
             key={v.id}
@@ -146,6 +148,29 @@ function FitToLine({ line }: { line: LineId | null }) {
     })
     fittedFor.current = line
   }, [line, network, map, reducedMotion])
+
+  return null
+}
+
+/**
+ * When a station is picked from a train's stop strip it may be off-screen:
+ * pan the map just enough to bring it into view. Stations picked on the map are
+ * already visible, so the map doesn't move for them.
+ */
+function ShowStation({ stationId }: { stationId: string | null }) {
+  const map = useMap()
+  const { data: network } = useNetwork()
+  const reducedMotion = useReducedMotion()
+
+  useEffect(() => {
+    if (!stationId || !network) return
+    const station = network.stations.find((s) => s.id === stationId)
+    if (!station) return
+    const point: [number, number] = [station.lat, station.lon]
+    if (!map.getBounds().pad(-0.1).contains(point)) {
+      map.panTo(point, { animate: !reducedMotion })
+    }
+  }, [stationId, network, map, reducedMotion])
 
   return null
 }

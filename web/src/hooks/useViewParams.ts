@@ -17,6 +17,7 @@ export function useViewParams() {
   const lineParam = params.get('line')
   const line: LineId | null = isLineId(lineParam) ? lineParam : null
   const vehicleId = params.get('vehicle')
+  const stationId = params.get('stop')
 
   /** Applies changes to the URL parameters, optionally moving to another view. */
   const update = useCallback(
@@ -56,12 +57,27 @@ export function useViewParams() {
    */
   const selectVehicle = useCallback(
     (id: string | null, vehicleLine?: LineId) => {
-      const changes: Record<string, string | null> = { vehicle: id }
+      // A train and a station are never selected at the same time: one card at a time.
+      const changes: Record<string, string | null> = { vehicle: id, stop: null }
       if (id && vehicleLine && line && line !== vehicleLine) changes.line = vehicleLine
       update(changes, id ? MAP_PATH : location.pathname)
     },
     [update, line, location.pathname],
   )
 
-  return { line, vehicleId, setLine, selectVehicle, search: location.search }
+  /** Selects a station (?stop=place-pktrm) to show when the next trains leave it. */
+  const selectStation = useCallback(
+    (id: string | null) => update({ stop: id, vehicle: null }, id ? MAP_PATH : location.pathname),
+    [update, location.pathname],
+  )
+
+  return {
+    line,
+    vehicleId,
+    stationId,
+    setLine,
+    selectVehicle,
+    selectStation,
+    search: location.search,
+  }
 }

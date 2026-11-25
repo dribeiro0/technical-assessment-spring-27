@@ -40,3 +40,4 @@ DEC-036  Every MBTA request shares one rate-limit wait. After an HTTP 429, all r
 DEC-037  Judge train ages against the last successful fetch, not the clock, so a paused or failing feed keeps its last trains instead of emptying the map.
 DEC-038  Cut the breadcrumb bar and search from the release. The sidebar list replaces the separate vehicle-list view of DEC-027.
 DEC-039  Use Esri's light gray basemap, which needs no API key. CARTO, the first choice, began requiring one.
+DEC-040  Tapping a station on the map, or a stop on a train strip, opens a station card with the next departures from that station, grouped by line and destination. The data is one predictions request when the station is opened, then every 15 s. A station and a train are never selected at the same time. Each car of a Green Line train is reported as its own trip, so departures from the same platform at the same moment count as one train.
