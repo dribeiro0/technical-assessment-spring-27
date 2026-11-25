@@ -16,3 +16,14 @@ DEC-013  Centralize ingestion so features share the same underlying transit obse
 DEC-014  Track subsystem health separately, retain usable data during failures, recover automatically and record gaps.
 DEC-015  Allow use without an account and make location access optional.
 DEC-019  Preserve the map's line filter when switching views. Use feed evidence for stop labels, distinguish empty results from failed refreshes and retain the last successful data and timestamp on failure. Compare all in-scope subway lines in Analytics and combine the Green branches into one bar.
+
+ENGINEERING DECISIONS - November 24, 2026
+DEC-020  Build the web app with Vite, React and TypeScript in a web/ folder. Use React Router for views, React Leaflet with CARTO tiles for the map, TanStack Query for data, Recharts for charts, Tailwind for styling and Vitest for tests.
+DEC-021  Run Sprints 1-3 without a backend. The browser calls the MBTA V3 API directly (CORS allows any origin) without an API key. Add a Vercel serverless proxy that holds a key only if rate limits are hit in practice or streaming is built.
+DEC-022  Deploy to Vercel with a custom domain registered at GoDaddy. Keep the vercel.app URL as a fallback link.
+DEC-023  Poll vehicles every 15 s, pause while the tab is hidden, allow at most one manual refresh per 5 s and wait until the rate-limit reset after an HTTP 429. Fetch routes once per visit and cache shapes on the device for 24 h.
+DEC-024  Show a vehicle normally when its last update is up to 2 min old, faded with its age from 2 to 10 min, and drop it after 10 min. Count shown vehicles in the chart. Mark the feed stale 45 s after the last successful fetch. Show an error panel with Retry when the first load fails.
+DEC-025  Keep the line filter in the URL (?line=) so it survives view switches and reloads.
+DEC-026  Exclude Mattapan from the assessment release. Add it as its own line in Sprint 9.
+DEC-027  Add route lines from /shapes, an auto-refresh pause toggle and a vehicle list view in Sprint 3.
+DEC-028  Deliver each sprint as a branch and pull request into the fork's main. Submit one final pull request to the assessment repository.
