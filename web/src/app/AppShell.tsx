@@ -8,7 +8,7 @@ import { Ribbon } from './Ribbon'
 import { StatusBar } from './StatusBar'
 import { TabBar } from './TabBar'
 
-export const APP_TITLE = 'Chaos Meter'
+export const APP_TITLE = 'EnRoute'
 export const APP_DESCRIPTION =
   'Every MBTA subway train, live: where it is, where it’s headed and what’s going wrong.'
 

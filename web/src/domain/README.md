@@ -1,6 +1,6 @@
 # domain/
 
-The rules of Chaos Meter, written as plain TypeScript with no React and no network. Run the tests with `npm test`.
+The rules of EnRoute, written as plain TypeScript with no React and no network. Run the tests with `npm test`.
 
 | File | What it decides |
 | --- | --- |

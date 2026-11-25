@@ -5,7 +5,7 @@ import { buildNetwork, type Network } from '../domain/network'
 // Line paths and stations change only with service changes, so they are fetched
 // once and kept on the device for 24 hours (DEC-023). That costs 5 requests per
 // day per visitor instead of 5 per visit.
-const STORAGE_KEY = 'chaos-meter:network:v1'
+const STORAGE_KEY = 'enroute:network:v1'
 const MAX_AGE_MS = 24 * 60 * 60_000
 
 interface Saved {

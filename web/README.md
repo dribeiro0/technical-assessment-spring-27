@@ -1,6 +1,6 @@
-# Chaos Meter: web app
+# EnRoute: web app
 
-A live MBTA subway dashboard: every Red, Orange, Blue and Green Line train on a dark map, where it is, where it's headed and what's going wrong. Built on the official MBTA V3 API. The product plan lives in [`../docs/planning`](../docs/planning/readme.md).
+EnRoute is a live MBTA subway dashboard: every Red, Orange, Blue and Green Line train on a dark map, where it is, where it's headed and what's going wrong. Built on the official MBTA V3 API. The product plan lives in [`../docs/planning`](../docs/planning/readme.md).
 
 ## Features
 
