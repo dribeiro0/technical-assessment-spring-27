@@ -1,0 +1,241 @@
+@import 'tailwindcss';
+
+/* Design tokens from the V5 board. Each becomes a Tailwind class,
+   e.g. --color-chrome -> bg-chrome, --color-fg-muted -> text-fg-muted. */
+@theme {
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', monospace;
+
+  --color-main: #1e1e1e;
+  --color-chrome: #161616; /* ribbon, tabs, status bar */
+  --color-side: #1a1a1a; /* sidebars */
+  --color-map: #141414;
+  --color-water: #0f1318;
+  --color-border: #333333;
+  --color-control: #444444;
+  --color-fg: #dadada;
+  --color-fg-secondary: #b5b5b5;
+  --color-fg-muted: #8a8a8a;
+  --color-accent: #e8a33d;
+
+  --color-red-line: #da291c;
+  --color-orange-line: #ed8b00;
+  --color-blue-line: #5b8cff;
+  --color-green-line: #12a150;
+
+  --radius-sm: 2px;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-main text-fg font-sans antialiased;
+    font-size: 14px;
+  }
+
+  /* Visible keyboard focus on every control (WCAG 2.4.7). */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  button {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- Map ---------- */
+
+.leaflet-container {
+  background: var(--color-map);
+  font-family: var(--font-sans);
+}
+
+/* Darken the basemap toward the V5 map colour so the lines and trains stand out. */
+.leaflet-tile-pane {
+  filter: brightness(0.62) contrast(1.05);
+}
+
+.leaflet-control-attribution {
+  background: rgb(22 22 22 / 0.85) !important;
+  color: var(--color-fg-muted) !important;
+  font-size: 10px;
+}
+
+.leaflet-control-attribution a {
+  color: var(--color-fg-secondary) !important;
+}
+
+.leaflet-bar a {
+  background: var(--color-chrome) !important;
+  color: var(--color-fg) !important;
+  border-color: var(--color-control) !important;
+  border-radius: 0 !important;
+}
+
+.leaflet-bar {
+  border: 1px solid var(--color-control) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Station names on hover. */
+.station-tooltip {
+  background: var(--color-chrome);
+  border: 1px solid var(--color-border);
+  border-radius: 0;
+  color: var(--color-fg);
+  box-shadow: none;
+  font-size: 12px;
+  padding: 2px 6px;
+}
+
+.station-tooltip::before {
+  display: none;
+}
+
+/* ---------- Vehicle markers ----------
+   A circle in the line colour. Moving: an arrow rotated to the bearing.
+   Stopped: a square. The car number tag sits underneath. */
+
+.vehicle-icon {
+  background: none;
+  border: none;
+}
+
+.vm {
+  position: relative;
+  width: 22px;
+  height: 22px;
+}
+
+.vm__dot {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: var(--c);
+  border: 2px solid var(--color-map);
+  display: grid;
+  place-items: center;
+}
+
+.vm__glyph {
+  display: block;
+  background: var(--g);
+}
+
+.vm__glyph--arrow {
+  width: 10px;
+  height: 11px;
+  clip-path: polygon(50% 0, 100% 100%, 50% 78%, 0 100%);
+}
+
+.vm__glyph--square {
+  width: 8px;
+  height: 8px;
+}
+
+.vm__glyph--dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.vm__tag {
+  display: none;
+  position: absolute;
+  top: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 1px 4px;
+  background: var(--color-chrome);
+  border: 1px solid var(--color-control);
+  color: var(--color-fg);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  line-height: 14px;
+}
+
+/* Tags appear when zoomed in, on hover or focus, and always for the selection. */
+.tags-visible .vm__tag,
+.leaflet-marker-icon:hover .vm__tag,
+.leaflet-marker-icon:focus-visible .vm__tag,
+.vm--selected .vm__tag {
+  display: block;
+}
+
+/* Vehicles not heard from in 2-10 minutes: faded, with a dashed outline so it's not colour alone. */
+.vm--aging .vm__dot {
+  opacity: 0.45;
+  border-style: dashed;
+  border-color: var(--color-fg-muted);
+}
+
+.vm--aging .vm__tag {
+  opacity: 0.6;
+}
+
+/* Selection: a double amber ring with a dark gap, plus an amber tag border. */
+.vm--selected .vm__dot {
+  box-shadow:
+    0 0 0 2px var(--color-map),
+    0 0 0 4px var(--color-accent);
+}
+
+.vm--selected::after {
+  content: '';
+  position: absolute;
+  inset: -9px;
+  border: 1.5px solid var(--color-accent);
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+.vm--selected .vm__tag {
+  border-color: var(--color-accent);
+}
+
+/* ---------- Popup ---------- */
+
+.vehicle-popup .leaflet-popup-content-wrapper {
+  background: var(--color-chrome);
+  color: var(--color-fg);
+  border: 1px solid var(--color-control);
+  border-radius: 2px;
+  box-shadow: none;
+}
+
+.vehicle-popup .leaflet-popup-content {
+  margin: 10px 12px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.vehicle-popup .leaflet-popup-tip {
+  background: var(--color-chrome);
+  border: 1px solid var(--color-control);
+  box-shadow: none;
+}
+
+.vehicle-popup a.leaflet-popup-close-button {
+  color: var(--color-fg-muted);
+}

@@ -1,15 +1,14 @@
 # features/analytics/
 
-The Analytics view (Sprint 3, R8).
+The Analytics view (R8).
 
-**Will contain**
-- `AnalyticsView.tsx`: the view layout, with the chart's scope, unit and last-updated time.
-- `VehiclesByLineChart.tsx`: a Recharts bar chart, "Active vehicles by subway line".
-  - One bar each for Red, Orange, Blue and Green, with the Green branches combined.
-  - Each bar is in its line colour and also labelled with text, so colour isn't the only cue.
+| File | What it does |
+| --- | --- |
+| `AnalyticsView.tsx` | The chart card, a table with the same numbers (vehicles, Green branch counts, line status) and the service alerts list. Clicking a line opens it on the map. |
+| `VehiclesByLineChart.tsx` | Recharts bar chart "Active vehicles by subway line": one bar per line in its colour, value labels on top, no animation under reduced motion. |
 
 **Rules**
-- Counts come from `domain/counts.ts` and the same vehicle data the map uses, so the two always agree.
-- The chart ignores the map's line filter and always compares every in-scope line (DEC-019).
-- Values must match a direct count of the current `/vehicles` response (R8 check).
+
+- Counts come from `domain/counts.ts` and the same data the map uses, so the two always agree.
+- The chart ignores the map's line filter and always compares every line (DEC-019).
 - Vehicle counts are not a Chaos Score.

@@ -1,14 +1,15 @@
 # features/map/
 
-The Live Map, built with React Leaflet over CARTO tiles. The tile credit stays visible.
+The Live Map, built with React Leaflet over Esri's dark gray basemap. It needs no API key; CARTO's tiles, the first choice, began requiring one. The map credits stay visible.
 
-**Will contain**
-- `LiveMapView.tsx`: the interactive map, centred on Greater Boston, with pan and zoom (R4, Sprint 1).
-- `VehicleMarker.tsx`: one marker per shown vehicle, in its line colour and pointed by bearing when known. Vehicles not updated in 2-10 min are drawn faded (Sprint 1).
-- `VehiclePopup.tsx`: opens on click or keyboard. Shows route, direction ("toward Alewife"), status and stop label, plus the update age (R5, Sprint 2).
-- `RouteLines.tsx`: the actual line paths from `/shapes`, drawn beneath the vehicles (Sprint 3, DEC-027).
+| File | What it does |
+| --- | --- |
+| `LiveMapView.tsx` | The interactive map centred on Boston (R4). Applies the line filter, shows car-number tags from zoom 14, deselects on empty-map clicks, and shows the loading, error, stale and empty-filter notices. |
+| `VehicleMarker.tsx` | One marker per vehicle and its popup with line, direction, status and next stop (R5). Selecting from the tree opens the popup. Enter on a focused marker works like a click. |
+| `vehicleIcon.ts` | The marker drawing: a line-coloured circle with an arrow rotated to the bearing when moving, a square when stopped, and the car-number tag. Feed text is HTML-escaped. |
+| `RouteLayer.tsx` | Line paths and hollow station dots beneath the vehicles. Transfer stations are drawn light gray; other lines fade when a filter is on. |
 
-**Rules**
-- Marker count equals the vehicles with usable coordinates after the line filter (R4 check).
-- A refresh moves markers in place. It doesn't reset the map view or close an open popup.
-- Honour the reduced-motion setting: no animated marker movement when it is on.
+**Marker states (never colour alone)**
+
+- Aging (2-10 min): faded, with a dashed outline.
+- Selected: a double amber ring and an amber tag border.
