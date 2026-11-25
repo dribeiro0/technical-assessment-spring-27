@@ -1,13 +1,17 @@
 # components/
 
-Shared controls used by more than one view.
+Shared pieces used by more than one view.
 
-**Will contain**
-- `LineFilter.tsx`: choose All, Red, Orange, Blue or Green. Updates `?line=` (R6, Sprint 2).
-- `RefreshControls.tsx`: the manual refresh button, an auto-refresh pause toggle (Sprint 3) and the last successful update time (R7, Sprint 2).
-- `ErrorPanel.tsx`: the small panel that pops up when the first load fails, with a Retry button. It is never a blank page (DEC-024).
-- `StaleBanner.tsx`: a notice when data is more than 45 s old or the app is waiting out a rate limit, showing the time of the last good data.
+| File | What it does |
+| --- | --- |
+| `LineTree.tsx` | The sidebar tree. Clicking a line filters the map (R6); the caret expands it into its vehicles with stop label and age. It doubles as the non-map vehicle list (09). |
+| `PropertiesPanel.tsx` | Details of the selected vehicle, or network status and alerts when nothing is selected. A side panel on desktop, a bottom sheet on phones. |
+| `FeedNotices.tsx` | The error panel with Retry for a failed first load, the loading notice, and the banner explaining stale, failed, rate-limited or paused data. |
+| `AlertList.tsx` | Official MBTA alerts, most severe first. |
+| `StatusMark.tsx` | Line status as a symbol plus text: ○ good service, ▲ minor issues, ■ major disruption. |
+| `Icons.tsx` | Small inline icons. |
 
 **Rules**
+
 - Everything works with the keyboard, with visible focus.
-- Status is never shown by colour alone. Pair it with text or a symbol.
+- Status is never shown by colour alone.
