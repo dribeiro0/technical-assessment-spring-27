@@ -3,23 +3,24 @@ import { MenuIcon } from '../components/Icons'
 import { ANALYTICS_PATH, MAP_PATH, useViewParams } from '../hooks/useViewParams'
 import { RefreshButtons } from './RefreshButtons'
 
+// The active tab turns paper-white with an orange bar on top; the others sit on the navy frame.
 const tabClass = ({ isActive }: { isActive: boolean }) =>
-  `relative flex h-full items-center whitespace-nowrap border-r border-border px-3 text-xs sm:px-4 ${
+  `relative flex h-full items-center whitespace-nowrap border-r border-chrome-border px-3 text-xs sm:px-4 ${
     isActive
-      ? 'bg-main text-fg before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:bg-accent'
-      : 'text-fg-muted hover:text-fg'
+      ? 'bg-main text-fg font-semibold before:absolute before:inset-x-0 before:top-0 before:h-0.5 before:bg-brand'
+      : 'text-chrome-muted hover:text-chrome-fg'
   }`
 
 /** Tabs across the top of the main area, plus the transit-mode selector. */
 export function TabBar({ onOpenMenu }: { onOpenMenu: () => void }) {
   const { search } = useViewParams()
   return (
-    <div className="bg-chrome border-border flex h-9 shrink-0 items-stretch border-b">
+    <div className="bg-chrome border-chrome-border flex h-9 shrink-0 items-stretch border-b">
       <button
         type="button"
         onClick={onOpenMenu}
-        aria-label="Open lines and vehicles"
-        className="text-fg-muted hover:text-fg border-border grid w-10 place-items-center border-r md:hidden"
+        aria-label="Open lines and trains"
+        className="text-chrome-muted hover:text-chrome-fg border-chrome-border grid w-10 place-items-center border-r md:hidden"
       >
         <MenuIcon />
       </button>
@@ -39,7 +40,7 @@ export function TabBar({ onOpenMenu }: { onOpenMenu: () => void }) {
         <select
           id="mode-select"
           defaultValue="subway"
-          className="bg-main border-control text-fg hidden h-6 rounded-sm border px-1.5 text-xs sm:block"
+          className="bg-main border-chrome-border text-fg hidden h-6 rounded-md border px-1.5 text-xs sm:block"
         >
           <option value="subway">Subway</option>
           <option value="bus" disabled>

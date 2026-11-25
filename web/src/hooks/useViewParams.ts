@@ -35,7 +35,20 @@ export function useViewParams() {
     [location.pathname, location.search, navigate],
   )
 
-  const setLine = useCallback((next: LineId | null) => update({ line: next }), [update])
+  /**
+   * Sets the line filter. Pass the selected train's line so that a train on another line
+   * is deselected: otherwise its card would stay open while its marker is filtered away.
+   */
+  const setLine = useCallback(
+    (next: LineId | null, selectedVehicleLine?: LineId | null) => {
+      const changes: Record<string, string | null> = { line: next }
+      if (next && vehicleId && selectedVehicleLine && selectedVehicleLine !== next) {
+        changes.vehicle = null
+      }
+      update(changes)
+    },
+    [update, vehicleId],
+  )
 
   /**
    * Selects a vehicle and shows it on the map. If the line filter would hide it,

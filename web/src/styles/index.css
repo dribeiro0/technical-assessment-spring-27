@@ -1,36 +1,61 @@
 @import 'tailwindcss';
 
-/* Design tokens from the V5 board. Each becomes a Tailwind class,
+/* Design tokens: the C4 "Paper Panels" direction. A navy frame (ribbon, tab bar, status bar),
+   paper-white panels, a cream map and burnt orange. Each token becomes a Tailwind class,
    e.g. --color-chrome -> bg-chrome, --color-fg-muted -> text-fg-muted. */
 @theme {
   --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', monospace;
 
-  --color-main: #1e1e1e;
-  --color-chrome: #161616; /* ribbon, tabs, status bar */
-  --color-side: #1a1a1a; /* sidebars */
-  --color-map: #141414;
-  --color-water: #0f1318;
-  --color-border: #333333;
-  --color-control: #444444;
-  --color-fg: #dadada;
-  --color-fg-secondary: #b5b5b5;
-  --color-fg-muted: #8a8a8a;
-  --color-accent: #e8a33d;
+  /* The navy frame and the text on it. */
+  --color-chrome: #1d2b44;
+  --color-chrome-fg: #fffdf8;
+  --color-chrome-muted: #b9c2d3;
+  --color-chrome-border: #2c3d5c;
 
+  /* Panels, map and cards. */
+  --color-main: #fffdf8;
+  --color-side: #fffdf8;
+  --color-map: #efe6d2;
+  --color-card: #ffffff;
+  --color-chip: #f3ecdf;
+  --color-border: #e6decf;
+  --color-control: #c6b9a1;
+
+  /* Text on panels. */
+  --color-fg: #1d2b44;
+  --color-fg-secondary: #3d4a60;
+  --color-fg-muted: #6a6356;
+
+  /* Accents. */
+  --color-brand: #d2643c; /* logo, active-tab bar, focus ring */
+  --color-accent: #a84b2a; /* emphasised text: next stop, countdown (5:1 on paper) */
+  --color-select: #1d2b44; /* selection rings */
+  --color-warn: #9a520a; /* minor issues, aging data */
+  --color-danger: #b42318; /* major disruption, offline */
+  --color-live: #3fcb86;
+
+  /* Official MBTA line colours (Orange darkened slightly so markers read on cream). */
   --color-red-line: #da291c;
-  --color-orange-line: #ed8b00;
-  --color-blue-line: #5b8cff;
-  --color-green-line: #12a150;
+  --color-orange-line: #bf6900;
+  --color-blue-line: #003da5;
+  --color-green-line: #00843d;
 
   --radius-sm: 2px;
+  --shadow-float: 0 12px 32px rgb(29 43 68 / 0.18), 0 1px 3px rgb(29 43 68 / 0.12);
 }
 
 @layer base {
+  /* The app fills the window exactly; only its panels scroll, never the page itself. */
   html,
   body,
   #root {
     height: 100%;
+    overflow: hidden;
+  }
+
+  #root {
+    height: 100dvh;
   }
 
   body {
@@ -38,9 +63,15 @@
     font-size: 14px;
   }
 
-  /* Visible keyboard focus on every control (WCAG 2.4.7). */
+  /* Thin scrollbars that match the panels. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-control) transparent;
+  }
+
+  /* Visible keyboard focus on every control (WCAG 2.4.7); orange reads on both navy and paper. */
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--color-brand);
     outline-offset: 2px;
   }
 
@@ -53,11 +84,42 @@
   }
 }
 
+/* The live dot in the status bar breathes so the app feels live. */
+@keyframes live-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgb(63 203 134 / 0.55);
+  }
+  100% {
+    box-shadow: 0 0 0 8px rgb(63 203 134 / 0);
+  }
+}
+
+.live-pulse {
+  animation: live-pulse 1.8s ease-out infinite;
+}
+
+/* The train card slides in when a train is picked. */
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.card-in {
+  animation: card-in 180ms ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }
@@ -69,13 +131,15 @@
   font-family: var(--font-sans);
 }
 
-/* Darken the basemap toward the V5 map colour so the lines and trains stand out. */
+/* Esri's light gray basemap, faded over the cream map colour so it turns warm.
+   Opacity is used instead of a CSS filter: filters force the whole map to repaint
+   on every pan and zoom frame, which made the map lag. */
 .leaflet-tile-pane {
-  filter: brightness(0.62) contrast(1.05);
+  opacity: 0.55;
 }
 
 .leaflet-control-attribution {
-  background: rgb(22 22 22 / 0.85) !important;
+  background: rgb(255 253 248 / 0.85) !important;
   color: var(--color-fg-muted) !important;
   font-size: 10px;
 }
@@ -84,28 +148,38 @@
   color: var(--color-fg-secondary) !important;
 }
 
+/* Floating, rounded zoom buttons. */
+.leaflet-bar {
+  border: 0 !important;
+  border-radius: 9px !important;
+  box-shadow: 0 4px 14px rgb(29 43 68 / 0.15) !important;
+  overflow: hidden;
+}
+
 .leaflet-bar a {
-  background: var(--color-chrome) !important;
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 34px !important;
+  background: var(--color-card) !important;
   color: var(--color-fg) !important;
-  border-color: var(--color-control) !important;
+  border-color: var(--color-border) !important;
   border-radius: 0 !important;
 }
 
-.leaflet-bar {
-  border: 1px solid var(--color-control) !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
+.leaflet-bottom.leaflet-right .leaflet-control-zoom {
+  margin-right: 16px;
+  margin-bottom: 24px;
 }
 
 /* Station names on hover. */
 .station-tooltip {
-  background: var(--color-chrome);
-  border: 1px solid var(--color-border);
-  border-radius: 0;
+  background: var(--color-card);
+  border: 0;
+  border-radius: 6px;
   color: var(--color-fg);
-  box-shadow: none;
+  box-shadow: 0 4px 12px rgb(29 43 68 / 0.18);
   font-size: 12px;
-  padding: 2px 6px;
+  padding: 3px 8px;
 }
 
 .station-tooltip::before {
@@ -114,7 +188,7 @@
 
 /* ---------- Vehicle markers ----------
    A circle in the line colour. Moving: an arrow rotated to the bearing.
-   Stopped: a square. The car number tag sits underneath. */
+   Stopped: a square. The destination tag sits underneath. */
 
 .vehicle-icon {
   background: none;
@@ -132,7 +206,8 @@
   inset: 0;
   border-radius: 50%;
   background: var(--c);
-  border: 2px solid var(--color-map);
+  border: 2px solid #ffffff;
+  box-shadow: 0 1px 3px rgb(29 43 68 / 0.35);
   display: grid;
   place-items: center;
 }
@@ -162,17 +237,17 @@
 .vm__tag {
   display: none;
   position: absolute;
-  top: 25px;
+  top: 26px;
   left: 50%;
   transform: translateX(-50%);
   white-space: nowrap;
-  padding: 1px 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
   background: var(--color-chrome);
-  border: 1px solid var(--color-control);
-  color: var(--color-fg);
+  color: var(--color-chrome-fg);
   font-family: var(--font-mono);
   font-size: 11px;
-  line-height: 14px;
+  line-height: 16px;
 }
 
 /* Tags appear when zoomed in, on hover or focus, and always for the selection. */
@@ -194,45 +269,39 @@
   opacity: 0.6;
 }
 
-/* Selection: a double amber ring with a dark gap, plus an amber tag border. */
+/* Selection: a double navy ring with a white gap. Navy stays distinct from every line colour. */
 .vm--selected .vm__dot {
   box-shadow:
-    0 0 0 2px var(--color-map),
-    0 0 0 4px var(--color-accent);
+    0 0 0 2px #ffffff,
+    0 0 0 4px var(--color-select);
 }
 
 .vm--selected::after {
   content: '';
   position: absolute;
   inset: -9px;
-  border: 1.5px solid var(--color-accent);
+  border: 1.5px solid var(--color-select);
   border-radius: 50%;
-  opacity: 0.7;
-}
-
-.vm--selected .vm__tag {
-  border-color: var(--color-accent);
+  opacity: 0.6;
 }
 
 /* ---------- Popup ---------- */
 
 .vehicle-popup .leaflet-popup-content-wrapper {
-  background: var(--color-chrome);
+  background: var(--color-card);
   color: var(--color-fg);
-  border: 1px solid var(--color-control);
-  border-radius: 2px;
-  box-shadow: none;
+  border-radius: 10px;
+  box-shadow: 0 8px 22px rgb(29 43 68 / 0.2);
 }
 
 .vehicle-popup .leaflet-popup-content {
-  margin: 10px 12px;
+  margin: 10px 14px;
   font-size: 13px;
   line-height: 1.4;
 }
 
 .vehicle-popup .leaflet-popup-tip {
-  background: var(--color-chrome);
-  border: 1px solid var(--color-control);
+  background: var(--color-card);
   box-shadow: none;
 }
 

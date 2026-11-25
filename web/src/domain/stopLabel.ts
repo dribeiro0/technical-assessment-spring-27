@@ -29,6 +29,16 @@ export function statusText(status: VehicleStatus): string {
   return STATUS_TEXT[status]
 }
 
+/**
+ * How riders identify a train: by where it's going, not by its car number.
+ * "Alewife", or "C · Cleveland Circle" on the Green Line where the branch matters.
+ */
+export function destinationLabel(vehicle: Pick<Vehicle, 'headsign' | 'branch'>): string {
+  const branch = vehicle.branch ? `${vehicle.branch} · ` : ''
+  if (vehicle.headsign) return `${branch}${vehicle.headsign}`
+  return vehicle.branch ? `${vehicle.branch} branch` : 'Destination unknown'
+}
+
 /** "toward Alewife", or a clear fallback when the trip has no headsign. */
 export function directionText(headsign: string | null): string {
   return headsign ? `toward ${headsign}` : 'Direction unavailable'

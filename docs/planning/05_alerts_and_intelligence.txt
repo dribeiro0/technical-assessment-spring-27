@@ -1,4 +1,4 @@
-CHAOS METER - 05 ALERTS AND INTELLIGENCE
+ENROUTE - 05 ALERTS AND INTELLIGENCE
 Planning baseline 0.1 - November 24, 2026
 Related: 03_chaos_engine.txt, 04, 06_my_commute.txt, 07, 08
 
@@ -173,7 +173,7 @@ Relevance levels for a saved journey:
   - An active suspension is listed above an active minor delay.
   - An upcoming notice is shown as upcoming and does not change the
     current score.
-  - A detected irregularity is labelled as Chaos Meter's own detection,
+  - A detected irregularity is labelled as EnRoute's own detection,
     with its evidence, and never with MBTA wording or branding.
   - A saved commute shows a notice only if relevance is DIRECT or
     INDIRECT, and shows which.

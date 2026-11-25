@@ -2,9 +2,9 @@ import { PauseIcon, PlayIcon, RefreshIcon } from '../components/Icons'
 import { useLiveData } from '../hooks/liveData'
 
 const buttonClass =
-  'text-fg-muted hover:text-fg hover:bg-main grid h-8 w-8 place-items-center rounded-sm disabled:opacity-40 disabled:hover:bg-transparent'
+  'text-chrome-muted hover:text-chrome-fg hover:bg-white/10 grid h-8 w-8 place-items-center rounded-md disabled:opacity-40 disabled:hover:bg-transparent'
 
-/** Manual refresh and the auto-refresh pause toggle (R7, DEC-027). */
+/** Manual refresh and the auto-refresh pause toggle (R7, DEC-027). They sit on the navy frame. */
 export function RefreshButtons() {
   const { refresh, canRefresh, isFetching, paused, setPaused } = useLiveData()
   return (
@@ -25,7 +25,7 @@ export function RefreshButtons() {
         aria-pressed={paused}
         aria-label="Pause auto-refresh"
         title={paused ? 'Resume auto-refresh' : 'Pause auto-refresh'}
-        className={`${buttonClass} ${paused ? 'text-accent' : ''}`}
+        className={`${buttonClass} ${paused ? 'bg-white/10 text-chrome-fg' : ''}`}
       >
         {paused ? <PlayIcon /> : <PauseIcon />}
       </button>

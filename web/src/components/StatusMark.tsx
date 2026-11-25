@@ -4,8 +4,8 @@ import { STATUS_TEXT, type StatusLevel } from '../domain/lineStatus'
 // good = hollow circle, minor = triangle, major = filled square.
 const MARK: Record<StatusLevel, { symbol: string; className: string }> = {
   good: { symbol: '○', className: 'text-fg-muted' },
-  minor: { symbol: '▲', className: 'text-accent' },
-  major: { symbol: '■', className: 'text-[#ff6b5e]' },
+  minor: { symbol: '▲', className: 'text-warn' },
+  major: { symbol: '■', className: 'text-danger' },
 }
 
 interface Props {
@@ -32,7 +32,9 @@ export function StatusMark({ level, withText = false }: Props) {
         {mark.symbol}
       </span>
       {withText ? (
-        <span className="text-xs">{STATUS_TEXT[level]}</span>
+        <span className={`text-xs ${level === 'good' ? '' : 'font-medium'}`}>
+          {STATUS_TEXT[level]}
+        </span>
       ) : (
         <span className="sr-only">{STATUS_TEXT[level]}</span>
       )}

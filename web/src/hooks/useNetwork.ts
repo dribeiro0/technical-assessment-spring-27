@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
-import { LINE_ROUTE_GROUPS, fetchRoutePatterns, fetchStops } from '../api/mbta'
+import { LINE_ROUTE_GROUPS, fetchRoutePatterns, fetchStops, isRateLimit } from '../api/mbta'
 import { buildNetwork, type Network } from '../domain/network'
+import { retryUnlessRateLimited } from './polling'
 
 // Line paths and stations change only with service changes, so they are fetched
 // once and kept on the device for 24 hours (DEC-023). That costs 5 requests per
@@ -52,13 +53,27 @@ async function loadNetwork(signal: AbortSignal): Promise<Network> {
   return network
 }
 
-/** Route lines and stations for the map. Optional decoration: the map works without them. */
+/** How long to wait before trying again after the line paths and stations failed to load. */
+const NETWORK_RETRY_MS = 60_000
+
+/**
+ * Route lines and stations for the map. Optional decoration: the map works without them.
+ * Once loaded they never refetch; if loading fails (for example during a rate limit),
+ * it tries again every minute until it succeeds, so the lines always come back.
+ */
 export function useNetwork() {
   return useQuery({
     queryKey: ['network'],
     queryFn: ({ signal }) => loadNetwork(signal),
     staleTime: Infinity,
     gcTime: Infinity,
-    retry: 1,
+    retry: retryUnlessRateLimited,
+    refetchInterval: (query) => {
+      if (query.state.status !== 'error') return false
+      const error = query.state.error
+      return isRateLimit(error) && error.retryAt
+        ? Math.max(NETWORK_RETRY_MS, error.retryAt - Date.now())
+        : NETWORK_RETRY_MS
+    },
   })
 }

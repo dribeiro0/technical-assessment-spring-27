@@ -1,16 +1,16 @@
-# Chaos Meter - Planning Baseline
+# EnRoute - Planning Baseline
 
 **Start here.** Follow the nine sprints in section 3 of 00_master_plan.txt. Section 5 records the release boundary and accepted interface behavior by sprint. Use 10_assessment_audit.txt to verify the submission. Sprints 1-3 deliver the assessment, Sprint 4 is optional, and Sprints 5-9 develop the personal app.
 
-**Version:** 0.1
-**Baseline date:** November 24, 2026
-**Project:** Chaos Meter, for the Impact Team Spring 2027 Technical Assessment
+**Version:** 0.2
+**Baseline date:** November 24, 2026 (updated November 25, 2026)
+**Project:** EnRoute, for the Impact Team Spring 2027 Technical Assessment
 **Assessment deadline:** Sunday, November 29, 2026, 11:59 p.m. (Boston local time)
 **Repository:** https://github.com/dribeiro0/technical-assessment-spring-27
 
 ## Purpose
 
-Chaos Meter combines live MBTA network exploration with personal commute monitoring. This baseline defines the product, delivery priorities, and evidence required to verify each feature.
+EnRoute combines live MBTA network exploration with personal commute monitoring. This baseline defines the product, delivery priorities, and evidence required to verify each feature.
 
 ## Reading order
 
@@ -69,3 +69,9 @@ Feature verification status is tracked separately in `10_assessment_audit.txt`. 
    - MBTA OPMI Data Blog, "Introducing Excess Trip Time," December 19, 2024. https://www.opmidatablog.com/latest-posts/introducing-excess-trip-time (read in full).
    - MBTA transit-performance repository, https://github.com/mbta/transit-performance . Confirmed MIT-licensed and archived (read-only) on March 4, 2026.
    - MBTA V3 API specification, https://api-v3.mbta.com/docs/swagger/swagger.json (paths, vehicle and prediction attributes, API-key and rate-limit notes).
+
+## Status (November 25, 2026)
+
+- The app, **EnRoute** (formerly Chaos Meter), is built in `web/` and live at https://enrouteboston.vercel.app.
+- Requirements R1-R8 are verified; R9 awaits the merge of `sprint-3/polish`, and R10 the PR and recording. See section 9 of `10_assessment_audit.txt`.
+- Decisions DEC-020 to DEC-039 in `12_decision_log.txt` cover the stack, the design and the audit fixes.

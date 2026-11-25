@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { formatAge, vehicleFreshness } from '../domain/freshness'
 import { LINES, type LineId } from '../domain/lines'
-import { stopLabel } from '../domain/stopLabel'
+import { destinationLabel, stopLabel } from '../domain/stopLabel'
 import type { Vehicle } from '../domain/vehicle'
 import { useLiveData } from '../hooks/liveData'
 import { useNow } from '../hooks/useNow'
@@ -30,26 +30,29 @@ export function LineTree({ onVehicleChosen }: Props) {
   const toggle = (id: LineId) => setOverrides((prev) => ({ ...prev, [id]: !isExpanded(id) }))
 
   const total = vehicles.length
+  // Before any data arrives, counts are unknown, not zero.
+  const noData = status === 'loading' || status === 'error'
+  const count = (n: number) => (noData ? '–' : n)
 
   return (
-    <nav aria-label="Lines and vehicles" className="flex min-h-0 flex-1 flex-col">
-      <p className="text-fg-muted px-4 pt-3 pb-2 text-[11px] font-medium tracking-wider uppercase">
-        Subway · {status === 'loading' || status === 'error' ? '–' : total} vehicles
-      </p>
+    <nav aria-label="Lines and trains" className="flex min-h-0 flex-1 flex-col">
+      <h2 className="text-fg-muted px-4 pt-3.5 pb-2 text-[10.5px] font-semibold tracking-[0.08em] uppercase">
+        Trains · {count(total)} live
+      </h2>
 
       <button
         type="button"
         aria-pressed={activeLine === null}
         onClick={() => setLine(null)}
-        className={`mx-2 flex items-center justify-between rounded-sm px-2 py-1.5 text-left text-[13px] ${
-          activeLine === null ? 'bg-main text-fg' : 'text-fg-secondary hover:bg-main/60'
+        className={`mx-2.5 flex items-center justify-between rounded-md px-2 py-1.5 text-left text-[13px] ${
+          activeLine === null ? 'bg-chip text-fg font-medium' : 'text-fg-secondary hover:bg-chip/60'
         }`}
       >
         <span>All lines</span>
-        <span className="text-fg-muted font-mono text-xs">{total}</span>
+        <span className="text-fg-muted font-mono text-xs">{count(total)}</span>
       </button>
 
-      <ul className="min-h-0 flex-1 overflow-y-auto px-2 pb-3">
+      <ul className="min-h-0 flex-1 overflow-y-auto px-2.5 pb-3">
         {LINES.map((line) => {
           const onLine = vehicles.filter((v) => v.line === line.id)
           const isOpen = isExpanded(line.id)
@@ -58,7 +61,7 @@ export function LineTree({ onVehicleChosen }: Props) {
           return (
             <li key={line.id}>
               <div
-                className={`flex items-center rounded-sm ${isActive ? 'bg-main' : 'hover:bg-main/60'}`}
+                className={`flex items-center rounded-md ${isActive ? 'bg-chip' : 'hover:bg-chip/60'}`}
               >
                 <button
                   type="button"
@@ -75,18 +78,22 @@ export function LineTree({ onVehicleChosen }: Props) {
                 <button
                   type="button"
                   aria-pressed={isActive}
-                  onClick={() => setLine(isActive ? null : line.id)}
+                  onClick={() => setLine(isActive ? null : line.id, selectedLine)}
                   title={isActive ? `Show all lines` : `Show only the ${line.name}`}
                   className="flex min-w-0 flex-1 items-center gap-2 py-1.5 pr-2 text-left text-[13px]"
                 >
                   <span
                     aria-hidden="true"
-                    className="h-2.5 w-2.5 shrink-0"
+                    className="h-2.5 w-2.5 shrink-0 rounded-[3px]"
                     style={{ background: line.color }}
                   />
-                  <span className={isActive ? 'text-fg font-medium' : 'text-fg'}>{line.name}</span>
+                  <span className={isActive ? 'text-fg font-semibold' : 'text-fg'}>
+                    {line.name}
+                  </span>
                   <StatusMark level={lineStatus?.[line.id].level ?? null} />
-                  <span className="text-fg-muted ml-auto font-mono text-xs">{onLine.length}</span>
+                  <span className="text-fg-muted ml-auto font-mono text-xs">
+                    {count(onLine.length)}
+                  </span>
                 </button>
               </div>
 
@@ -99,6 +106,7 @@ export function LineTree({ onVehicleChosen }: Props) {
                     <VehicleRow
                       key={v.id}
                       vehicle={v}
+                      color={line.color}
                       now={now}
                       selected={v.id === vehicleId}
                       onSelect={() => {
@@ -119,41 +127,62 @@ export function LineTree({ onVehicleChosen }: Props) {
 
 function VehicleRow({
   vehicle,
+  color,
   now,
   selected,
   onSelect,
 }: {
   vehicle: Vehicle
+  color: string
   now: number
   selected: boolean
   onSelect: () => void
 }) {
   const aging = vehicleFreshness(vehicle.updatedAt, now) === 'aging'
   const label = stopLabel(vehicle)
+  const destination = destinationLabel(vehicle)
+  const rowRef = useRef<HTMLButtonElement>(null)
+
+  // When a train is picked on the map, bring its row into view in the list.
+  useEffect(() => {
+    if (selected) rowRef.current?.scrollIntoView({ block: 'nearest' })
+  }, [selected])
+
   return (
     <li>
       <button
+        ref={rowRef}
         type="button"
         onClick={onSelect}
         aria-current={selected ? 'true' : undefined}
-        className={`grid w-full grid-cols-[auto_1fr_auto] items-baseline gap-x-2 rounded-sm py-1 pr-2 pl-9 text-left ${
-          selected ? 'bg-main ring-accent ring-1 ring-inset' : 'hover:bg-main/60'
+        aria-label={`${destination}, ${label}`}
+        className={`my-px grid w-full grid-cols-[auto_1fr_auto] items-center gap-x-2.5 rounded-md py-1.5 pr-2 pl-7 text-left ${
+          selected ? 'bg-chip ring-select ring-[1.5px] ring-inset' : 'hover:bg-chip/60'
         }`}
       >
-        <span className={`font-mono text-xs ${selected ? 'text-fg' : 'text-fg-secondary'}`}>
-          {vehicle.label}
-          {vehicle.branch && <span className="text-fg-muted"> · {vehicle.branch}</span>}
-        </span>
-        <span className="text-fg-muted truncate text-xs" title={label}>
-          {label}
+        <span
+          aria-hidden="true"
+          className="row-span-2 h-1.5 w-1.5 rounded-full"
+          style={{ background: color }}
+        />
+        <span
+          className={`truncate text-[12.5px] font-medium ${selected ? 'text-fg' : 'text-fg-secondary'}`}
+        >
+          <span aria-hidden="true" className="text-fg-muted font-normal">
+            →{' '}
+          </span>
+          {destination}
         </span>
         <span
-          className={`font-mono text-[11px] ${aging ? 'text-accent' : 'text-fg-muted'}`}
+          className={`row-span-2 self-center font-mono text-[11px] ${aging ? 'text-warn' : 'text-fg-muted'}`}
           title={aging ? 'Not heard from in over 2 minutes' : 'Time since last report'}
         >
           {aging && <span aria-hidden="true">⧗ </span>}
           {formatAge(vehicle.updatedAt, now)}
           {aging && <span className="sr-only"> old, may be out of date</span>}
+        </span>
+        <span className="text-fg-muted truncate text-[11px]" title={label}>
+          {label}
         </span>
       </button>
     </li>

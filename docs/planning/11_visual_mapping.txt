@@ -1,4 +1,4 @@
-CHAOS METER - 11 VISUAL MAPPING (FUNCTIONAL)
+ENROUTE - 11 VISUAL MAPPING (FUNCTIONAL)
 Planning baseline 0.1 - November 24, 2026
 Related: 01, 06, 09, 10 (R1, R2)
 
@@ -7,7 +7,8 @@ Delivery scope: Sprints 1-3 share Live Map and Analytics inside one page. Deskto
 This is a functional map: what appears, in what priority, and where each
 action leads. It does not decide appearance.
 
-  [DEFERRED] Palette, typography, branding, motion, and detailed styling.
+  [DECIDED November 25, 2026] Palette, typography, branding, motion and the
+  assessment layout: see section 8 and DEC-029 to DEC-039.
   The assessment still requires a polished UI (10, R2), so these
   decisions must be made before submission.
 
@@ -29,7 +30,7 @@ action leads. It does not decide appearance.
 2. SITE STRUCTURE
 ======================================================================
 
-  Chaos Meter
+  EnRoute
   |
   +-- Command Center (desktop emphasis)
   |     Overview | Live Map | Service Alerts | Analytics | My Commute
@@ -48,7 +49,7 @@ action leads. It does not decide appearance.
 ======================================================================
 
   +---------------------------------------------------------------+
-  | Chaos Meter - <description>     [search]  [mode]  [refresh]   |
+  | EnRoute - <description>     [search]  [mode]  [refresh]   |
   |                                 status: LIVE, updated 8s ago  |
   +-----------+---------------------------------------------------+
   | Overview  |  NETWORK STATUS (score or UNKNOWN, confidence)    |
@@ -69,7 +70,7 @@ action leads. It does not decide appearance.
 ======================================================================
 
   +---------------------------+     +---------------------------+
-  | Chaos Meter    [mode]     |     | TRACKING                  |
+  | EnRoute    [mode]     |     | TRACKING                  |
   | network: compact status   |     | Green B to Gov't Center   |
   |---------------------------|     | arrives BU Central 3 min  |
   | MY DEPARTURES             |     | 2 stops away              |
@@ -211,3 +212,40 @@ action leads. It does not decide appearance.
     Home (no saved) -> "find a station" -> types "Kenmore" -> Station
     details -> departures -> save -> becomes a saved stop
 
+
+======================================================================
+8. VISUAL IDENTITY AND LAYOUT AS BUILT (Sprints 1-3)       [ACCEPTED]
+======================================================================
+
+  Name: EnRoute. "Every MBTA subway train, live: where it is, where it's
+  headed and what's going wrong."
+
+  Colours ("Paper Panels", DEC-030)
+    Frame (ribbon, tab bar, status bar)   navy #1D2B44, cream text
+    Panels and cards                      paper #FFFDF8 / white
+    Map                                   cream #EFE6D2 over a light gray basemap
+    Brand, focus ring                     burnt orange #D2643C
+    Emphasised text (next stop, times)    #A84B2A
+    Lines                                 Red #DA291C, Orange #BF6900,
+                                          Blue #003DA5, Green #00843D
+  Type: IBM Plex Sans; JetBrains Mono for times, counts and IDs.
+  Shapes: square frame; 6-12 px rounded floating cards, popups and zoom.
+  Motion: trains glide between updates, the live dot pulses, the train
+  card slides in. All of it stops under reduced motion.
+
+  Desktop (Live Map)
+  +----+-------------+------------------------------------------------+
+  |    | EnRoute     | Live map | Analytics                  Subway v |
+  | ri | description +------------------------------------------------+
+  | bb | LINE STATUS |                              +---------------+ |
+  | on | [Red ][Ora] |        map: lines, stations, | train card    | |
+  |    | [Blue][Grn] |        live trains, popup    | 1 min to X    | |
+  |    | TRAINS · n  |                              | stop strip    | |
+  |    | line list   |                              +---------------+ |
+  +----+-------------+------------------------------------------------+
+  | live · updated 8 s ago · n trains · alerts         auto-refresh 15 s |
+  +--------------------------------------------------------------------+
+
+  Phone: a navy header with the name and description and the tabs and
+  controls below; the sidebar opens as a drawer; the train card becomes a
+  bottom sheet; the map always comes first.

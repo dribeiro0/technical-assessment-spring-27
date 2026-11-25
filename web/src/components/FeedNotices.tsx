@@ -14,7 +14,7 @@ export function ErrorPanel() {
     <div className="absolute inset-0 z-[1000] grid place-items-center p-4">
       <div
         role="alert"
-        className="bg-chrome border-control w-full max-w-sm rounded-sm border p-4 shadow-lg"
+        className="bg-card w-full max-w-sm rounded-xl p-5 shadow-[var(--shadow-float)]"
       >
         <h2 className="text-fg text-sm font-semibold">Can't load live trains</h2>
         <p className="text-fg-secondary mt-1 text-xs leading-relaxed">
@@ -24,7 +24,7 @@ export function ErrorPanel() {
           type="button"
           onClick={refresh}
           disabled={!canRefresh}
-          className="bg-accent mt-3 rounded-sm px-3 py-1.5 text-xs font-semibold text-[#161616] disabled:opacity-50"
+          className="bg-chrome text-chrome-fg mt-4 rounded-md px-4 py-2 text-xs font-semibold disabled:opacity-50"
         >
           Retry
         </button>
@@ -41,7 +41,7 @@ export function LoadingNotice() {
     <div className="pointer-events-none absolute inset-x-0 top-3 z-[1000] flex justify-center">
       <p
         role="status"
-        className="bg-chrome border-control text-fg-secondary border px-3 py-1 text-xs"
+        className="bg-card text-fg-secondary rounded-full px-4 py-1.5 text-xs shadow-[var(--shadow-float)]"
       >
         Loading live trains…
       </p>
@@ -75,7 +75,7 @@ export function StaleBanner() {
     <div className="pointer-events-none absolute inset-x-0 top-3 z-[1000] flex justify-center px-3">
       <p
         role="status"
-        className="bg-chrome border-accent text-fg max-w-full border px-3 py-1 text-center text-xs"
+        className="bg-card text-fg border-brand max-w-full rounded-full border px-4 py-1.5 text-center text-xs shadow-[var(--shadow-float)]"
       >
         {message}
       </p>

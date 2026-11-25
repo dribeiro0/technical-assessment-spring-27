@@ -2,10 +2,10 @@
 
 The Analytics view (R8).
 
-| File | What it does |
-| --- | --- |
-| `AnalyticsView.tsx` | The chart card, a table with the same numbers (vehicles, Green branch counts, line status) and the service alerts list. Clicking a line opens it on the map. |
-| `VehiclesByLineChart.tsx` | Recharts bar chart "Active vehicles by subway line": one bar per line in its colour, value labels on top, no animation under reduced motion. |
+| File                      | What it does                                                                                                                                                 |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `AnalyticsView.tsx`       | The chart card, a table with the same numbers (vehicles, Green branch counts, line status) and the service alerts list. Clicking a line opens it on the map. |
+| `VehiclesByLineChart.tsx` | Recharts bar chart "Active vehicles by subway line": one bar per line in its colour, value labels on top, no animation under reduced motion.                 |
 
 **Rules**
 

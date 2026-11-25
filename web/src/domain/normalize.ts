@@ -86,6 +86,7 @@ export function normalizeVehicles(doc: VehiclesDocument): Vehicle[] {
       status: STATUS_BY_FEED_VALUE[attrs.current_status ?? ''] ?? 'unknown',
       stopName: textOrNull(stop?.attributes?.name),
       headsign: textOrNull(trip?.attributes?.headsign),
+      tripId: tripRef?.id ?? null,
       directionId,
       updatedAt,
     }
@@ -98,6 +99,8 @@ export function normalizeVehicles(doc: VehiclesDocument): Vehicle[] {
     (a, b) =>
       (LINE_ORDER.get(a.line) ?? 0) - (LINE_ORDER.get(b.line) ?? 0) ||
       a.routeId.localeCompare(b.routeId) ||
+      // Group trains by where they're headed, so the list reads like a departures board.
+      (a.headsign ?? '￿').localeCompare(b.headsign ?? '￿') ||
       a.label.localeCompare(b.label, undefined, { numeric: true }),
   )
 }

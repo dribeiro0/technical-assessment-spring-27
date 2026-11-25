@@ -1,4 +1,4 @@
-CHAOS METER - PRODUCT DECISIONS
+ENROUTE - PRODUCT DECISIONS
 Planning baseline 0.1 - November 24, 2026
 
 DEC-001  Explain MBTA service conditions in terms of disruptions, vehicle locations and the effects on a rider's trip.
@@ -18,12 +18,25 @@ DEC-015  Allow use without an account and make location access optional.
 DEC-019  Preserve the map's line filter when switching views. Use feed evidence for stop labels, distinguish empty results from failed refreshes and retain the last successful data and timestamp on failure. Compare all in-scope subway lines in Analytics and combine the Green branches into one bar.
 
 ENGINEERING DECISIONS - November 24, 2026
-DEC-020  Build the web app with Vite, React and TypeScript in a web/ folder. Use React Router for views, React Leaflet with CARTO tiles for the map, TanStack Query for data, Recharts for charts, Tailwind for styling and Vitest for tests.
+DEC-020  Build the web app with Vite, React and TypeScript in a web/ folder. Use React Router for views, React Leaflet with Esri's light gray basemap for the map (DEC-039), TanStack Query for data, Recharts for charts, Tailwind for styling and Vitest for tests.
 DEC-021  Run Sprints 1-3 without a backend. The browser calls the MBTA V3 API directly (CORS allows any origin) without an API key. Add a Vercel serverless proxy that holds a key only if rate limits are hit in practice or streaming is built.
-DEC-022  Deploy to Vercel with a custom domain registered at GoDaddy. Keep the vercel.app URL as a fallback link.
+DEC-022  Deploy to Vercel with a custom domain registered at GoDaddy. Keep the vercel.app URL as a fallback link. Live at https://enrouteboston.vercel.app; the custom domain comes later.
 DEC-023  Poll vehicles every 15 s, pause while the tab is hidden, allow at most one manual refresh per 5 s and wait until the rate-limit reset after an HTTP 429. Fetch routes once per visit and cache shapes on the device for 24 h.
 DEC-024  Show a vehicle normally when its last update is up to 2 min old, faded with its age from 2 to 10 min, and drop it after 10 min. Count shown vehicles in the chart. Mark the feed stale 45 s after the last successful fetch. Show an error panel with Retry when the first load fails.
 DEC-025  Keep the line filter in the URL (?line=) so it survives view switches and reloads.
 DEC-026  Exclude Mattapan from the assessment release. Add it as its own line in Sprint 9.
-DEC-027  Add route lines from /shapes, an auto-refresh pause toggle and a vehicle list view in Sprint 3.
+DEC-027  Add route lines from /shapes, an auto-refresh pause toggle and a vehicle list view in Sprint 3. Updated November 25: the list lives in the sidebar instead of its own view (DEC-038).
 DEC-028  Deliver each sprint as a branch and pull request into the fork's main. Submit one final pull request to the assessment repository.
+
+DESIGN AND AUDIT DECISIONS - November 25, 2026
+DEC-029  Name the app EnRoute. The planned domain enroute.boston is not bought yet; the site runs at https://enrouteboston.vercel.app.
+DEC-030  Visual identity "Paper Panels": a navy frame (ribbon, tab bar, status bar), paper-white panels, a cream map and a burnt-orange brand colour. Use the official MBTA line colours, with Orange deepened to #BF6900 so markers reach 3:1 contrast on the map. Fonts: IBM Plex Sans for text, JetBrains Mono for times and IDs.
+DEC-031  Layout: the navy icon ribbon, tab bar and status bar frame a sidebar and the map. The sidebar leads with four line-status badges, which also filter the map, followed by the train list. Train details float over the map as a card (a bottom sheet on phones), replacing the fixed properties column.
+DEC-032  The selected-train card shows a countdown to the next stop and a strip of the stops ahead, with the line filled up to the train. Times come from MBTA predictions for that trip: one request when a train is selected, then every 15 s while it stays selected. Without predictions the card falls back to the stop text.
+DEC-033  Name trains by destination ("Alewife", "C · Cleveland Circle") in map tags, the list and cards. Car and vehicle numbers appear only as details.
+DEC-034  Markers glide to each new position over one polling interval so trains keep moving between updates. Jumps over 2.5 km snap instead, and gliding is off under reduced motion.
+DEC-035  Line status comes from official alerts. Suspensions and shuttles count as a major disruption, any other alert of severity 3 or more as minor issues, and lower-severity notices are ignored. This is not the Chaos Score.
+DEC-036  Every MBTA request shares one rate-limit wait. After an HTTP 429, all requests pause for 60 s, because the MBTA does not expose its reset header to browsers.
+DEC-037  Judge train ages against the last successful fetch, not the clock, so a paused or failing feed keeps its last trains instead of emptying the map.
+DEC-038  Cut the breadcrumb bar and search from the release. The sidebar list replaces the separate vehicle-list view of DEC-027.
+DEC-039  Use Esri's light gray basemap, which needs no API key. CARTO, the first choice, began requiring one.

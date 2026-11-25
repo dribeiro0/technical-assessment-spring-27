@@ -25,7 +25,10 @@ export function AnalyticsView() {
   return (
     <div className="bg-main relative h-full overflow-y-auto">
       <div className="mx-auto max-w-4xl space-y-6 p-4 md:p-8">
-        <section aria-labelledby="chart-title" className="border-border bg-side border">
+        <section
+          aria-labelledby="chart-title"
+          className="border-border bg-card overflow-hidden rounded-xl border shadow-[0_1px_3px_rgb(29_43_68_/0.08)]"
+        >
           <header className="border-border flex flex-wrap items-baseline justify-between gap-2 border-b px-4 py-3">
             <div>
               <h2 id="chart-title" className="text-fg text-sm font-semibold">
@@ -105,7 +108,10 @@ export function AnalyticsView() {
           </table>
         </section>
 
-        <section aria-labelledby="alerts-title" className="border-border bg-side border">
+        <section
+          aria-labelledby="alerts-title"
+          className="border-border bg-card overflow-hidden rounded-xl border shadow-[0_1px_3px_rgb(29_43_68_/0.08)]"
+        >
           <header className="border-border border-b px-4 py-3">
             <h2 id="alerts-title" className="text-fg text-sm font-semibold">
               Service alerts

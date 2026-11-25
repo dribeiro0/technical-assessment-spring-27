@@ -1,4 +1,4 @@
-CHAOS METER - 02 FUNCTIONAL ARCHITECTURE
+ENROUTE - 02 FUNCTIONAL ARCHITECTURE
 Planning baseline 0.1 - November 24, 2026
 Related: 03-08, 11_visual_mapping.txt
 

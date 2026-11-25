@@ -26,6 +26,8 @@ export interface Vehicle {
   stopName: string | null
   /** Where the trip is headed, e.g. "Alewife". */
   headsign: string | null
+  /** The MBTA trip this vehicle is running, used to fetch its upcoming stops. */
+  tripId: string | null
   directionId: 0 | 1 | null
   /** When the vehicle last reported, in epoch milliseconds. */
   updatedAt: number

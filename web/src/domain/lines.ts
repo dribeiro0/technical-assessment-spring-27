@@ -5,7 +5,7 @@ export interface LineInfo {
   id: LineId
   /** Display name, e.g. "Red line". */
   name: string
-  /** Marker and route colour on the dark map. Blue and Green are brightened for contrast. */
+  /** Marker and route colour on the cream map: official MBTA colours (Orange slightly darker). */
   color: string
   /** Colour of the arrow or square drawn inside a vehicle marker. */
   glyphColor: string
@@ -19,15 +19,15 @@ export const LINES: readonly LineInfo[] = [
   {
     id: 'Orange',
     name: 'Orange line',
-    color: '#ED8B00',
-    glyphColor: '#161616',
+    color: '#BF6900',
+    glyphColor: '#FFFFFF',
     routeIds: ['Orange'],
   },
-  { id: 'Blue', name: 'Blue line', color: '#5B8CFF', glyphColor: '#FFFFFF', routeIds: ['Blue'] },
+  { id: 'Blue', name: 'Blue line', color: '#003DA5', glyphColor: '#FFFFFF', routeIds: ['Blue'] },
   {
     id: 'Green',
     name: 'Green line',
-    color: '#12A150',
+    color: '#00843D',
     glyphColor: '#FFFFFF',
     routeIds: ['Green-B', 'Green-C', 'Green-D', 'Green-E'],
   },

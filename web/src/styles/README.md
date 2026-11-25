@@ -1,28 +1,30 @@
 # styles/
 
-`index.css` holds the Tailwind v4 setup, the V5 design tokens, and the styles for the map, markers and popups.
+`index.css` holds the Tailwind v4 setup, the design tokens ("Paper Panels", DEC-030), and the styles for the map, markers, popups and the small animations.
 
 **Tokens** (each becomes a Tailwind class, e.g. `bg-chrome`, `text-fg-muted`)
 
-| Token | Value | Used for |
-| --- | --- | --- |
-| `main` | `#1E1E1E` | Main background |
-| `chrome` | `#161616` | Ribbon, tabs, status bar |
-| `side` | `#1A1A1A` | Sidebars |
-| `map` | `#141414` | Map background |
-| `border` / `control` | `#333` / `#444` | Dividers / control outlines |
-| `fg` / `fg-secondary` / `fg-muted` | `#DADADA` / `#B5B5B5` / `#8A8A8A` | Text |
-| `accent` | `#E8A33D` | Selection and focus |
+| Token                                   | Value                                      | Used for                                                   |
+| --------------------------------------- | ------------------------------------------ | ---------------------------------------------------------- |
+| `chrome` / `chrome-fg` / `chrome-muted` | `#1D2B44` / `#FFFDF8` / `#B9C2D3`          | The navy frame (ribbon, tab bar, status bar) and its text  |
+| `main`, `side`                          | `#FFFDF8`                                  | Paper-white panels                                         |
+| `card` / `chip`                         | `#FFFFFF` / `#F3ECDF`                      | Cards and popups / chips and selected rows                 |
+| `map`                                   | `#EFE6D2`                                  | Cream map background                                       |
+| `border` / `control`                    | `#E6DECF` / `#C6B9A1`                      | Dividers / control outlines                                |
+| `fg` / `fg-secondary` / `fg-muted`      | `#1D2B44` / `#3D4A60` / `#6A6356`          | Text on panels                                             |
+| `brand`                                 | `#D2643C`                                  | Logo, active-tab bar, focus ring                           |
+| `accent`                                | `#A84B2A`                                  | Emphasised text: next stop, countdown                      |
+| `select`, `warn`, `danger`, `live`      | `#1D2B44`, `#9A520A`, `#B42318`, `#3FCB86` | Selection rings, minor issues, major/offline, the live dot |
 
 **Line colours** (the source of truth is `domain/lines.ts`)
 
-| Line | Hex | Note |
-| --- | --- | --- |
-| Red | `#DA291C` | Official MBTA |
-| Orange | `#ED8B00` | Official MBTA; dark glyphs |
-| Blue | `#5B8CFF` | Brightened from `#003DA5`, which is about 2:1 on the dark map |
-| Green | `#12A150` | Brightened from `#00843D` to match |
+| Line   | Hex       | Note                                                              |
+| ------ | --------- | ----------------------------------------------------------------- |
+| Red    | `#DA291C` | Official MBTA                                                     |
+| Orange | `#BF6900` | Official `#ED8B00` deepened so markers reach 3:1 on the cream map |
+| Blue   | `#003DA5` | Official MBTA                                                     |
+| Green  | `#00843D` | Official MBTA                                                     |
 
-**Fonts** (placeholders): IBM Plex Sans for the interface, JetBrains Mono for IDs and times.
+**Fonts:** IBM Plex Sans for the interface, JetBrains Mono for times, counts and IDs.
 
-**Rules:** usable from 375 px up, visible focus everywhere, and the reduced-motion setting is respected.
+**Rules:** usable from 375 px up and at 200% text, visible focus everywhere, every text pair at least 4.5:1, and the reduced-motion setting is respected.

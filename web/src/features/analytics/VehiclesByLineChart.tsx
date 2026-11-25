@@ -28,30 +28,31 @@ export function VehiclesByLineChart({ counts, onPickLine }: Props) {
     <div className="h-72 w-full" role="img" aria-label={describe(counts)}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 24, right: 8, bottom: 0, left: -16 }}>
-          <CartesianGrid stroke="#333333" vertical={false} />
+          <CartesianGrid stroke="#E6DECF" vertical={false} />
           <XAxis
             dataKey="label"
-            tick={{ fill: '#B5B5B5', fontSize: 12 }}
-            axisLine={{ stroke: '#444444' }}
+            tick={{ fill: '#3D4A60', fontSize: 12 }}
+            axisLine={{ stroke: '#C6B9A1' }}
             tickLine={false}
           />
           <YAxis
             allowDecimals={false}
-            tick={{ fill: '#8A8A8A', fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}
+            tick={{ fill: '#6A6356', fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}
             axisLine={false}
             tickLine={false}
           />
           <Tooltip
-            cursor={{ fill: 'rgba(255,255,255,0.04)' }}
+            cursor={{ fill: 'rgba(29,43,68,0.05)' }}
             contentStyle={{
-              background: '#161616',
-              border: '1px solid #444444',
-              borderRadius: 2,
-              color: '#DADADA',
+              background: '#FFFFFF',
+              border: '1px solid #E6DECF',
+              borderRadius: 8,
+              boxShadow: '0 8px 22px rgba(29,43,68,0.15)',
+              color: '#1D2B44',
               fontSize: 12,
             }}
-            labelStyle={{ color: '#DADADA' }}
-            itemStyle={{ color: '#DADADA' }}
+            labelStyle={{ color: '#1D2B44' }}
+            itemStyle={{ color: '#1D2B44' }}
             formatter={(value) => [`${value} vehicles`, 'Active']}
           />
           <Bar
@@ -69,7 +70,7 @@ export function VehiclesByLineChart({ counts, onPickLine }: Props) {
             <LabelList
               dataKey="count"
               position="top"
-              style={{ fill: '#DADADA', fontSize: 12, fontFamily: 'JetBrains Mono, monospace' }}
+              style={{ fill: '#1D2B44', fontSize: 12, fontFamily: 'JetBrains Mono, monospace' }}
             />
           </Bar>
         </BarChart>
