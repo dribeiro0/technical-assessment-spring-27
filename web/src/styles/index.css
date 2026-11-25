@@ -27,15 +27,31 @@
 }
 
 @layer base {
+  /* The app fills the window exactly; only its panels scroll, never the page itself. */
   html,
   body,
   #root {
     height: 100%;
+    overflow: hidden;
+  }
+
+  #root {
+    height: 100dvh;
   }
 
   body {
     @apply bg-main text-fg font-sans antialiased;
     font-size: 14px;
+  }
+
+  /* Thin, dark scrollbars that match the panels. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-control) transparent;
+  }
+
+  *:hover {
+    scrollbar-color: #5a5a5a transparent;
   }
 
   /* Visible keyboard focus on every control (WCAG 2.4.7). */
@@ -69,9 +85,11 @@
   font-family: var(--font-sans);
 }
 
-/* Darken the basemap toward the V5 map colour so the lines and trains stand out. */
+/* Darken the basemap toward the V5 map colour so the lines and trains stand out.
+   Opacity over the dark background is used instead of a CSS filter: filters force
+   the whole map to repaint on every pan and zoom frame, which made the map lag. */
 .leaflet-tile-pane {
-  filter: brightness(0.62) contrast(1.05);
+  opacity: 0.6;
 }
 
 .leaflet-control-attribution {

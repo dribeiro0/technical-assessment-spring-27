@@ -1,0 +1,2 @@
+# Keep line endings consistent with Prettier (LF) on every OS.
+* text=auto eol=lf

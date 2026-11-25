@@ -1,5 +1,6 @@
 import L from 'leaflet'
 import { getLine } from '../../domain/lines'
+import { destinationLabel } from '../../domain/stopLabel'
 import type { Vehicle } from '../../domain/vehicle'
 
 const ESCAPES: Record<string, string> = {
@@ -28,7 +29,7 @@ interface IconOptions {
   aging: boolean
 }
 
-/** Builds the Leaflet marker for one vehicle: line-coloured circle, glyph and car-number tag. */
+/** Builds the Leaflet marker for one vehicle: line-coloured circle, glyph and destination tag. */
 export function vehicleIcon(vehicle: Vehicle, { selected, aging }: IconOptions): L.DivIcon {
   const line = getLine(vehicle.line)
   const glyph = glyphFor(vehicle)
@@ -44,7 +45,7 @@ export function vehicleIcon(vehicle: Vehicle, { selected, aging }: IconOptions):
     html:
       `<div class="${classes}" style="--c: ${line.color}; --g: ${line.glyphColor}">` +
       `<div class="vm__dot"><span class="vm__glyph vm__glyph--${glyph}"${rotation}></span></div>` +
-      `<span class="vm__tag">${escapeHtml(vehicle.label)}</span>` +
+      `<span class="vm__tag">${escapeHtml(destinationLabel(vehicle))}</span>` +
       `</div>`,
   })
 }

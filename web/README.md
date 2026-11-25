@@ -4,7 +4,7 @@ EnRoute is a live MBTA subway dashboard: every Red, Orange, Blue and Green Line 
 
 ## Features
 
-- **Live map** (React Leaflet): every train in its line colour. An arrow shows its heading when moving and a square when stopped. Car numbers appear when zoomed in. Line paths and stations are drawn underneath.
+- **Live map** (React Leaflet): every train in its line colour. An arrow shows its heading when moving and a square when stopped. Trains glide between updates, are labelled by destination when zoomed in, and the map zooms to fit a chosen line. Line paths and stations are drawn underneath.
 - **Popups and properties:** line, direction, status and next stop ("At Park Street", "Approaching Kendall/MIT" or "Next stop unavailable"), plus how old the report is.
 - **Sidebar tree:** filter by line, then expand a line to list its trains with stop and age. It doubles as the non-map list.
 - **Line status** from official MBTA alerts: ○ good service, ▲ minor issues, ■ major disruption.

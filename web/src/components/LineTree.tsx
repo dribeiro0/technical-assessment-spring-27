@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { formatAge, vehicleFreshness } from '../domain/freshness'
 import { LINES, type LineId } from '../domain/lines'
-import { stopLabel } from '../domain/stopLabel'
+import { destinationLabel, stopLabel } from '../domain/stopLabel'
 import type { Vehicle } from '../domain/vehicle'
 import { useLiveData } from '../hooks/liveData'
 import { useNow } from '../hooks/useNow'
@@ -130,30 +130,42 @@ function VehicleRow({
 }) {
   const aging = vehicleFreshness(vehicle.updatedAt, now) === 'aging'
   const label = stopLabel(vehicle)
+  const destination = destinationLabel(vehicle)
+  const rowRef = useRef<HTMLButtonElement>(null)
+
+  // When a train is picked on the map, bring its row into view in the list.
+  useEffect(() => {
+    if (selected) rowRef.current?.scrollIntoView({ block: 'nearest' })
+  }, [selected])
+
   return (
     <li>
       <button
+        ref={rowRef}
         type="button"
         onClick={onSelect}
         aria-current={selected ? 'true' : undefined}
-        className={`grid w-full grid-cols-[auto_1fr_auto] items-baseline gap-x-2 rounded-sm py-1 pr-2 pl-9 text-left ${
+        aria-label={`${destination}, ${label}`}
+        className={`grid w-full grid-cols-[1fr_auto] items-baseline gap-x-2 rounded-sm py-1 pr-2 pl-9 text-left ${
           selected ? 'bg-main ring-accent ring-1 ring-inset' : 'hover:bg-main/60'
         }`}
       >
-        <span className={`font-mono text-xs ${selected ? 'text-fg' : 'text-fg-secondary'}`}>
-          {vehicle.label}
-          {vehicle.branch && <span className="text-fg-muted"> · {vehicle.branch}</span>}
-        </span>
-        <span className="text-fg-muted truncate text-xs" title={label}>
-          {label}
+        <span className={`truncate text-xs ${selected ? 'text-fg' : 'text-fg-secondary'}`}>
+          <span aria-hidden="true" className="text-fg-muted">
+            →{' '}
+          </span>
+          {destination}
         </span>
         <span
-          className={`font-mono text-[11px] ${aging ? 'text-accent' : 'text-fg-muted'}`}
+          className={`row-span-2 self-center font-mono text-[11px] ${aging ? 'text-accent' : 'text-fg-muted'}`}
           title={aging ? 'Not heard from in over 2 minutes' : 'Time since last report'}
         >
           {aging && <span aria-hidden="true">⧗ </span>}
           {formatAge(vehicle.updatedAt, now)}
           {aging && <span className="sr-only"> old, may be out of date</span>}
+        </span>
+        <span className="text-fg-muted truncate text-[11px]" title={label}>
+          {label}
         </span>
       </button>
     </li>

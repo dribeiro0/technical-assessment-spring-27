@@ -41,7 +41,7 @@ export function AppShell() {
   }, [drawerOpen])
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col overflow-hidden">
       {/* Phone header: the title and description stay visible on the landing view (R2). */}
       <header className="bg-chrome border-border border-b px-3 py-2 md:hidden">
         <p className="text-fg text-sm font-semibold">{APP_TITLE}</p>
@@ -51,7 +51,7 @@ export function AppShell() {
       <div className="flex min-h-0 flex-1">
         <Ribbon />
 
-        <aside className="bg-side border-border hidden w-64 shrink-0 flex-col border-r md:flex">
+        <aside className="bg-side border-border hidden min-h-0 w-64 shrink-0 flex-col overflow-hidden border-r md:flex">
           <Brand />
           <LineTree />
         </aside>
@@ -71,7 +71,7 @@ export function AppShell() {
         </main>
 
         {onMap && (
-          <aside className="bg-side border-border hidden w-72 shrink-0 flex-col border-l lg:flex">
+          <aside className="bg-side border-border hidden min-h-0 w-72 shrink-0 flex-col overflow-hidden border-l lg:flex">
             <PropertiesPanel />
           </aside>
         )}

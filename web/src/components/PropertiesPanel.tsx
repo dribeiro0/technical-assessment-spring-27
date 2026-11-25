@@ -72,11 +72,15 @@ function VehicleDetails({ vehicle }: { vehicle: Vehicle }) {
   return (
     <>
       <div className="border-border border-b px-4 py-4">
-        <p className="text-fg font-mono text-base font-medium">{vehicle.id}</p>
-        <p className="text-accent mt-1 text-sm">
-          {stopLabel(vehicle)}
-          {vehicle.headsign && <> → {vehicle.headsign}</>}
+        <p className="text-fg-muted flex items-center gap-2 text-xs">
+          <span aria-hidden="true" className="h-2.5 w-2.5" style={{ background: line.color }} />
+          {line.name}
+          {vehicle.branch && ` · ${vehicle.branch} branch`}
         </p>
+        <p className="text-fg mt-1 text-base font-semibold">
+          {vehicle.headsign ? `To ${vehicle.headsign}` : 'Destination unknown'}
+        </p>
+        <p className="text-accent mt-0.5 text-sm">{stopLabel(vehicle)}</p>
       </div>
       <dl>
         <Row label="line">
@@ -89,14 +93,18 @@ function VehicleDetails({ vehicle }: { vehicle: Vehicle }) {
         <Row label="direction">{directionText(vehicle.headsign)}</Row>
         <Row label="status">{statusText(vehicle.status)}</Row>
         <Row label="stop">{stopLabel(vehicle)}</Row>
-        <Row label="car">
-          <span className="font-mono">{vehicle.label}</span>
-        </Row>
         <Row label="updated">
           <span className={`font-mono ${aging ? 'text-accent' : ''}`}>
             {formatAgeLong(vehicle.updatedAt, now)}
           </span>
           {aging && <span className="text-fg-muted block">Not heard from in over 2 minutes</span>}
+        </Row>
+        {/* Car and vehicle numbers are for enthusiasts; riders go by destination. */}
+        <Row label="car no.">
+          <span className="text-fg-secondary font-mono">{vehicle.label}</span>
+        </Row>
+        <Row label="vehicle ID">
+          <span className="text-fg-secondary font-mono">{vehicle.id}</span>
         </Row>
       </dl>
       <div className="px-4 py-4">

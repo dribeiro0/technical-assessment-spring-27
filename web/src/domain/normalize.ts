@@ -98,6 +98,8 @@ export function normalizeVehicles(doc: VehiclesDocument): Vehicle[] {
     (a, b) =>
       (LINE_ORDER.get(a.line) ?? 0) - (LINE_ORDER.get(b.line) ?? 0) ||
       a.routeId.localeCompare(b.routeId) ||
+      // Group trains by where they're headed, so the list reads like a departures board.
+      (a.headsign ?? '￿').localeCompare(b.headsign ?? '￿') ||
       a.label.localeCompare(b.label, undefined, { numeric: true }),
   )
 }
