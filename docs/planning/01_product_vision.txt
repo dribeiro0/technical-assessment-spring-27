@@ -1,4 +1,4 @@
-CHAOS METER - 01 PRODUCT VISION
+ENROUTE - 01 PRODUCT VISION
 Planning baseline 0.1 - November 24, 2026
 Related: 00_master_plan.txt, 06_my_commute.txt, 11_visual_mapping.txt
 
@@ -121,7 +121,7 @@ user can still open My Commute. See 12_decision_log.txt DEC-003.
       The README itself lists Silver and Commuter Rail among /routes.
 
 ======================================================================
-6. WHAT CHAOS METER IS NOT (FOR NOW)
+6. WHAT ENROUTE IS NOT (FOR NOW)
 ======================================================================
 
   - Not a full journey planner competing with general navigation apps.

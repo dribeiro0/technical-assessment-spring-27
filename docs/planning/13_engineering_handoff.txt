@@ -1,4 +1,4 @@
-Chaos Meter | Engineering handoff
+EnRoute | Engineering handoff
 Planning baseline 0.1 | November 24, 2026 | Draft for review
 
 Release scope
@@ -24,7 +24,7 @@ Decisions DEC-020 to DEC-028 in 12_decision_log.txt answer the stack, hosting, r
 
 Mapping library: React Leaflet, which matches both the README and the PR template checkbox and resolves D1 in 10_assessment_audit.txt.
 
-Structure (web/src): api/ holds every MBTA request and the raw response types. domain/ holds plain, tested TypeScript: line scope and colours, normalization into a Vehicle model, stop labels, freshness rules and per-line counts. hooks/ wraps data fetching and the URL line filter. features/ holds the map, analytics and vehicle-list views. components/ holds shared controls. Raw API shapes do not pass beyond domain/normalize.ts.
+Structure (web/src): api/ holds every MBTA request and the raw response types. domain/ holds plain, tested TypeScript: line scope and colours, normalization into a Vehicle model, stop labels, freshness rules and per-line counts. hooks/ wraps data fetching and the URL line filter. features/ holds the map and analytics views. components/ holds the sidebar, train card and shared controls. Raw API shapes do not pass beyond domain/normalize.ts.
 
 Data flow:
   /vehicles?filter[route]=<in-scope routes>&include=trip,stop  (every 15 s + manual)
@@ -39,3 +39,10 @@ Vehicle trace (live, November 24, 2026): vehicle R-548CD8D6 on route Red, curren
 Live-data observations (November 24, 2026): anonymous limit 20 requests/min per IP; streaming returns 406 without a key; 1 of 108 subway vehicles had no stop; update ages p50 19 s, p90 55 s, max about 7 min, with every update older than 90 s belonging to a train at a terminal.
 
 Still to verify against live data: Green Line next-stop accuracy on surface branches; whether HTTP 304 responses count against the rate limit; vehicle counts during service changes and late at night.
+
+As built | November 25, 2026
+The app lives in web/; web/README.md and the README in each web/src folder describe every file. Changes since the design above: Esri light gray tiles replace CARTO (DEC-039); the vehicle list lives in the sidebar (DEC-038); the selected train's card adds per-trip predictions (DEC-032); all requests share one rate-limit wait (DEC-036); train ages are judged against the last successful fetch (DEC-037).
+
+Request budget: vehicles every 15 s (4/min), alerts every 60 s (1/min), predictions for the selected train every 15 s (4/min, only while one is selected), line paths and stations once a day per device (5 requests). Manual refresh is limited to once per 5 s.
+
+Verification: 37 unit tests on the data rules (npm test) and the audit in section 9 of 10_assessment_audit.txt.

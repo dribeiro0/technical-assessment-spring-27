@@ -1,14 +1,14 @@
-CHAOS METER - MASTER PLAN
+ENROUTE - MASTER PLAN
 Planning baseline 0.1 - November 24, 2026
 Status labels: see readme.md. Nothing described here is implemented yet.
 
 ======================================================================
-1. WHAT CHAOS METER IS
+1. WHAT ENROUTE IS
 ======================================================================
 
 Working tagline [PROPOSED]: "Know the T before you go."
 
-Chaos Meter is a real-time Boston transit product built on the official
+EnRoute is a real-time Boston transit product built on the official
 MBTA V3 API. It is meant to answer four questions [ACCEPTED as product
 direction]:
 
@@ -19,7 +19,7 @@ direction]:
 
 The difference from an ordinary MBTA dashboard is interpretation. An
 ordinary tracker answers "where is my train and when will it arrive?"
-Chaos Meter also tries to answer "how reliable is my journey, what is
+EnRoute also tries to answer "how reliable is my journey, what is
 going wrong, how does it affect me, and what should I do?" [ACCEPTED as
 the guiding distinction]
 
@@ -179,23 +179,27 @@ ACCEPTED RELEASE BEHAVIOR
   transit and prediction approach, alerts and transit intelligence,
   My Commute, analytics, data management, reliability.
   Partly done: performance, accessibility, privacy, security (09).
-  Not done: visual design, formal per-subsystem acceptance criteria,
-  engineering design and implementation roadmap.
-  Implementation: none. No application code exists.
+  Decided November 24-25: engineering stack and design (DEC-020 to
+  DEC-028, 13), visual identity and layout (DEC-029 to DEC-039, 11).
+  Implementation (November 25): Sprints 1-3 are built in web/ and live
+  at https://enrouteboston.vercel.app. Sprint 3 polish (the redesign) and
+  the audit fixes are on branch sprint-3/polish. R1-R8 are verified (10,
+  section 9); R9 awaits the merge, R10 the PR and recording.
+  Not done: formal per-subsystem acceptance criteria for Sprints 4-9.
 
 ======================================================================
 7. WHAT IS STILL OPEN
 ======================================================================
 
-  - Visual identity: palette, typography, branding, motion [DEFERRED]
-  - Technology stack, hosting, storage, polling vs. streaming [DEFERRED
-    to engineering]
-  - Mapping library: README allows "React Leaflet (or a similar mapping
-    library)"; template checkbox names React Leaflet [OPEN, see 10]
+  - Visual identity [DECIDED: DEC-030, DEC-031]
+  - Technology stack, hosting, polling [DECIDED: DEC-020 to DEC-023].
+    Streaming stays deferred: it needs an API key and a server relay.
+  - Mapping library [DECIDED: React Leaflet, DEC-020]
+  - Custom domain enroute.boston [OPEN: not bought yet]
   - Final Chaos Score weights and thresholds [UNVALIDATED]
   - Detailed acceptance criteria per subsystem beyond those recorded in
     files 03-10 [OPEN]
-  - Engineering design review is pending. See 13_engineering_handoff.txt.
+  - Engineering design: recorded in 13_engineering_handoff.txt and web/README.md.
   - Crowdsourced rider reports [OPEN]
 
   Decision register: 12_decision_log.txt

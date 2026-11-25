@@ -1,4 +1,4 @@
-CHAOS METER - 03 CHAOS ENGINE
+ENROUTE - 03 CHAOS ENGINE
 Planning baseline 0.1 - November 24, 2026
 Related: 05_alerts_and_intelligence.txt, 07_analytics_and_data.txt,
          08_reliability_and_recovery.txt, 12_decision_log.txt DEC-006
@@ -320,7 +320,7 @@ reliability measures (C).
     passengers budget waiting time from an extreme of the wait
     distribution (e.g. 95th percentile); short- vs long-headway waiting
     behaves differently.
-    Does not support: any specific Chaos Meter weight.
+    Does not support: any specific EnRoute weight.
 
   - MBTA OPMI, "Introducing Excess Trip Time" (December 19, 2024).
     ETT = (actual wait + actual travel) - (baseline wait + baseline
@@ -332,7 +332,7 @@ reliability measures (C).
     shows the share of riders within 5 and within 20 minutes of expected
     trip time; OPMI treats 5 minutes as the primary target.
     Use: an AGENCY BENCHMARK for validating our outcome measure. It is
-    not a Chaos Meter scoring threshold, and "within 5 minutes" is not a
+    not a EnRoute scoring threshold, and "within 5 minutes" is not a
     band boundary.
 
   - MBTA transit-performance (github.com/mbta/transit-performance).

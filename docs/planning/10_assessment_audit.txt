@@ -1,10 +1,10 @@
-CHAOS METER - 10 ASSESSMENT AUDIT
+ENROUTE - 10 ASSESSMENT AUDIT
 Planning baseline 0.1 - November 24, 2026
 Sources: README.md and pr_template.md at commit 8381263 (read directly;
 unchanged). Where this file and those files disagree, those files win.
 
 Verification status values: NOT STARTED | IN PROGRESS | VERIFIED.
-At this baseline every row is NOT STARTED. No application code exists.
+Updated November 25, 2026 after the audit recorded in section 9.
 
 ======================================================================
 1. CORE REQUIREMENTS MATRIX
@@ -19,7 +19,7 @@ R1  Single-page app, no full reloads when switching views [Sprint 3]
            (network panel: no new document request); state such as
            filters survives the switch.
     Evidence: recording segment clicking through all views.
-    Status: NOT STARTED
+    Status: VERIFIED (Nov 25). One document request per session; filter and selection survive view switches and reloads.
 
 R2  Polished, responsive UI with catchy title and apt description [Sprint 1; recheck in Sprint 3]
     Source: README core #2 (also "cool fonts"; MBTA palette and subtle
@@ -27,13 +27,13 @@ R2  Polished, responsive UI with catchy title and apt description [Sprint 1; rec
             ... catchy title, apt description, cool fonts/colors ...
             any screen size".
     Planned: one responsive map and chart interface on desktop and phone.
-             Title "Chaos Meter"; description [OPEN]. Visual identity
-             [DEFERRED] but must be decided before submission.
+             Title "EnRoute"; description [OPEN]. Visual identity
+             Decided: see DEC-030 and section 8 of 11_visual_mapping.txt.
     Depends: responsive app shell.
     Check: usable at phone (~375 px), tablet, desktop widths; title and
            one-line description visible on landing.
     Evidence: recording at desktop and narrow width; screenshots.
-    Status: NOT STARTED
+    Status: VERIFIED (Nov 25). Title and description visible on desktop and phone; usable at 375, 768, 1024 and 1440 px and at 200% text.
 
 R3  Real MBTA V3 data [Sprint 1]
     Source: README core #4 ("Successfully fetch and render live data");
@@ -43,7 +43,7 @@ R3  Real MBTA V3 data [Sprint 1]
     Check: values on screen match a direct API response at the same
            time; no mock data in production.
     Evidence: recording with the network panel or a timestamp.
-    Status: NOT STARTED
+    Status: VERIFIED (Nov 25). Every on-screen count equals a direct count of the same /vehicles response.
 
 R4  Interactive map centred on Greater Boston with live /vehicles [Sprint 1]
     markers
@@ -55,7 +55,7 @@ R4  Interactive map centred on Greater Boston with live /vehicles [Sprint 1]
            count equals vehicles with positions in the current response
            (after filters).
     Evidence: recording.
-    Status: NOT STARTED
+    Status: VERIFIED (Nov 25). 23 markers for 23 in-scope trains with positions reported within 10 minutes.
 
 R5  Clicking a marker opens a popup: route, direction, current status, [Sprint 2]
     next stop
@@ -66,7 +66,7 @@ R5  Clicking a marker opens a popup: route, direction, current status, [Sprint 2
     Check: popup shows all four; next stop says "unavailable" when the
            data is missing; values match /vehicles for that id.
     Evidence: recording of at least two vehicles on different lines.
-    Status: NOT STARTED
+    Status: VERIFIED (Nov 25). Popup shows line, direction, status and next stop; opens by click or by Enter on a focused marker (fixed in the audit).
 
 R6  Search bar or filter controls [Sprint 2]
     Source: README core #4 (by line, route, or stop name). Not in the
@@ -74,7 +74,7 @@ R6  Search bar or filter controls [Sprint 2]
     Planned: one line filter on the live map.
     Check: choosing "Red" leaves only Red vehicles; clearing it restores all lines in scope.
     Evidence: recording.
-    Status: NOT STARTED
+    Status: VERIFIED (Nov 25). Line badges and the line list filter the map, by mouse and keyboard; clearing restores all lines.
 
 R7  Manual refresh button or auto-refresh toggle [Sprint 2]
     Source: README core #4. Not in the template checklist.
@@ -84,7 +84,7 @@ R7  Manual refresh button or auto-refresh toggle [Sprint 2]
     Check: manual refresh requests current data and preserves the line filter.
            A failed request leaves the previous success time visible.
     Evidence: recording.
-    Status: NOT STARTED
+    Status: VERIFIED (Nov 25). Manual refresh (once per 5 s) and pause; a failed refresh keeps the last data and time; stale after 45 s; HTTP 429 waits 60 s (local stand-in API and a real MBTA 429).
 
 R8  At least one chart from API data [Sprint 3]
     Source: README core #5 (Chart.js, Recharts, D3 given as examples);
@@ -93,17 +93,17 @@ R8  At least one chart from API data [Sprint 3]
              time (07 section 2). Vehicle counts are not a chaos score.
     Check: chart values match a count of the current /vehicles response.
     Evidence: recording.
-    Status: NOT STARTED
+    Status: VERIFIED (Nov 25). Chart and table showed Red 1, Orange 3, Blue 0, Green 19, equal to the API count at the same moment.
 
 R9  Deploy frontend (and backend, if applicable) [Sprint 3]
     Source: README core #6 ("free deployment tools we talked about in
             the workshops" - which tools is not stated in the repo);
             template "Deployed the frontend" (no backend checkbox).
-    Planned: [DEFERRED] to engineering. If a backend or collector
+    Planned: Vercel with no backend (DEC-021, DEC-022). If a backend or collector
              exists, it must be deployed too.
     Check: public URL loads in a fresh browser with live data.
     Evidence: link in PR "Live Deployment".
-    Status: NOT STARTED
+    Status: IN PROGRESS. Live at https://enrouteboston.vercel.app (Vercel, no backend). The redesign and audit fixes on branch sprint-3/polish are not merged yet.
 
 R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3]
     Source: README intro and closing; template sections.
@@ -112,7 +112,7 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3
     Check: PR open against the assessment repository from the applicant's fork,
            template filled, recording link works without sign-in.
     Evidence: PR URL.
-    Status: NOT STARTED
+    Status: NOT STARTED. Fork PR to the assessment repository and the screen recording.
 
 ======================================================================
 2. EXTRA FEATURES (optional)
@@ -139,7 +139,7 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3
       requires: search/filters (R6), refresh control (R7), live markers
       from /vehicles (R4), and popup fields (R5). Build to the README.
   D3  README asks for "cool fonts"; template asks for "cool
-      fonts/colors". Same intent; visual identity still [DEFERRED].
+      fonts/colors". Same intent; visual identity decided (DEC-030).
   D4  Deployment: README "frontend (and backend, if applicable)";
       template only "Deployed the frontend".
 
@@ -219,3 +219,51 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3
   Submit the completed application through a pull request from the fork
   to the assessment repository. Include the recording and deployment links.
   Mark a requirement VERIFIED only after its acceptance check passes.
+
+======================================================================
+9. AUDIT OF NOVEMBER 25, 2026
+======================================================================
+
+  How it was checked
+  - Every check in section 1 was run against the real app and the live MBTA feed.
+  - Error states were triggered on purpose. A test build was pointed at a local
+    stand-in for the MBTA API that could fail (HTTP 500) or rate-limit
+    (HTTP 429) on a timed plan. A real MBTA 429 was also observed.
+  - On-screen counts were compared with the exact /vehicles response the
+    page received.
+  - Colour contrast was computed for every text and marker pair.
+  - An independent code review ran in parallel.
+
+  Passed without changes
+  - First-load failure shows an error panel with Retry, never a blank page.
+  - A failed refresh keeps the last trains and their time; stale after 45 s.
+  - A rate limit shows a countdown and sends no requests until it ends.
+  - Map, status bar, chart and table counts match the API exactly.
+  - Visible keyboard focus; state never shown by colour alone.
+  - Single page with one document load; title and description on all sizes.
+
+  Found and fixed (commit 6fff8bc)
+  - A long pause or outage aged every train out and emptied the map,
+    which looked like "no trains". Ages are now judged against the last
+    successful fetch (DEC-037).
+  - Enter on a focused marker opened its popup but did not select the
+    train. The card now opens from the keyboard too.
+  - Line paths and stations never retried after a failed first load; they
+    now retry every minute.
+  - Marker screen-reader titles kept the first stop label; they now update.
+  - Orange markers were 2.94:1 on the map (3:1 needed); now 3.23:1.
+  - Only the request that hit a 429 waited; all requests now share one wait
+    (DEC-036).
+  - Changing the line filter kept a train selected on another line.
+  - No refresh on returning to the tab.
+  - Counts showed 0 before any data; they now show "–". The status bar says
+    "rate limited" on a first-load 429.
+  - Countdowns rounded down and passed stops lingered.
+  - Map zoom still animated under reduced motion.
+
+  Open (minor, not blocking)
+  - The phone drawer does not trap focus or return it on close.
+  - Closing a popup keeps the train selected.
+  - Direction falls back to "Direction unavailable" when a trip has no headsign.
+  - The "paused more than 10 minutes" fix was checked by reading the code,
+    not by waiting 10 minutes.
