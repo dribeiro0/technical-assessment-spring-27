@@ -9,13 +9,14 @@ The only place that talks to the MBTA V3 API (https://api-v3.mbta.com).
 
 **Requests**
 
-| Request                                                                      | When                                      | Why                                                                                          |
-| ---------------------------------------------------------------------------- | ----------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `/vehicles?filter[route]=…&include=trip,stop`                                | Every 15 s, plus manual refresh           | Positions, plus the trip (headsign, for direction) and stop (for the stop label) in one call |
-| `/alerts?filter[route]=…&filter[datetime]=NOW`                               | Every 60 s                                | Line status and alert text                                                                   |
-| `/predictions?filter[trip]=…&include=stop`                                   | When a train is selected, then every 15 s | The countdown and the strip of stops ahead on the train card                                 |
-| `/route_patterns?…&filter[canonical]=true&include=representative_trip.shape` | Once a day (device cache)                 | Line paths                                                                                   |
-| `/stops?filter[route]=…` ×4                                                  | Once a day (device cache)                 | Station dots, asked per line so each stop's line is known                                    |
+| Request                                                                      | When                                        | Why                                                                                          |
+| ---------------------------------------------------------------------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `/vehicles?filter[route]=…&include=trip,stop`                                | Every 15 s, plus manual refresh             | Positions, plus the trip (headsign, for direction) and stop (for the stop label) in one call |
+| `/alerts?filter[route]=…&filter[datetime]=NOW`                               | Every 60 s                                  | Line status and alert text                                                                   |
+| `/predictions?filter[trip]=…&include=stop`                                   | When a train is selected, then every 15 s   | The countdown and the strip of stops ahead on the train card                                 |
+| `/predictions?filter[stop]=…&include=trip`                                   | When a station is selected, then every 15 s | The station card: next departures from every platform                                        |
+| `/route_patterns?…&filter[canonical]=true&include=representative_trip.shape` | Once a day (device cache)                   | Line paths                                                                                   |
+| `/stops?filter[route]=…` ×4                                                  | Once a day (device cache)                   | Station dots, asked per line so each stop's line is known                                    |
 
 **Rules**
 

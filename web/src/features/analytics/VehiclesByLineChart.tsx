@@ -37,7 +37,7 @@ export function VehiclesByLineChart({ counts, onPickLine }: Props) {
           />
           <YAxis
             allowDecimals={false}
-            tick={{ fill: '#6A6356', fontSize: 11, fontFamily: 'JetBrains Mono, monospace' }}
+            tick={{ fill: '#6A6356', fontSize: 11, fontFamily: 'Monaspace Neon, monospace' }}
             axisLine={false}
             tickLine={false}
           />
@@ -70,7 +70,7 @@ export function VehiclesByLineChart({ counts, onPickLine }: Props) {
             <LabelList
               dataKey="count"
               position="top"
-              style={{ fill: '#1D2B44', fontSize: 12, fontFamily: 'JetBrains Mono, monospace' }}
+              style={{ fill: '#1D2B44', fontSize: 12, fontFamily: 'Monaspace Neon, monospace' }}
             />
           </Bar>
         </BarChart>

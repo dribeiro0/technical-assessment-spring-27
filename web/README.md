@@ -7,6 +7,7 @@ EnRoute is a live MBTA subway dashboard: every Red, Orange, Blue and Green Line 
 - **Live map** (React Leaflet): every train in its line colour. An arrow shows its heading when moving and a square when stopped. Trains glide between updates, are labelled by destination when zoomed in, and the map zooms to fit a chosen line. Line paths and stations are drawn underneath.
 - **Popups:** line, direction, status and next stop ("At Park Street", "Approaching Kendall/MIT" or "Next stop unavailable"), plus how old the report is.
 - **Train card:** pick a train and a card shows a countdown to its next stop ("1 min to Harvard") and a strip of the stops ahead with their times, filled up to the train. It comes from MBTA predictions and falls back to the stop text when there are none.
+- **Station departures:** tap a station on the map, or a stop on a train's strip, to see when the next trains leave it, by line and destination.
 - **Line status badges** from official MBTA alerts (○ good service, ▲ minor issues, ■ major disruption); each badge also filters the map.
 - **Train list:** expand a line to see its trains by destination, with stop and age. It doubles as the non-map list.
 - **Analytics:** "Active vehicles by subway line" chart (Green branches combined), a table of the same numbers, and service alerts.
@@ -77,12 +78,12 @@ The anonymous MBTA limit is 20 requests per minute per network address. The app 
 
 - vehicles every 15 s (4 per minute)
 - alerts every 60 s (1 per minute)
-- predictions for the selected train every 15 s (4 per minute, only while one is selected)
+- predictions for the selected train or station every 15 s (4 per minute, only while one is selected)
 - line paths and stations once a day, cached on the device
 
 Manual refresh is limited to once every 5 s. Polling stops while the tab is hidden and resumes when you come back. After an HTTP 429 every request waits a minute while the last good data stays on screen.
 
 ## Testing
 
-- `npm test` runs 37 unit tests on the data rules in `src/domain`.
+- `npm test` runs 43 unit tests on the data rules in `src/domain`.
 - The audit of November 25, 2026 is recorded in section 9 of [`../docs/planning/10_assessment_audit.txt`](../docs/planning/10_assessment_audit.txt). It covers live-data checks, error states forced through a local stand-in API, contrast and keyboard checks.

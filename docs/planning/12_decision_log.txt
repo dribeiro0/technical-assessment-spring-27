@@ -30,7 +30,7 @@ DEC-028  Deliver each sprint as a branch and pull request into the fork's main. 
 
 DESIGN AND AUDIT DECISIONS - November 25, 2026
 DEC-029  Name the app EnRoute. The planned domain enroute.boston is not bought yet; the site runs at https://enrouteboston.vercel.app.
-DEC-030  Visual identity "Paper Panels": a navy frame (ribbon, tab bar, status bar), paper-white panels, a cream map and a burnt-orange brand colour. Use the official MBTA line colours, with Orange deepened to #BF6900 so markers reach 3:1 contrast on the map. Fonts: IBM Plex Sans for text, JetBrains Mono for times and IDs.
+DEC-030  Visual identity "Paper Panels": a navy frame (ribbon, tab bar, status bar), paper-white panels, a cream map and a burnt-orange brand colour. Use the official MBTA line colours, with Orange deepened to #BF6900 so markers reach 3:1 contrast on the map. Fonts: Mona Sans for text and Monaspace Neon for times and IDs, GitHub's open-source typefaces (changed from IBM Plex Sans and JetBrains Mono on November 25).
 DEC-031  Layout: the navy icon ribbon, tab bar and status bar frame a sidebar and the map. The sidebar leads with four line-status badges, which also filter the map, followed by the train list. Train details float over the map as a card (a bottom sheet on phones), replacing the fixed properties column.
 DEC-032  The selected-train card shows a countdown to the next stop and a strip of the stops ahead, with the line filled up to the train. Times come from MBTA predictions for that trip: one request when a train is selected, then every 15 s while it stays selected. Without predictions the card falls back to the stop text.
 DEC-033  Name trains by destination ("Alewife", "C · Cleveland Circle") in map tags, the list and cards. Car and vehicle numbers appear only as details.
@@ -40,3 +40,4 @@ DEC-036  Every MBTA request shares one rate-limit wait. After an HTTP 429, all r
 DEC-037  Judge train ages against the last successful fetch, not the clock, so a paused or failing feed keeps its last trains instead of emptying the map.
 DEC-038  Cut the breadcrumb bar and search from the release. The sidebar list replaces the separate vehicle-list view of DEC-027.
 DEC-039  Use Esri's light gray basemap, which needs no API key. CARTO, the first choice, began requiring one.
+DEC-040  Tapping a station on the map, or a stop on a train strip, opens a station card with the next departures from that station, grouped by line and destination. The data is one predictions request when the station is opened, then every 15 s. A station and a train are never selected at the same time. Each car of a Green Line train is reported as its own trip, so departures from the same platform at the same moment count as one train.

@@ -75,8 +75,11 @@ export const VehicleMarker = memo(function VehicleMarker({
   }, [title])
 
   // When selected from the list, open this vehicle's popup (which also pans the map to it).
+  // When deselected (another train, a station, or the card closed), close it so the popup
+  // never describes a train the card no longer shows.
   useEffect(() => {
     if (selected) markerRef.current?.openPopup()
+    else markerRef.current?.closePopup()
   }, [selected])
 
   return (

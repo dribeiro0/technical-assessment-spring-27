@@ -4,6 +4,8 @@ import type { VehicleStatus } from './vehicle'
 /** One stop still ahead of a train, with the MBTA's estimate of when it gets there. */
 export interface UpcomingStop {
   id: string
+  /** The parent station (e.g. "place-pktrm"), so the stop can open its station card. */
+  stationId: string
   name: string
   /** Estimated arrival (or departure, for the first stop) in epoch ms; null if the MBTA gives none. */
   at: number | null
@@ -18,10 +20,13 @@ const NOT_SERVED = new Set(['SKIPPED', 'CANCELLED'])
  */
 export function upcomingStops(doc: PredictionsDocument): UpcomingStop[] {
   const names = new Map<string, string>()
+  const stations = new Map<string, string>()
   for (const r of doc.included ?? []) {
     if (r.type !== 'stop') continue
     const name = (r as Resource<StopAttributes>).attributes?.name
     if (name) names.set(r.id, name)
+    const parent = r.relationships?.parent_station?.data?.id
+    if (parent) stations.set(r.id, parent)
   }
 
   return (doc.data ?? [])
@@ -32,6 +37,7 @@ export function upcomingStops(doc: PredictionsDocument): UpcomingStop[] {
       const at = time ? Date.parse(time) : NaN
       return {
         id: stopId,
+        stationId: stations.get(stopId) ?? stopId,
         name: names.get(stopId) ?? '',
         at: Number.isFinite(at) ? at : null,
         sequence: p.attributes?.stop_sequence ?? 0,
@@ -39,7 +45,7 @@ export function upcomingStops(doc: PredictionsDocument): UpcomingStop[] {
     })
     .filter((s) => s.id && s.name)
     .sort((a, b) => a.sequence - b.sequence)
-    .map(({ id, name, at }) => ({ id, name, at }))
+    .map(({ id, stationId, name, at }) => ({ id, stationId, name, at }))
 }
 
 /** "1", "4", or "Now" when the train is under a minute away. Rounds to the nearest minute. */
