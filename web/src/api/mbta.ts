@@ -138,11 +138,14 @@ export function fetchStops(
   )
 }
 
-/** Alerts active right now on any in-scope route. */
+/**
+ * Alerts on any in-scope route, active now or upcoming (Sprint 5): upcoming notices such
+ * as weekend shutdowns are shown ahead of time. Still one request a minute.
+ */
 export function fetchAlerts(signal?: AbortSignal): Promise<AlertsDocument> {
   return getJson(
-    `/alerts?filter[route]=${routeFilter}&filter[datetime]=NOW` +
-      '&fields[alert]=header,effect,severity,lifecycle,informed_entity,updated_at',
+    `/alerts?filter[route]=${routeFilter}` +
+      '&fields[alert]=header,description,effect,severity,lifecycle,informed_entity,active_period,updated_at',
     signal,
   )
 }

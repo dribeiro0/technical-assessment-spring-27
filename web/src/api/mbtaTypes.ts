@@ -51,7 +51,16 @@ export interface InformedEntity {
   route?: string | null
   route_type?: number | null
   stop?: string | null
+  /** 0 or 1 when only one direction is affected; missing when both are. */
+  direction_id?: number | null
+  /** BOARD and EXIT: the station is affected; RIDE: trains themselves are not running. */
   activities?: string[]
+}
+
+export interface ActivePeriod {
+  start?: string | null
+  /** Missing when the end is not known yet. */
+  end?: string | null
 }
 
 export interface AlertAttributes {
@@ -59,7 +68,9 @@ export interface AlertAttributes {
   effect?: string | null
   severity?: number | null
   lifecycle?: string | null
+  description?: string | null
   informed_entity?: InformedEntity[]
+  active_period?: ActivePeriod[]
   updated_at?: string | null
 }
 

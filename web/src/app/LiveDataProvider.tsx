@@ -32,7 +32,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
 
   const alertsQuery = useQuery({
     queryKey: ['alerts'],
-    queryFn: async ({ signal }) => relevantAlerts(await fetchAlerts(signal)),
+    queryFn: async ({ signal }) => relevantAlerts(await fetchAlerts(signal), Date.now()),
     refetchInterval: pollEvery(ALERT_POLL_MS, paused),
     retry: retryUnlessRateLimited,
   })

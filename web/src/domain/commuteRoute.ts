@@ -1,4 +1,5 @@
 import type { Commute } from './commute'
+import type { LineAlert } from './lineStatus'
 import { BRANCH_ONLY_STATIONS } from './lines'
 import type { Network, Station } from './network'
 
@@ -187,4 +188,50 @@ export function endsBeforeDestination(
       : endPos > destPos + END_TOLERANCE_M
   }
   return false
+}
+
+/**
+ * What an alert lights up on the map (Sprint 5, A3): its stations, and for a suspension
+ * (trains not running, RIDE) the track between the first and last affected station on
+ * each branch. A route-wide suspension lights up the whole route. Null when nothing it
+ * names is on the map.
+ */
+export function alertFocus(network: Network, alert: LineAlert): CommuteFocus | null {
+  const known = new Map(network.stations.map((s) => [s.id, s]))
+  const stationIds = new Set(
+    alert.entities.map((e) => e.stationId).filter((id): id is string => !!id && known.has(id)),
+  )
+
+  const paths: LatLon[][] = []
+  const seen = new Set<string>()
+  const routes = new Set(alert.entities.filter((e) => e.ride).map((e) => e.routeId))
+  for (const routeId of routes) {
+    const ride = alert.entities.filter((e) => e.ride && e.routeId === routeId)
+    const wholeRoute = ride.some((e) => e.stationId === null)
+    for (const shape of network.shapes) {
+      if (shape.routeId !== routeId || shape.points.length < 2) continue
+      let path: LatLon[]
+      if (wholeRoute) {
+        path = [...shape.points]
+      } else {
+        const terminus = shapeTerminus(shape.points, network.stations)
+        const onShape = ride
+          .map((e) => (e.stationId ? known.get(e.stationId) : undefined))
+          .filter((s): s is Station => !!s && serves(terminus, s.id))
+          .map((s): LatLon => [s.lat, s.lon])
+          .filter((p) => closestOnPath(shape.points, p).distance <= ON_LINE_M)
+        if (onShape.length < 2) continue
+        const byPosition = onShape
+          .map((p) => ({ p, at: along(shape.points, p) }))
+          .sort((a, b) => a.at - b.at)
+        path = cut(shape.points, byPosition[0].p, byPosition.at(-1)!.p)
+      }
+      const key = `${path.length}|${path[0]}|${path.at(-1)}`
+      if (seen.has(key)) continue
+      seen.add(key)
+      paths.push(path)
+    }
+  }
+  if (stationIds.size === 0 && paths.length === 0) return null
+  return { paths, stationIds }
 }

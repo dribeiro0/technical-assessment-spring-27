@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Commute } from './commute'
-import { commuteFocus, endsBeforeDestination } from './commuteRoute'
+import { alertFocus, commuteFocus, endsBeforeDestination } from './commuteRoute'
+import type { LineAlert } from './lineStatus'
 import type { Network, Station } from './network'
 
 // A made-up line running due south from A to E (direction 0 = southbound), with a fork
@@ -196,5 +197,54 @@ describe('endsBeforeDestination (short trips)', () => {
     expect(endsBeforeDestination(network, toE, 'Somewhere else')).toBe(false)
     expect(endsBeforeDestination(network, toE, null)).toBe(false)
     expect(endsBeforeDestination(network, commute({}), 'C')).toBe(false) // no destination
+  })
+})
+
+describe('alertFocus (what an alert lights up)', () => {
+  const alert = (entities: LineAlert['entities']): LineAlert => ({
+    id: 'a',
+    header: 'h',
+    description: null,
+    effect: 'X',
+    severity: 7,
+    level: 'major',
+    lines: ['Red'],
+    timing: 'active',
+    start: null,
+    end: null,
+    entities,
+    updatedAt: null,
+  })
+  const e = (stationId: string | null, ride: boolean) => ({
+    routeId: 'Red',
+    stationId,
+    directionId: null,
+    ride,
+  })
+
+  it('a closure lights up its stations only', () => {
+    const focus = alertFocus(network, alert([e('C', false)]))!
+    expect([...focus.stationIds]).toEqual(['C'])
+    expect(focus.paths).toHaveLength(0)
+  })
+
+  it('a suspension lights up the track between its first and last station', () => {
+    const focus = alertFocus(network, alert([e('B', true), e('C', true), e('D', true)]))!
+    // The whole B -> D stretch is lit (the F branch shares B -> C, so that part can be
+    // drawn twice, on the same track), and nothing strays onto the F branch.
+    const spans = focus.paths.map((p) => [p[0][0], p.at(-1)![0]])
+    expect(
+      spans.some(([from, to]) => Math.abs(from - 42.39) < 1e-5 && Math.abs(to - 42.37) < 1e-5),
+    ).toBe(true)
+    expect(focus.paths.flat().every(([, lon]) => Math.abs(lon + 71.06) < 1e-5)).toBe(true)
+  })
+
+  it('a route-wide suspension lights up the whole route', () => {
+    const focus = alertFocus(network, alert([e(null, true)]))!
+    expect(focus.paths).toHaveLength(2) // both branches
+  })
+
+  it('gives nothing when none of its places are on the map', () => {
+    expect(alertFocus(network, alert([e('nowhere', false)]))).toBeNull()
   })
 })
