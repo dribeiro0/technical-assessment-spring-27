@@ -33,6 +33,26 @@ export const LINES: readonly LineInfo[] = [
   },
 ]
 
+/**
+ * Where each direction of a route goes: index 0 is direction_id 0, index 1 is direction_id 1.
+ * Copied from /routes (direction_destinations) on November 28, 2026. They change only when a
+ * terminus changes, so they are kept here instead of spending a request on them.
+ */
+export const DIRECTION_DESTINATIONS: Readonly<Record<string, readonly [string, string]>> = {
+  Red: ['Ashmont/Braintree', 'Alewife'],
+  Orange: ['Forest Hills', 'Oak Grove'],
+  Blue: ['Bowdoin', 'Wonderland'],
+  'Green-B': ['Boston College', 'Government Center'],
+  'Green-C': ['Cleveland Circle', 'Government Center'],
+  'Green-D': ['Riverside', 'Union Square'],
+  'Green-E': ['Heath Street', 'Medford/Tufts'],
+}
+
+/** "Alewife" for Red direction 1. Falls back to a neutral label for an unknown route. */
+export function directionDestination(routeId: string, directionId: 0 | 1): string {
+  return DIRECTION_DESTINATIONS[routeId]?.[directionId] ?? `Direction ${directionId}`
+}
+
 /** Every route ID the app requests from the API. */
 export const IN_SCOPE_ROUTE_IDS: readonly string[] = LINES.flatMap((line) => line.routeIds)
 

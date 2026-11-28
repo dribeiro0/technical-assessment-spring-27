@@ -76,3 +76,12 @@ export interface PredictionAttributes {
 }
 
 export type PredictionsDocument = Document<PredictionAttributes>
+
+/** A timetable entry (/schedules). pickup_type 1 means passengers cannot board there. */
+export interface ScheduleAttributes {
+  arrival_time?: string | null
+  departure_time?: string | null
+  pickup_type?: number | null
+}
+
+export type SchedulesDocument = Document<ScheduleAttributes>
