@@ -85,3 +85,6 @@ export interface ScheduleAttributes {
 }
 
 export type SchedulesDocument = Document<ScheduleAttributes>
+
+/** Only the route ID is used, so no attributes are requested beyond the type. */
+export type RoutesDocument = Document<{ type?: number | null }>

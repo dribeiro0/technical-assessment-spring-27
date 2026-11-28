@@ -37,6 +37,14 @@ export const ChartIcon = (p: IconProps) => (
   </Svg>
 )
 
+/** A location pin, for My commute. */
+export const PinIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M8 14.5S3.5 10.2 3.5 6.5a4.5 4.5 0 0 1 9 0c0 3.7-4.5 8-4.5 8z" />
+    <circle cx="8" cy="6.5" r="1.6" />
+  </Svg>
+)
+
 export const RefreshIcon = (p: IconProps) => (
   <Svg {...p}>
     <path d="M13 8a5 5 0 1 1-1.5-3.5 M13 2.5v3h-3" />

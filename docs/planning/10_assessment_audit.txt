@@ -103,7 +103,7 @@ R9  Deploy frontend (and backend, if applicable) [Sprint 3]
              exists, it must be deployed too.
     Check: public URL loads in a fresh browser with live data.
     Evidence: link in PR "Live Deployment".
-    Status: IN PROGRESS. Live at https://enrouteboston.vercel.app (Vercel, no backend). The redesign and audit fixes on branch sprint-3/polish are not merged yet.
+    Status: VERIFIED (Nov 25). Live at https://enrouteboston.vercel.app (Vercel, no backend). The production deploy of main (67d8366, PR #5) succeeded; its bundle contains the station card, the station predictions request and the Mona Sans font.
 
 R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3]
     Source: README intro and closing; template sections.
@@ -267,3 +267,59 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3
   - Direction falls back to "Direction unavailable" when a trip has no headsign.
   - The "paused more than 10 minutes" fix was checked by reading the code,
     not by waiting 10 minutes.
+
+======================================================================
+10. SPRINT 4 AUDIT (MY COMMUTE), NOVEMBER 27-28, 2026
+======================================================================
+
+  Sprint 4 is an optional extra ("saved commutes"); R1-R10 do not depend
+  on it. Acceptance criteria C1-C10 were agreed before building.
+
+  How it was checked
+  - 26 new unit tests (69 in total), type check, lint and format.
+  - A headless browser ran each flow against the real MBTA feed, and
+    against the local stand-in API extended with the commute requests
+    (empty live predictions, HTTP 500 from the start, healthy then failing).
+  - Requests were counted over 62 s; contrast was computed for every new
+    colour pair.
+
+  Results
+  C1  Save without location: station by name, line, direction, optional
+      destination, walk, buffer, name. Saved on the real feed. VERIFIED
+  C2  Three commutes stored beforehand appeared after a fresh load. VERIFIED
+  C3  Rename, reverse (stations swap, direction flips) and delete with an
+      on-page "Keep it" confirmation. VERIFIED
+  C4  Live rows labelled LIVE; with no live predictions the rows, advice and
+      footer say SCHEDULED / "based on the timetable". VERIFIED
+  C5  15 min train, 6 walk, 3 buffer gives "Leave in 6 min" (unit test);
+      missed trains are counted ("You may miss the next 2 trains"). VERIFIED
+  C6  First-load failure explains itself and says the commute is still
+      saved; after 45 s without fresh data the countdown freezes to clock
+      times, advice is withheld and the failed refresh is named. VERIFIED
+  C7  62 s with three saved commutes: 17 requests including 5 one-time
+      loads; steady state 9 per minute (vehicles 4, alerts 1, the open
+      commute 4). Closed commutes and the timetable cost nothing while
+      live data exists. VERIFIED
+  C8  390 px phone with saved commutes moved from / to /commute; desktop
+      stayed on the map. VERIFIED
+  C9  Text contrast 4.82:1 or more; input borders raised from 1.93:1 to
+      5.95:1; each departure row reads as one sentence to screen readers;
+      native radios and selects keep keyboard support. VERIFIED
+  C10 All earlier tests pass; one document load across map, Analytics, My
+      commute and back; map, lines and chart unchanged. VERIFIED
+
+  Found and fixed during the audit
+  - Saving an edit while the destination list had not loaded dropped the
+    destination. The saved destination, station and line now stay as
+    choices.
+  - "Aim for the one after" was wrong when two trains were out of reach.
+  - The leave-time box was a live region and would have been announced
+    every minute.
+  - The ribbon had no My commute link.
+
+  Open (minor)
+  - A countdown can read "9 min" while 9 minutes of walk and buffer marks
+    that train as missed: the countdown rounds, the advice rounds down.
+  - The station picker is a native list with type-to-jump, not a search box.
+  - Timetable fallback was tested with recorded data, not during a real
+    early-morning gap.

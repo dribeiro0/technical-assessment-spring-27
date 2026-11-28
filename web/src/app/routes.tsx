@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate } from 'react-router'
+import { CommuteView } from '../features/commute/CommuteView'
 import { LiveMapView } from '../features/map/LiveMapView'
 import { AppShell } from './AppShell'
 import { LiveDataProvider } from './LiveDataProvider'
@@ -10,7 +11,7 @@ const AnalyticsView = lazy(() =>
   import('../features/analytics/AnalyticsView').then((m) => ({ default: m.AnalyticsView })),
 )
 
-// One page, two views. Switching between them happens in the browser with no reload (R1).
+// One page, three views. Switching between them happens in the browser with no reload (R1).
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
           </Suspense>
         ),
       },
+      { path: 'commute', element: <CommuteView /> },
       { path: '*', element: <Navigate to="/" replace /> },
     ],
   },

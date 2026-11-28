@@ -139,14 +139,20 @@ describe('recommendDeparture (C5)', () => {
   it('recommends the soonest train the rider can make', () => {
     const r = recommendDeparture([live('a', 12), live('b', 20)], NOW, 6, 3)
     expect(r?.departure.tripId).toBe('a')
-    expect(r?.missedEarlier).toBe(false)
+    expect(r?.missed).toBe(0)
   })
 
   it('points at the next train when the soonest would be missed', () => {
     const r = recommendDeparture([live('a', 4), live('b', 20)], NOW, 6, 3)
     expect(r?.departure.tripId).toBe('b')
-    expect(r?.missedEarlier).toBe(true)
+    expect(r?.missed).toBe(1)
     expect(r?.advice).toEqual({ kind: 'leave-in', minutes: 11 })
+  })
+
+  it('counts every train that is out of reach', () => {
+    const r = recommendDeparture([live('a', 4), live('b', 8.5), live('c', 15)], NOW, 6, 3)
+    expect(r?.departure.tripId).toBe('c')
+    expect(r?.missed).toBe(2)
   })
 
   it('gives nothing when every listed train would be missed', () => {

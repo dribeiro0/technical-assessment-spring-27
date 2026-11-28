@@ -3,6 +3,7 @@ import type {
   AlertsDocument,
   PredictionsDocument,
   RoutePatternsDocument,
+  RoutesDocument,
   SchedulesDocument,
   StopsDocument,
   VehiclesDocument,
@@ -166,6 +167,17 @@ export function fetchStationPredictions(
   return getJson(
     `/predictions?filter[stop]=${encodeURIComponent(stationId)}&filter[route]=${routeFilter}&include=trip` +
       '&fields[prediction]=arrival_time,departure_time,schedule_relationship&fields[trip]=headsign',
+    signal,
+  )
+}
+
+/**
+ * Subway routes that stop at one station, e.g. Kenmore -> Green-B, Green-C, Green-D.
+ * Asked once when a station is picked in the commute form (the map only knows lines).
+ */
+export function fetchRoutesAtStation(stationId: string, signal?: AbortSignal) {
+  return getJson<RoutesDocument>(
+    `/routes?filter[stop]=${encodeURIComponent(stationId)}&filter[type]=0,1&fields[route]=type`,
     signal,
   )
 }

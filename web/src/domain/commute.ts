@@ -261,17 +261,17 @@ export function leaveAdvice(
 
 /**
  * The departure to recommend: the first one the rider can still make. When the soonest
- * would be missed, the rider is told so and pointed at this one instead.
+ * would be missed, `missed` says how many are out of reach, so the rider is told so.
  */
 export function recommendDeparture(
   departures: readonly CommuteDeparture[],
   now: number,
   walkMin: number,
   bufferMin: number,
-): { departure: CommuteDeparture; advice: LeaveAdvice; missedEarlier: boolean } | null {
+): { departure: CommuteDeparture; advice: LeaveAdvice; missed: number } | null {
   for (let i = 0; i < departures.length; i++) {
     const advice = leaveAdvice(departures[i].at, now, walkMin, bufferMin)
-    if (advice.kind !== 'miss') return { departure: departures[i], advice, missedEarlier: i > 0 }
+    if (advice.kind !== 'miss') return { departure: departures[i], advice, missed: i }
   }
   return null
 }

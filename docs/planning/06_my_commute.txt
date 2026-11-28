@@ -169,3 +169,11 @@ requirement (10).
     stale.
   - Tapping "End tracking" stops updates and alerts for that journey.
   - With notifications denied, the in-app alert still appears.
+
+  Built in Sprint 4 (November 27-28, 2026; 10 section 10):
+  - Saved stops with direction, optional destination, walk time and buffer;
+    several per device; rename, reverse and delete in one place.
+  - Departures labelled LIVE or SCHEDULED, with a leave-time recommendation
+    that says when it is based on the timetable.
+  - Not yet: alerts for the journey (Sprint 5), Commute Chaos Score
+    (Sprint 7), waiting, onboard and get-off tracking (Sprint 8).

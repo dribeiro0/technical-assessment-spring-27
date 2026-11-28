@@ -4,6 +4,7 @@ import { isLineId, type LineId } from '../domain/lines'
 
 export const MAP_PATH = '/'
 export const ANALYTICS_PATH = '/analytics'
+export const COMMUTE_PATH = '/commute'
 
 /**
  * The line filter (?line=Red) and selected vehicle (?vehicle=R-548CD8D6) live in the URL,
