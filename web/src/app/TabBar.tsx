@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router'
 import { MenuIcon } from '../components/Icons'
-import { ANALYTICS_PATH, COMMUTE_PATH, MAP_PATH, useViewParams } from '../hooks/useViewParams'
+import { ANALYTICS_PATH, MAP_PATH, useViewParams } from '../hooks/useViewParams'
 import { RefreshButtons } from './RefreshButtons'
 
 // The active tab turns paper-white with an orange bar on top; the others sit on the navy frame.
@@ -30,9 +30,6 @@ export function TabBar({ onOpenMenu }: { onOpenMenu: () => void }) {
         </NavLink>
         <NavLink to={{ pathname: ANALYTICS_PATH, search }} className={tabClass}>
           Analytics
-        </NavLink>
-        <NavLink to={{ pathname: COMMUTE_PATH, search }} className={tabClass}>
-          My commute
         </NavLink>
       </nav>
       <div className="ml-auto flex items-center gap-1 px-2">

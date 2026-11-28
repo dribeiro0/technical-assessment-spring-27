@@ -300,8 +300,9 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3
       loads; steady state 9 per minute (vehicles 4, alerts 1, the open
       commute 4). Closed commutes and the timetable cost nothing while
       live data exists. VERIFIED
-  C8  390 px phone with saved commutes moved from / to /commute; desktop
-      stayed on the map. VERIFIED
+  C8  390 px phone with a saved commute opened / with its card as the
+      bottom sheet (/?commute=...); desktop stayed on the map. VERIFIED
+      (re-run after the redesign below)
   C9  Text contrast 4.82:1 or more; input borders raised from 1.93:1 to
       5.95:1; each departure row reads as one sentence to screen readers;
       native radios and selects keep keyboard support. VERIFIED
@@ -323,3 +324,16 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3
   - The station picker is a native list with type-to-jump, not a search box.
   - Timetable fallback was tested with recorded data, not during a real
     early-morning gap.
+
+  Redesign, November 28 (DEC-047, DEC-048)
+  - Review: the separate tab felt unnatural, and a typed walk time is only
+    right from one place. My Commute became a card on the map, saved from
+    the station card, and the walk can come from the rider's location.
+  - Checked in the browser on the real feed: station card -> "Save as my
+    commute" -> form in the card with the station chosen -> saved commute
+    card (?commute=), listed in the sidebar; no page errors. With location
+    refused, the card says so and uses the usual walk.
+  - 4 new unit tests for the walking estimate (73 in total).
+  - Not checked in a browser: a granted location (the test browser cannot
+    grant it). The estimate itself is unit tested; try it on a phone.
+  - Open: on a phone the ringed station can sit under the bottom sheet.

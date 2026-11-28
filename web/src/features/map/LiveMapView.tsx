@@ -8,6 +8,7 @@ import type { Vehicle } from '../../domain/vehicle'
 import { useLiveData } from '../../hooks/liveData'
 import { useNetwork } from '../../hooks/useNetwork'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
+import { useSavedCommutes } from '../../hooks/useSavedCommutes'
 import { useViewParams } from '../../hooks/useViewParams'
 import { RouteLayer } from './RouteLayer'
 import { VehicleMarker } from './VehicleMarker'
@@ -31,7 +32,10 @@ const TILE_ATTRIBUTION =
 export function LiveMapView() {
   const { vehicles, status, freshnessReference } = useLiveData()
   const reducedMotion = useReducedMotion()
-  const { line, vehicleId, stationId, selectVehicle, selectStation } = useViewParams()
+  const { line, vehicleId, stationId, commuteId, selectVehicle, selectStation } = useViewParams()
+  const { commutes } = useSavedCommutes()
+  // An open commute rings its station on the map, as a selected station does.
+  const ringedStation = stationId ?? commutes.find((c) => c.id === commuteId)?.stationId ?? null
 
   const shown = line ? vehicles.filter((v) => v.line === line) : vehicles
   const onSelect = useCallback((v: Vehicle) => selectVehicle(v.id, v.line), [selectVehicle])
@@ -64,10 +68,16 @@ export function LiveMapView() {
         <ZoomControl position="bottomright" />
         <TagVisibility />
         <FitToLine line={line} />
-        <ShowStation stationId={stationId} />
-        {/* Clicking empty map closes whichever card is open (selectVehicle clears both). */}
-        <ClearSelectionOnMapClick onClear={() => (vehicleId || stationId) && selectVehicle(null)} />
-        <RouteLayer activeLine={line} selectedStation={stationId} onSelectStation={selectStation} />
+        <ShowStation stationId={ringedStation} />
+        {/* Clicking empty map closes whichever card is open (selectVehicle clears all three). */}
+        <ClearSelectionOnMapClick
+          onClear={() => (vehicleId || stationId || commuteId) && selectVehicle(null)}
+        />
+        <RouteLayer
+          activeLine={line}
+          selectedStation={ringedStation}
+          onSelectStation={selectStation}
+        />
         {shown.map((v) => (
           <VehicleMarker
             key={v.id}

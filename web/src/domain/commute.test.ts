@@ -3,7 +3,9 @@ import type { SchedulesDocument } from '../api/mbtaTypes'
 import {
   chooseDepartures,
   createCommute,
+  distanceMetres,
   leaveAdvice,
+  walkFromHere,
   parseCommutes,
   parseScheduledDepartures,
   recommendDeparture,
@@ -221,6 +223,32 @@ describe('serviceDayQuery (the timetable day runs past midnight)', () => {
       date: '2026-10-31',
       minTime: '25:30',
     })
+  })
+})
+
+describe('walkFromHere (walking time from the rider’s location)', () => {
+  const kendall = { lat: 42.36249, lon: -71.08617 }
+
+  it('measures straight-line distance', () => {
+    // Kendall/MIT to Park Street is about 2.4 km as the crow flies.
+    const park = { lat: 42.35639, lon: -71.0624 }
+    expect(distanceMetres(kendall, park)).toBeGreaterThan(2000)
+    expect(distanceMetres(kendall, park)).toBeLessThan(2200)
+  })
+
+  it('allows for streets and rounds up: 800 m away is a 13 min walk', () => {
+    // 800 m north of Kendall: 800 x 1.3 / 80 = 13.
+    const here = { lat: kendall.lat + 800 / 111_195, lon: kendall.lon }
+    expect(walkFromHere(here, kendall)).toEqual({ kind: 'walk', minutes: 13 })
+  })
+
+  it('is at least 1 minute, even at the station', () => {
+    expect(walkFromHere(kendall, kendall)).toEqual({ kind: 'walk', minutes: 1 })
+  })
+
+  it('gives no walking estimate beyond 3 km', () => {
+    const far = { lat: kendall.lat + 0.05, lon: kendall.lon }
+    expect(walkFromHere(far, kendall).kind).toBe('too-far')
   })
 })
 

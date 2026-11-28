@@ -214,6 +214,47 @@ function pad(n: number): string {
   return String(n).padStart(2, '0')
 }
 
+/** A normal walking pace: 80 m a minute is about 4.8 km/h. */
+export const WALK_METRES_PER_MIN = 80
+/** Streets are not straight lines; a walk is typically about 30% longer than the crow flies. */
+export const WALK_DETOUR = 1.3
+/** Further than this, nobody walks to the station, so no walking estimate is given. */
+export const MAX_WALK_ESTIMATE_M = 3000
+
+export interface Point {
+  lat: number
+  lon: number
+}
+
+/** Straight-line distance in metres between two points (haversine formula). */
+export function distanceMetres(a: Point, b: Point): number {
+  const R = 6_371_000
+  const rad = Math.PI / 180
+  const dLat = (b.lat - a.lat) * rad
+  const dLon = (b.lon - a.lon) * rad
+  const h =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin(dLon / 2) ** 2
+  return 2 * R * Math.asin(Math.sqrt(h))
+}
+
+export type WalkEstimate = { kind: 'walk'; minutes: number } | { kind: 'too-far'; metres: number }
+
+/**
+ * Minutes to walk from the rider's position to the station. An estimate from the
+ * straight-line distance, not a route: working out a real walking route would mean
+ * sending the rider's location to a mapping service, and it never leaves the browser.
+ * Rounded up, like the leave-time advice, so the rider is never late.
+ */
+export function walkFromHere(here: Point, station: Point): WalkEstimate {
+  const metres = distanceMetres(here, station)
+  if (metres > MAX_WALK_ESTIMATE_M) return { kind: 'too-far', metres }
+  return {
+    kind: 'walk',
+    minutes: Math.max(1, Math.ceil((metres * WALK_DETOUR) / WALK_METRES_PER_MIN)),
+  }
+}
+
 /** How long ago a departure may be and still be listed ("leaving now"). */
 const JUST_LEFT_MS = 30_000
 

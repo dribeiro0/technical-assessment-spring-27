@@ -1,10 +1,9 @@
 import { useId, useMemo, useState, type FormEvent } from 'react'
-import { MAX_BUFFER_MIN, MAX_WALK_MIN, type Commute } from '../../domain/commute'
-import { directionDestination } from '../../domain/lines'
-import { useRoutesAtStation, useStationsOnRoute } from '../../hooks/useCommuteOptions'
-import { useNetwork } from '../../hooks/useNetwork'
-import type { CommuteInput } from '../../hooks/useSavedCommutes'
-import { routeLabel } from './routeLabel'
+import { MAX_BUFFER_MIN, MAX_WALK_MIN, type Commute } from '../domain/commute'
+import { directionDestination, routeLabel } from '../domain/lines'
+import { useRoutesAtStation, useStationsOnRoute } from '../hooks/useCommuteOptions'
+import { useNetwork } from '../hooks/useNetwork'
+import type { CommuteInput } from '../hooks/useSavedCommutes'
 
 const field = 'border-fg-muted bg-card text-fg h-9 w-full rounded-md border px-2 text-sm'
 const label = 'text-fg mb-1 block text-xs font-semibold'
@@ -17,17 +16,20 @@ const hint = 'text-fg-muted mt-1 text-[11px]'
  */
 export function CommuteForm({
   initial,
+  presetStationId,
   onSave,
   onCancel,
 }: {
   initial?: Commute
+  /** Saving from a station card: that station is already chosen. */
+  presetStationId?: string
   onSave: (input: CommuteInput) => { ok: true } | { ok: false; error: string }
   onCancel?: () => void
 }) {
   const id = useId()
   const { data: network, isError: networkFailed } = useNetwork()
   const [name, setName] = useState(initial?.name ?? '')
-  const [stationId, setStationId] = useState(initial?.stationId ?? '')
+  const [stationId, setStationId] = useState(initial?.stationId ?? presetStationId ?? '')
   const [routeId, setRouteId] = useState(initial?.routeId ?? '')
   const [directionId, setDirectionId] = useState<0 | 1 | null>(initial?.directionId ?? null)
   const [destinationId, setDestinationId] = useState(initial?.destinationId ?? '')
@@ -210,7 +212,7 @@ export function CommuteForm({
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label htmlFor={`${id}-walk`} className={label}>
-            Walk to station (min)
+            Usual walk to station (min)
           </label>
           <input
             id={`${id}-walk`}
@@ -241,6 +243,11 @@ export function CommuteForm({
           />
         </div>
       </div>
+
+      <p className={`${hint} -mt-2`}>
+        The usual walk is used when location is off. With location on, the commute card estimates
+        the walk from wherever you are.
+      </p>
 
       {error && (
         <p role="alert" className="text-danger text-sm font-semibold">

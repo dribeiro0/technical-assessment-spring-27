@@ -1,15 +1,20 @@
+import { useState } from 'react'
 import { groupDepartures, type DepartureGroup } from '../domain/departures'
 import { formatAgeLong } from '../domain/freshness'
 import { getLine } from '../domain/lines'
 import { minutesAway, shortEta } from '../domain/predictions'
 import { useNetwork } from '../hooks/useNetwork'
 import { useNow } from '../hooks/useNow'
+import { useSavedCommutes } from '../hooks/useSavedCommutes'
 import { useStationDepartures } from '../hooks/useStationDepartures'
+import { useViewParams } from '../hooks/useViewParams'
+import { CommuteForm } from './CommuteForm'
 import { FloatingCard } from './FloatingCard'
 
 /**
  * The station card: tap a station on the map (or a stop on a train's strip) to see
  * when the next trains leave it, grouped by line and destination, with countdowns.
+ * From here a rider can save the station as a commute; the form opens in the card.
  */
 export function StationCard({ stationId, onClose }: { stationId: string; onClose: () => void }) {
   const now = useNow(1000)
@@ -20,6 +25,34 @@ export function StationCard({ stationId, onClose }: { stationId: string; onClose
   const groups = data ? groupDepartures(data, now) : []
   // A one-line station takes that line's colour; transfer stations stay navy.
   const color = station && station.lines.length === 1 ? getLine(station.lines[0]).color : undefined
+  const { commutes, add } = useSavedCommutes()
+  const { selectCommute } = useViewParams()
+  const [saving, setSaving] = useState(false)
+  const savedHere = commutes.filter((c) => c.stationId === stationId)
+
+  if (saving) {
+    return (
+      <FloatingCard
+        label={`Save ${name} as a commute`}
+        color={color}
+        onClose={onClose}
+        closeLabel="Close"
+      >
+        <div className="px-4 pt-3 pb-4">
+          <h2 className="mb-3 pr-10 text-base font-bold">Save {name} as my commute</h2>
+          <CommuteForm
+            presetStationId={stationId}
+            onSave={(input) => {
+              const result = add(input)
+              if (result.ok) selectCommute(result.commute.id)
+              return result
+            }}
+            onCancel={() => setSaving(false)}
+          />
+        </div>
+      </FloatingCard>
+    )
+  }
 
   return (
     <FloatingCard
@@ -49,6 +82,28 @@ export function StationCard({ stationId, onClose }: { stationId: string; onClose
         </div>
         <h2 className="mt-1.5 text-xl font-bold tracking-tight">{name}</h2>
         <p className="text-fg-muted text-xs">Next trains leaving this station</p>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {savedHere.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => selectCommute(c.id)}
+              className="bg-chrome text-chrome-fg h-7 rounded-full px-3 text-xs font-semibold"
+            >
+              <span aria-hidden="true">★ </span>
+              {c.name}
+              <span className="sr-only">: open this saved commute</span>
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={() => setSaving(true)}
+            className="border-control text-fg h-7 rounded-full border px-3 text-xs font-semibold"
+          >
+            <span aria-hidden="true">☆ </span>
+            {savedHere.length > 0 ? 'Save another commute here' : 'Save as my commute'}
+          </button>
+        </div>
       </div>
 
       <div className="mt-2.5">

@@ -187,7 +187,8 @@ ACCEPTED RELEASE BEHAVIOR
   awaits the PR and recording.
   Sprint 4 (November 27-28): My Commute is built on branch
   sprint-4/my-commute with criteria C1-C10, all verified (10, section 10;
-  DEC-041 to DEC-046).
+  DEC-041 to DEC-048). It lives on the map
+  as a card, not as a separate tab (DEC-047).
   Not done: formal per-subsystem acceptance criteria for Sprints 5-9.
 
 ======================================================================

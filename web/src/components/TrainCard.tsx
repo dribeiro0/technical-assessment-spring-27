@@ -18,10 +18,13 @@ import { useViewParams } from '../hooks/useViewParams'
 import { AlertList } from './AlertList'
 import { FloatingCard } from './FloatingCard'
 import { ChevronIcon } from './Icons'
+import { useSavedCommutes } from '../hooks/useSavedCommutes'
+import { CommuteCard } from './CommuteCard'
 import { StationCard } from './StationCard'
 
 /**
  * The card over the map. Shows, in order of priority:
+ * - the open saved commute (?commute=): when to leave and its next departures,
  * - the selected station's departures (?stop=),
  * - the selected train (?vehicle=): a countdown to its next stop and a strip of the stops
  *   ahead with the line filled in behind the train (DEC-032),
@@ -29,7 +32,14 @@ import { StationCard } from './StationCard'
  */
 export function TrainCard() {
   const { vehicles, status, lineStatus } = useLiveData()
-  const { vehicleId, stationId, line, selectVehicle, selectStation } = useViewParams()
+  const { vehicleId, stationId, commuteId, line, selectVehicle, selectStation, selectCommute } =
+    useViewParams()
+  const { commutes } = useSavedCommutes()
+  const commute = commuteId ? commutes.find((c) => c.id === commuteId) : undefined
+
+  if (commute) {
+    return <CommuteCard key={commute.id} commute={commute} onClose={() => selectCommute(null)} />
+  }
   const vehicle = vehicleId ? vehicles.find((v) => v.id === vehicleId) : undefined
 
   if (stationId) {

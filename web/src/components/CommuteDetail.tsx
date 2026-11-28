@@ -3,13 +3,19 @@ import {
   type Commute,
   type CommuteDeparture,
   type LeaveAdvice,
-} from '../../domain/commute'
-import { formatAgeLong } from '../../domain/freshness'
-import { directionDestination } from '../../domain/lines'
-import { minutesAway } from '../../domain/predictions'
-import { useCommuteDepartures } from '../../hooks/useCommuteDepartures'
-import { useNow } from '../../hooks/useNow'
-import { routeColor, routeLabel } from './routeLabel'
+} from '../domain/commute'
+import { formatAgeLong } from '../domain/freshness'
+import { directionDestination, routeLabel } from '../domain/lines'
+import { minutesAway } from '../domain/predictions'
+import { useCommuteDepartures } from '../hooks/useCommuteDepartures'
+import { useNow } from '../hooks/useNow'
+
+/** The walking time the advice uses, and where it came from. */
+export interface WalkTime {
+  minutes: number
+  /** "location": estimated from where the rider is now; "setting": the minutes they typed. */
+  source: 'location' | 'setting'
+}
 
 const clock = new Intl.DateTimeFormat('en-US', {
   timeZone: 'America/New_York',
@@ -18,32 +24,33 @@ const clock = new Intl.DateTimeFormat('en-US', {
 })
 
 /**
- * One commute: when to leave, then the next departures with where each time comes from
- * (LIVE prediction or SCHEDULED timetable, C4), then the source and age of the data.
+ * The body of a commute card: when to leave, the next departures with where each time
+ * comes from (LIVE prediction or SCHEDULED timetable), and the source and age of the data.
+ * The card around it (CommuteCard) supplies the frame, the walking time and the actions.
  */
-export function CommuteDetail({ commute }: { commute: Commute }) {
+export function CommuteDetail({
+  commute,
+  walk,
+  walkControl,
+}: {
+  commute: Commute
+  walk: WalkTime
+  /** Shown under the advice: the "use my location" control and its status. */
+  walkControl?: React.ReactNode
+}) {
   const now = useNow(1000)
   const { status, departures, updatedAt, stale, errorMessage } = useCommuteDepartures(commute, now)
   const scheduled = departures[0]?.source === 'scheduled'
   const toward = directionDestination(commute.routeId, commute.directionId)
 
   return (
-    <article
-      aria-labelledby={`commute-${commute.id}`}
-      className="border-border bg-card overflow-hidden rounded-xl border shadow-[0_1px_3px_rgb(29_43_68_/0.08)]"
-    >
-      <div
-        aria-hidden="true"
-        className="h-[5px]"
-        style={{ background: routeColor(commute.routeId) }}
-      />
-      <header className="px-4 pt-3 pb-3">
+    <div>
+      <header className="px-4 pt-3 pr-12 pb-3">
         <p className="text-fg-muted text-xs font-semibold">
-          {routeLabel(commute.routeId)} · toward {toward}
+          <span aria-hidden="true">★ </span>My commute · {routeLabel(commute.routeId)} · toward{' '}
+          {toward}
         </p>
-        <h2 id={`commute-${commute.id}`} className="mt-0.5 text-xl font-bold tracking-tight">
-          {commute.name}
-        </h2>
+        <h2 className="mt-0.5 text-xl font-bold tracking-tight">{commute.name}</h2>
         <p className="text-fg-secondary text-sm">
           {commute.stationName}
           {commute.destinationName && (
@@ -61,10 +68,12 @@ export function CommuteDetail({ commute }: { commute: Commute }) {
           departures={departures}
           now={now}
           commute={commute}
+          walk={walk}
           stale={stale}
           updatedAt={updatedAt}
         />
       )}
+      {walkControl}
 
       <div className="border-border border-t">
         {status === 'loading' ? (
@@ -95,7 +104,7 @@ export function CommuteDetail({ commute }: { commute: Commute }) {
           </span>
         )}
       </p>
-    </article>
+    </div>
   )
 }
 
@@ -103,12 +112,14 @@ function Advice({
   departures,
   now,
   commute,
+  walk,
   stale,
   updatedAt,
 }: {
   departures: CommuteDeparture[]
   now: number
   commute: Commute
+  walk: WalkTime
   stale: boolean
   updatedAt: number | null
 }) {
@@ -123,8 +134,10 @@ function Advice({
     )
   }
 
-  const rec = recommendDeparture(departures, now, commute.walkMin, commute.bufferMin)
-  const budget = `${commute.walkMin} min walk + ${commute.bufferMin} min buffer`
+  const rec = recommendDeparture(departures, now, walk.minutes, commute.bufferMin)
+  const budget = `${walk.minutes} min walk${
+    walk.source === 'location' ? ' from where you are' : ''
+  } + ${commute.bufferMin} min buffer`
   if (!rec) {
     return (
       <div className="bg-chip px-4 py-3">

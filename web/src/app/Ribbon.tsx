@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router'
-import { ChartIcon, MapIcon, PinIcon } from '../components/Icons'
-import { ANALYTICS_PATH, COMMUTE_PATH, MAP_PATH, useViewParams } from '../hooks/useViewParams'
+import { ChartIcon, MapIcon } from '../components/Icons'
+import { ANALYTICS_PATH, MAP_PATH, useViewParams } from '../hooks/useViewParams'
 import { RefreshButtons } from './RefreshButtons'
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -30,14 +30,6 @@ export function Ribbon() {
           className={linkClass}
         >
           <ChartIcon />
-        </NavLink>
-        <NavLink
-          to={{ pathname: COMMUTE_PATH, search }}
-          aria-label="My commute"
-          title="My commute"
-          className={linkClass}
-        >
-          <PinIcon />
         </NavLink>
       </nav>
       <div className="bg-chrome-border my-1 h-px w-6" aria-hidden="true" />
