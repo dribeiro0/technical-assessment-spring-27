@@ -4,6 +4,8 @@ import { isLineId, type LineId } from '../domain/lines'
 
 export const MAP_PATH = '/'
 export const ANALYTICS_PATH = '/analytics'
+/** The value of ?alert= that opens the list of every alert rather than one alert. */
+export const ALL_ALERTS = 'all'
 
 /**
  * The line filter (?line=Red) and selected vehicle (?vehicle=R-548CD8D6) live in the URL,
@@ -19,6 +21,7 @@ export function useViewParams() {
   const vehicleId = params.get('vehicle')
   const stationId = params.get('stop')
   const commuteId = params.get('commute')
+  const alertId = params.get('alert')
 
   /** Applies changes to the URL parameters, optionally moving to another view. */
   const update = useCallback(
@@ -45,7 +48,7 @@ export function useViewParams() {
     (next: LineId | null, selectedVehicleLine?: LineId | null) => {
       // Picking a line filter closes an open commute, so the two never compete over what
       // the map highlights.
-      const changes: Record<string, string | null> = { line: next, commute: null }
+      const changes: Record<string, string | null> = { line: next, commute: null, alert: null }
       if (next && vehicleId && selectedVehicleLine && selectedVehicleLine !== next) {
         changes.vehicle = null
       }
@@ -61,7 +64,12 @@ export function useViewParams() {
   const selectVehicle = useCallback(
     (id: string | null, vehicleLine?: LineId) => {
       // A train, a station and a commute are never selected together: one card at a time.
-      const changes: Record<string, string | null> = { vehicle: id, stop: null, commute: null }
+      const changes: Record<string, string | null> = {
+        vehicle: id,
+        stop: null,
+        commute: null,
+        alert: null,
+      }
       if (id && vehicleLine && line && line !== vehicleLine) changes.line = vehicleLine
       update(changes, id ? MAP_PATH : location.pathname)
     },
@@ -71,14 +79,30 @@ export function useViewParams() {
   /** Selects a station (?stop=place-pktrm) to show when the next trains leave it. */
   const selectStation = useCallback(
     (id: string | null) =>
-      update({ stop: id, vehicle: null, commute: null }, id ? MAP_PATH : location.pathname),
+      update(
+        { stop: id, vehicle: null, commute: null, alert: null },
+        id ? MAP_PATH : location.pathname,
+      ),
     [update, location.pathname],
   )
 
   /** Opens a saved commute's card over the map (?commute=<id>). */
   const selectCommute = useCallback(
     (id: string | null) =>
-      update({ commute: id, vehicle: null, stop: null }, id ? MAP_PATH : location.pathname),
+      update(
+        { commute: id, vehicle: null, stop: null, alert: null },
+        id ? MAP_PATH : location.pathname,
+      ),
+    [update, location.pathname],
+  )
+
+  /** Opens an official alert's card over the map (?alert=<id>). */
+  const selectAlert = useCallback(
+    (id: string | null) =>
+      update(
+        { alert: id, vehicle: null, stop: null, commute: null },
+        id ? MAP_PATH : location.pathname,
+      ),
     [update, location.pathname],
   )
 
@@ -87,10 +111,12 @@ export function useViewParams() {
     vehicleId,
     stationId,
     commuteId,
+    alertId,
     setLine,
     selectVehicle,
     selectStation,
     selectCommute,
+    selectAlert,
     search: location.search,
   }
 }

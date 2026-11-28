@@ -37,8 +37,13 @@ export interface LiveData {
   canRefresh: boolean
   paused: boolean
   setPaused: (paused: boolean) => void
-  /** Relevant official alerts, most severe first. */
+  /** Relevant official alerts, in effect now and upcoming, ranked by impact. */
   alerts: LineAlert[]
+  /**
+   * Whether alerts could be loaded. "unavailable" must never be shown as "no disruptions"
+   * (planning file 05, section 9).
+   */
+  alertsState: 'loading' | 'ok' | 'unavailable'
   lineStatus: Record<LineId, LineStatus> | null
 }
 

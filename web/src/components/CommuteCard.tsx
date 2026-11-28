@@ -4,6 +4,7 @@ import { routeColor } from '../domain/lines'
 import { useLocation, type LocationState } from '../hooks/useLocation'
 import { useNetwork } from '../hooks/useNetwork'
 import { useSavedCommutes } from '../hooks/useSavedCommutes'
+import { CommuteAlerts } from './CommuteAlerts'
 import { CommuteDetail, type WalkTime } from './CommuteDetail'
 import { CommuteForm } from './CommuteForm'
 import { FloatingCard } from './FloatingCard'
@@ -65,6 +66,7 @@ export function CommuteCard({ commute, onClose }: { commute: Commute; onClose: (
               />
             }
           />
+          <CommuteAlerts commute={commute} />
           <div className="border-border flex flex-wrap items-center gap-2 border-t px-4 py-3">
             {mode === 'delete' ? (
               <>

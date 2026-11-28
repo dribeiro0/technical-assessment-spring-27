@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router'
 import { ChartIcon, MapIcon } from '../components/Icons'
 import { ANALYTICS_PATH, MAP_PATH, useViewParams } from '../hooks/useViewParams'
+import { AlertsButton } from './AlertsButton'
 import { RefreshButtons } from './RefreshButtons'
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -34,6 +35,7 @@ export function Ribbon() {
       </nav>
       <div className="bg-chrome-border my-1 h-px w-6" aria-hidden="true" />
       <RefreshButtons />
+      <AlertsButton />
     </div>
   )
 }

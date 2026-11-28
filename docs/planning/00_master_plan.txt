@@ -189,7 +189,10 @@ ACCEPTED RELEASE BEHAVIOR
   sprint-4/my-commute with criteria C1-C10, all verified (10, section 10;
   DEC-041 to DEC-048). It lives on the map
   as a card, not as a separate tab (DEC-047).
-  Not done: formal per-subsystem acceptance criteria for Sprints 5-9.
+  Sprint 5 (November 28-29): MBTA alerts on the map, upcoming notices and
+  relevance to saved commutes, criteria A1-A9 (10, section 11; DEC-053 to
+  DEC-055). The overview score waits for Sprint 7.
+  Not done: formal per-subsystem acceptance criteria for Sprints 6-9.
 
 ======================================================================
 7. WHAT IS STILL OPEN

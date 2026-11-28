@@ -369,3 +369,50 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3
     instead of "Station" while names load.
   - Open (minor): at some window sizes the card overlaps a corner of the
     first-load error panel; its message and Retry button stay visible.
+
+======================================================================
+11. SPRINT 5 AUDIT (MBTA ALERTS), NOVEMBER 28-29, 2026
+======================================================================
+
+  Sprint 5 is part of the personal app; R1-R10 do not depend on it.
+  Acceptance criteria A1-A9 were agreed before building. Overview score
+  and "recovery not confirmed" need history (Sprint 7); elevator outages
+  and step-free preferences are left for later.
+
+  A1  Sidebar lists the 5 relevant alerts of the night (3 closures in
+      effect, 2 upcoming shutdowns), ranked by impact. VERIFIED
+  A2  The Dec 12-20 Blue shutdown is listed as upcoming with its dates and
+      Blue stays "Good service". VERIFIED (unit test and live)
+  A3  Symphony closure: card, zoom, dashed warning ring. Dec 4-7 Green
+      shutdown: track lit from North Station along all four branches to
+      the stations its header names. VERIFIED
+  A4  Prudential -> Symphony: "2 MBTA alerts affect your trip" (Symphony
+      closed; upcoming shutdown). Cleveland Circle -> Kenmore: Hawes St and
+      Summit Ave closures counted as elsewhere (the train runs through).
+      Rules unit tested and run against the real alerts. VERIFIED
+  A5  Alerts failing: sidebar and commute card say alerts are unavailable;
+      never "no disruptions". VERIFIED (local stand-in API)
+  A6  Every alert card is labelled "Official MBTA alert". VERIFIED
+  A7  62 s on the real feed: 12 requests, alerts twice (once a minute, as
+      before). VERIFIED
+  A8  Severity as symbol and text (triangle, square, diamond for
+      upcoming); alerts are buttons; long text folds behind "More
+      details". VERIFIED by reading; no separate keyboard run
+  A9  105 tests pass; map, commute card and line status checked in the
+      browser. VERIFIED
+
+  Found and fixed during the audit
+  - Opening an alert crashed the page (React error 300): a hook ran after
+    an early return. The linter did not catch it; its React hook rules
+    should be turned on.
+  - The status bar showed "0 alerts" when alerts were unavailable, and
+    counted upcoming ones. It now shows alerts in effect now, or "-".
+  - Alert summaries on the commute card were not clamped to two lines.
+
+  Layout change after review (DEC-056)
+  - Review: the sidebar was overcrowded, and the map showed nothing at
+    stations with alerts until one was opened.
+  - Checked in the browser on the real feed: the warning button shows "3";
+    it opens the list card (3 now, 2 upcoming); Hawes St, Summit Ave and
+    Symphony carry dashed rings with nothing open; Symphony's station card
+    lists its closure and the upcoming shutdown. No page errors.

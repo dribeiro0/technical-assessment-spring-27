@@ -32,7 +32,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
 
   const alertsQuery = useQuery({
     queryKey: ['alerts'],
-    queryFn: async ({ signal }) => relevantAlerts(await fetchAlerts(signal)),
+    queryFn: async ({ signal }) => relevantAlerts(await fetchAlerts(signal), Date.now()),
     refetchInterval: pollEvery(ALERT_POLL_MS, paused),
     retry: retryUnlessRateLimited,
   })
@@ -93,6 +93,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       paused,
       setPaused,
       alerts,
+      alertsState: alertsQuery.data ? 'ok' : alertsQuery.isError ? 'unavailable' : 'loading',
       lineStatus: alertsQuery.data ? lineStatuses(alerts) : null,
     }
   }, [
@@ -108,6 +109,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
     refresh,
     throttled,
     alertsQuery.data,
+    alertsQuery.isError,
   ])
 
   return <LiveDataContext.Provider value={value}>{children}</LiveDataContext.Provider>
