@@ -397,7 +397,8 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3
       before). VERIFIED
   A8  Severity as symbol and text (triangle, square, diamond for
       upcoming); alerts are buttons; long text folds behind "More
-      details". VERIFIED by reading; no separate keyboard run
+      details". VERIFIED: keyboard only, Enter on the warning button
+      opened the list and Enter on an alert opened its card
   A9  105 tests pass; map, commute card and line status checked in the
       browser. VERIFIED
 
@@ -416,3 +417,5 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3
     it opens the list card (3 now, 2 upcoming); Hawes St, Summit Ave and
     Symphony carry dashed rings with nothing open; Symphony's station card
     lists its closure and the upcoming shutdown. No page errors.
+  - Final check before merging: 390 px phone, the warning button sits in
+    the top bar with its count and opens the list as a bottom sheet.
