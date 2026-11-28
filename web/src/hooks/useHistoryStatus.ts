@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { fetchHistoryStatus } from '../api/history'
+import { fetchBaselines, fetchHistoryStatus } from '../api/history'
 
 /** Collection status changes slowly; every 5 minutes is plenty. */
 const HISTORY_POLL_MS = 5 * 60_000
@@ -14,6 +14,19 @@ export function useHistoryStatus() {
     queryFn: ({ signal }) => fetchHistoryStatus(signal),
     refetchInterval: HISTORY_POLL_MS,
     staleTime: 60_000,
+    retry: 1,
+  })
+}
+
+/**
+ * Baselines from public MBTA history (Sprint 7). They change only when re-imported, so
+ * they are fetched once a visit and kept; only Analytics asks for them (B7).
+ */
+export function useBaselines() {
+  return useQuery({
+    queryKey: ['baselines'],
+    queryFn: ({ signal }) => fetchBaselines(signal),
+    staleTime: Infinity,
     retry: 1,
   })
 }

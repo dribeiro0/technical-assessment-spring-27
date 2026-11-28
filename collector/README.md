@@ -2,12 +2,12 @@
 
 EnRoute's collector (Sprint 6): a Cloudflare Worker that records MBTA subway observations **every minute, whether or not anyone has the site open** (DEC-012), into a Cloudflare D1 database. It is deployed separately from the site in `web/`, so a collector problem can never break the site.
 
-| File                         | What it does                                                                                                                                                                        |
-| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/rules.ts`               | The rules, as plain functions with tests: parsing positions and alert versions, duplicate keys, "only if newer", when a gap is due, the 14-day retention cut-off.                  |
-| `src/worker.ts`              | The Worker. Every minute (`scheduled`) it runs one collection; `GET /status` returns collecting-since, last run, last success, run counts for 24 h, recent gaps and overall health. |
-| `migrations/0001_history.sql` | The tables: `runs`, `vehicle_obs` (raw, 14 days), `vehicle_current`, `alert_versions`, `gaps`, `meta`.                                                                           |
-| `wrangler.toml`              | Worker name, the every-minute schedule and the database binding.                                                                                                                    |
+| File                          | What it does                                                                                                                                                                        |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/rules.ts`                | The rules, as plain functions with tests: parsing positions and alert versions, duplicate keys, "only if newer", when a gap is due, the 14-day retention cut-off.                   |
+| `src/worker.ts`               | The Worker. Every minute (`scheduled`) it runs one collection; `GET /status` returns collecting-since, last run, last success, run counts for 24 h, recent gaps and overall health. |
+| `migrations/0001_history.sql` | The tables: `runs`, `vehicle_obs` (raw, 14 days), `vehicle_current`, `alert_versions`, `gaps`, `meta`.                                                                              |
+| `wrangler.toml`               | Worker name, the every-minute schedule and the database binding.                                                                                                                    |
 
 **Rules (planning files 07 and 08)**
 
@@ -25,4 +25,19 @@ npx wrangler d1 migrations apply enroute-history --local
 npx wrangler dev --test-scheduled                   # then GET /__scheduled to run once, /status to read
 npx wrangler deploy                                 # after `wrangler login` and creating the database
 npx wrangler secret put MBTA_API_KEY                # the key is typed at the prompt, never committed
+```
+
+**Baselines from MBTA history (Sprint 7)**
+
+| File                            | What it does                                                                                                                                                |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/baselines.ts`              | The rules, with tests: reading LAMP rows, day types, typical and 90th-percentile gaps, reliability (within 2 minutes of schedule), typical trains mid-hour. |
+| `scripts/import-lamp.ts`        | Downloads the last N days of LAMP (cached in `.lamp-cache/`) and writes `baselines.sql`, which replaces all baselines.                                      |
+| `migrations/0002_baselines.sql` | `baseline_headways`, `baseline_trains`, `baseline_source`.                                                                                                  |
+
+`GET /baselines` returns the source and all summaries (cached an hour).
+
+```sh
+node scripts/import-lamp.ts 56                                     # 8 weeks
+npx wrangler d1 execute enroute-history --remote --file baselines.sql
 ```

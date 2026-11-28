@@ -152,6 +152,37 @@ export async function status(db: D1Database, now: number) {
   }
 }
 
+/**
+ * Baselines from public MBTA history (Sprint 7, DEC-059), always with their source (B6).
+ * Null when none have been imported, so the site can say so rather than guess.
+ */
+export async function baselines(db: D1Database) {
+  const source = await db
+    .prepare('SELECT source, from_date, to_date, days, events, imported_at FROM baseline_source WHERE id = 1')
+    .first<{ source: string; from_date: number; to_date: number; days: number; events: number; imported_at: number }>()
+  if (!source) return null
+  const [headways, trains] = await Promise.all([
+    db
+      .prepare(
+        'SELECT line, direction_id, day_type, hour, samples, median_seconds, p90_seconds, scheduled_median_seconds, reliable_share FROM baseline_headways',
+      )
+      .all(),
+    db.prepare('SELECT line, day_type, hour, typical_trains, days FROM baseline_trains').all(),
+  ])
+  return {
+    source: {
+      name: source.source,
+      fromDate: source.from_date,
+      toDate: source.to_date,
+      days: source.days,
+      events: source.events,
+      importedAt: source.imported_at,
+    },
+    headways: headways.results,
+    trains: trains.results,
+  }
+}
+
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' }
 
 export default {
@@ -164,6 +195,14 @@ export default {
     if (request.method === 'GET' && url.pathname === '/status') {
       return new Response(JSON.stringify(await status(env.DB, Date.now())), {
         headers: { ...CORS, 'Cache-Control': 'public, max-age=30' },
+      })
+    }
+    if (request.method === 'GET' && url.pathname === '/baselines') {
+      const body = await baselines(env.DB)
+      // Baselines change only on import: cache for an hour.
+      return new Response(JSON.stringify(body), {
+        status: body ? 200 : 404,
+        headers: { ...CORS, 'Cache-Control': 'public, max-age=3600' },
       })
     }
     return new Response(JSON.stringify({ error: 'Not found' }), { status: 404, headers: CORS })

@@ -3,3 +3,5 @@ node_modules/
 .dev.vars
 *.log
 wrangler.pause.toml
+.lamp-cache/
+baselines.sql

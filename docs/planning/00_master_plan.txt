@@ -209,7 +209,10 @@ ACCEPTED RELEASE BEHAVIOR
   Sprint 6 (November 28): the collector runs on Cloudflare every minute
   since Nov 28, 1:58 a.m., with gaps recorded (10, section 12; DEC-057,
   DEC-058). Sprint 7 starts from public MBTA history (DEC-059).
-  Not done: formal per-subsystem acceptance criteria for Sprints 7-9.
+  Sprint 7 (November 28): baselines from 8 weeks of MBTA LAMP history;
+  Analytics shows "usually" counts and reliability by hour, labelled with
+  their source (10, section 13; DEC-060, DEC-061). Scores (step e) next.
+  Not done: formal per-subsystem acceptance criteria for Sprints 8-9.
 
 ======================================================================
 7. WHAT IS STILL OPEN

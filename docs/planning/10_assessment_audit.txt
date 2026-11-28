@@ -460,3 +460,46 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3
     real outage, not the intended one, which is correct.
   - Analytics showed upcoming alerts unlabelled; they now carry
     "Upcoming" and their dates.
+
+======================================================================
+13. SPRINT 7 AUDIT (BASELINES FROM MBTA HISTORY), NOVEMBER 28, 2026
+======================================================================
+
+  Sprint 7 steps a-d of DEC-059; scores (step e) follow. Personal app;
+  R1-R10 do not depend on it.
+
+  Step a (sources): MBTA LAMP daily Parquet files exist for every service
+  date from 2019-09-15 to the day before, about 1.6 MB each, with actual
+  and scheduled headways, travel and dwell times per stop. The Open Data
+  Portal CSVs are monthly; the MBTA Performance API was retired in May 2024.
+
+  B1  56 days imported (Oct 3 - Nov 27), 2,160,710 stop events -> 538
+      headway rows and 272 train rows, with a source row. Figures match the
+      live map: weekday 11 p.m. Red 15 and Green 44 typical, 16 and 48 seen
+      live on Friday at 11:45 p.m. VERIFIED (local database)
+  B2  Three imports give identical data; loading the file twice leaves the
+      same 538 + 272 + 1 rows. VERIFIED
+  B3  Reliability defined, labelled as EnRoute's measure and unit tested
+      (a gap exactly 2 minutes late counts; 4 minutes late does not). VERIFIED
+  B4  Analytics "Usually" column with its source note; no figure on fewer
+      than 3 days; no flag on fewer than 4 typical trains. VERIFIED (local)
+  B5  Reliability by hour per line, weekdays / Saturdays / Sundays, with a
+      table for screen readers; hours under 50 gaps left out. VERIFIED (local)
+  B6  Every baseline is shown with "MBTA LAMP data, Oct 3 - Nov 27";
+      "collecting since" stays the collector's date. VERIFIED
+  B7  Baselines come from the collector (111 KB, cached an hour, read only
+      by Analytics); no new MBTA requests from the browser. VERIFIED
+  B8  112 site tests and 17 collector tests pass; without baselines,
+      Analytics says so and the rest works. VERIFIED (by test and code)
+
+  Found and fixed during the audit
+  - Reliability at 3-4 a.m. swung between 0% and 100% on a handful of gaps.
+  - At 2:37 a.m. the table flagged Red "fewer than usual" (0 against 2):
+    normal end of service, not a shortfall.
+
+  Known limits
+  - Green's figures cover all its stops: long gaps on the branches, short
+    ones where they merge downtown.
+  - The 8 weeks include Thanksgiving and Black Friday, which ran holiday
+    schedules; holidays are not yet separated from ordinary days.
+  - The import is run by hand; a daily refresh is for later.
