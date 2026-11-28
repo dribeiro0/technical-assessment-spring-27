@@ -397,7 +397,8 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3
       before). VERIFIED
   A8  Severity as symbol and text (triangle, square, diamond for
       upcoming); alerts are buttons; long text folds behind "More
-      details". VERIFIED by reading; no separate keyboard run
+      details". VERIFIED: keyboard only, Enter on the warning button
+      opened the list and Enter on an alert opened its card
   A9  105 tests pass; map, commute card and line status checked in the
       browser. VERIFIED
 
@@ -416,3 +417,46 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3
     it opens the list card (3 now, 2 upcoming); Hawes St, Summit Ave and
     Symphony carry dashed rings with nothing open; Symphony's station card
     lists its closure and the upcoming shutdown. No page errors.
+  - Final check before merging: 390 px phone, the warning button sits in
+    the top bar with its count and opens the list as a bottom sheet.
+
+======================================================================
+12. SPRINT 6 AUDIT (HISTORY COLLECTION), NOVEMBER 28, 2026
+======================================================================
+
+  Sprint 6 is part of the personal app; R1-R10 do not depend on it.
+  Collector: https://enroute-collector.enroute-collector.workers.dev
+  (Cloudflare Worker, every minute, D1 database; DEC-057, DEC-058).
+
+  H1  Runs every minute with the site closed: 1:58:23, 1:59:22, 2:00:22 ...
+      2:04:22, then 2:19:14, 2:20:14, 2:21:14 (Boston), all successful,
+      19 to 14 trains each at that hour. VERIFIED
+  H2  No duplicates: 107 raw rows, 107 unique (vehicle, source time)
+      keys; repeat fetches add only new reports. Unit tests. VERIFIED
+  H3  Real stop test: the schedule was removed and restored. Exactly one
+      gap was recorded, 2:04:22-2:19:15 (14.9 min), from the last run
+      before the stop to the first after it; nothing filled in. A failed
+      run (unreachable MBTA, local test) left the last success alone and
+      the next good run recorded the gap (08, F9). VERIFIED
+  H4  Older reports never replace newer current state. Unit test and SQL
+      condition. VERIFIED (by test)
+  H5  Raw positions older than 14 days are deleted each run. Unit test of
+      the cut-off; deletion on real data shows only after 14 days.
+  H6  Analytics History panel on the real collector: "Collecting data
+      since Nov 28, 1:58 AM", runs in 24 h, gaps. VERIFIED
+  H7  The MBTA key is a Cloudflare secret. A search of every unpushed
+      commit, all project files and the built site for anything shaped
+      like a key found none; the site's bundle has no key header. VERIFIED
+  H8  GET /status reports health (ok, degraded, down), last run, last
+      success, runs in 24 h and gaps; seen going down -> ok -> down -> ok
+      in local tests. VERIFIED
+  H9  With the collector unreachable, Analytics says history is
+      unavailable and everything else works; the history code loads only
+      with Analytics. 105 site tests and 9 collector tests pass. VERIFIED
+
+  Found during the audit
+  - Cloudflare applies schedule changes after about 4 to 6 minutes (the
+    first deploy, the stop and the restart). The recorded gap shows the
+    real outage, not the intended one, which is correct.
+  - Analytics showed upcoming alerts unlabelled; they now carry
+    "Upcoming" and their dates.

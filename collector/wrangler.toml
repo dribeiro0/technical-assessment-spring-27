@@ -1,0 +1,15 @@
+# EnRoute collector (Sprint 6). Deployed separately from the site in web/.
+name = "enroute-collector"
+main = "src/worker.ts"
+compatibility_date = "2026-11-01"
+
+# Every minute, whether or not anyone has the site open (DEC-012).
+[triggers]
+crons = ["* * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "enroute-history"
+# Created on the EnRoute Cloudflare account (not a secret: access needs the account login).
+database_id = "eccbf719-1d6a-48ff-9054-d2c190fb4c98"
+migrations_dir = "migrations"

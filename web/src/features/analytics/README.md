@@ -12,3 +12,5 @@ The Analytics view (R8).
 - Counts come from `domain/counts.ts` and the same data the map uses, so the two always agree.
 - The chart ignores the map's line filter and always compares every line (DEC-019).
 - Vehicle counts are not a Chaos Score.
+
+`HistoryPanel.tsx` shows EnRoute's own history collection (Sprint 6): collecting since, runs in the last 24 hours and gaps, or that history is unavailable. Trend charts come in Sprint 7.

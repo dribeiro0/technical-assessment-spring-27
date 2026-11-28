@@ -7,6 +7,7 @@ import { formatAgeLong } from '../../domain/freshness'
 import { useLiveData } from '../../hooks/liveData'
 import { useNow } from '../../hooks/useNow'
 import { MAP_PATH } from '../../hooks/useViewParams'
+import { HistoryPanel } from './HistoryPanel'
 import { VehiclesByLineChart } from './VehiclesByLineChart'
 
 /**
@@ -124,10 +125,11 @@ export function AnalyticsView() {
             <AlertList
               alerts={alerts}
               unavailable={lineStatus === null}
-              emptyText="No active service alerts. Good service on all lines."
+              emptyText="No service alerts. Good service on all lines."
             />
           </div>
         </section>
+        <HistoryPanel />
       </div>
       <ErrorPanel />
     </div>

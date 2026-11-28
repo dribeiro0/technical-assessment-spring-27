@@ -140,3 +140,9 @@ Related: 02, 03, 04 (prediction evaluation), 05, 08, 10 (chart row)
   - Replaying the same batch of observations twice does not change any
     aggregate.
   - Every stored score carries its model version.
+
+  Built in Sprint 6 (November 28, 2026; 10 section 12): the collector in
+  collector/ records positions, current state, alert versions, runs and
+  gaps every minute; Analytics shows "collecting data since" and the gaps.
+  Aggregates and trends follow in Sprint 7, starting from public MBTA
+  history (DEC-059).

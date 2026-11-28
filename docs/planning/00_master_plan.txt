@@ -113,6 +113,20 @@ Assessment IDs refer to the release criteria in file 10.
    Keep validation separate from public analytics. Introduce network,
    route and commute scores only where the evidence supports them.
    Each score includes contributing evidence; insufficient observations yield an unknown state.
+   Historical head start [ACCEPTED Nov 28, DEC-059], in this order:
+     a. Check public MBTA history (Open Data Portal headways, travel
+        times and reliability; MBTA performance data and LAMP files; the
+        GTFS schedule archive) for availability, format, span and
+        definitions.
+     b. Import one dataset first (headways) into the collector's database,
+        in separate tables marked with their source.
+     c. Baselines: what is normal per line, direction and hour.
+     d. Analytics: "is now worse than usual?" (live counts against the
+        usual count for the hour), reliability by time of day, travel-time
+        trends, each labelled with its source.
+     e. Scores built on those baselines.
+   The collector's own minute-by-minute record replaces imported
+   summaries as it grows. "Collecting since" stays the collector's date.
 
 8. Active journey monitoring | personal app
    Confirm boarding, follow onboard progress and offer destination alerts
@@ -192,7 +206,10 @@ ACCEPTED RELEASE BEHAVIOR
   Sprint 5 (November 28-29): MBTA alerts on the map, upcoming notices and
   relevance to saved commutes, criteria A1-A9 (10, section 11; DEC-053 to
   DEC-055). The overview score waits for Sprint 7.
-  Not done: formal per-subsystem acceptance criteria for Sprints 6-9.
+  Sprint 6 (November 28): the collector runs on Cloudflare every minute
+  since Nov 28, 1:58 a.m., with gaps recorded (10, section 12; DEC-057,
+  DEC-058). Sprint 7 starts from public MBTA history (DEC-059).
+  Not done: formal per-subsystem acceptance criteria for Sprints 7-9.
 
 ======================================================================
 7. WHAT IS STILL OPEN
