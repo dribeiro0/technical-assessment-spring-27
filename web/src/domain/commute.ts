@@ -1,4 +1,9 @@
-import type { Resource, ScheduleAttributes, SchedulesDocument, TripAttributes } from '../api/mbtaTypes'
+import type {
+  Resource,
+  ScheduleAttributes,
+  SchedulesDocument,
+  TripAttributes,
+} from '../api/mbtaTypes'
 import type { Departure } from './departures'
 import { branchForRoute, lineForRoute } from './lines'
 
@@ -236,9 +241,7 @@ export function chooseDepartures(
 }
 
 export type LeaveAdvice =
-  | { kind: 'leave-in'; minutes: number }
-  | { kind: 'leave-now' }
-  | { kind: 'miss' }
+  { kind: 'leave-in'; minutes: number } | { kind: 'leave-now' } | { kind: 'miss' }
 
 /**
  * When to leave for one departure: T_leave = T_departure - walk - buffer (06, section 3).
