@@ -23,6 +23,10 @@ export interface HeadwayBaselineRow {
   p90_seconds: number
   scheduled_median_seconds: number
   reliable_share: number
+  /** Mean gap; null for baselines imported before step e. */
+  mean_seconds: number | null
+  /** Expected wait for a rider arriving at random, E[H²]/(2E[H]) (03 section 10). */
+  wait_seconds: number | null
 }
 
 export interface Baselines {

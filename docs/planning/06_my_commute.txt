@@ -179,4 +179,5 @@ requirement (10).
   - Departures labelled LIVE or SCHEDULED, with a leave-time recommendation
     that says when it is based on the timetable.
   - Not yet: alerts for the journey (Sprint 5), Commute Chaos Score
-    (Sprint 7), waiting, onboard and get-off tracking (Sprint 8).
+    (Sprint 7), waiting, onboard and get-off tracking (Sprint 8, future
+    expansion, DEC-063).

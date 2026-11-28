@@ -36,6 +36,8 @@ const baselines: Baselines = {
       p90_seconds: 700,
       scheduled_median_seconds: 300,
       reliable_share: 0.8,
+      mean_seconds: null,
+      wait_seconds: null,
     },
     {
       line: 'Red',
@@ -47,6 +49,8 @@ const baselines: Baselines = {
       p90_seconds: 700,
       scheduled_median_seconds: 300,
       reliable_share: 0.4,
+      mean_seconds: null,
+      wait_seconds: null,
     },
     {
       line: 'Red',
@@ -58,6 +62,8 @@ const baselines: Baselines = {
       p90_seconds: 900,
       scheduled_median_seconds: 600,
       reliable_share: 0.9,
+      mean_seconds: null,
+      wait_seconds: null,
     },
     {
       line: 'Red',
@@ -69,6 +75,8 @@ const baselines: Baselines = {
       p90_seconds: 900,
       scheduled_median_seconds: 600,
       reliable_share: 1,
+      mean_seconds: null,
+      wait_seconds: null,
     },
   ],
 }

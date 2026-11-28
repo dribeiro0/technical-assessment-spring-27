@@ -7,6 +7,7 @@ import {
   vehicleObservations,
   type VehicleObservation,
 } from './rules'
+import { LIVE_LOOKBACK_MS, LIVE_WINDOW_MS, lineOf, liveGaps, type FirstSeen } from './live'
 
 // EnRoute's collector (Sprint 6, DEC-012/DEC-013): records MBTA subway observations every
 // minute, whether or not anyone has the site open, and serves a status summary to the site.
@@ -164,7 +165,7 @@ export async function baselines(db: D1Database) {
   const [headways, trains] = await Promise.all([
     db
       .prepare(
-        'SELECT line, direction_id, day_type, hour, samples, median_seconds, p90_seconds, scheduled_median_seconds, reliable_share FROM baseline_headways',
+        'SELECT line, direction_id, day_type, hour, samples, median_seconds, p90_seconds, scheduled_median_seconds, reliable_share, mean_seconds, wait_seconds FROM baseline_headways',
       )
       .all(),
     db.prepare('SELECT line, day_type, hour, typical_trains, days FROM baseline_trains').all(),
@@ -182,6 +183,35 @@ export async function baselines(db: D1Database) {
     trains: trains.results,
   }
 }
+
+/**
+ * Live gaps between trains over the last 30 minutes (step e, DEC-062), timed against the
+ * last successful collection, not the clock: if collection stops, gaps do not grow on
+ * their own. Null before the first successful run.
+ */
+export async function liveHeadways(db: D1Database) {
+  const asOf = await meta(db, 'last_success_at')
+  if (asOf === null) return null
+  const rows = await db
+    .prepare(
+      `SELECT route_id, direction_id, stop_id, trip_id, MIN(updated_at) AS at
+       FROM vehicle_obs
+       WHERE updated_at > ? AND updated_at <= ?
+         AND stop_id IS NOT NULL AND trip_id IS NOT NULL AND direction_id IN (0, 1)
+         AND trip_id NOT LIKE 'NONREV%'
+       GROUP BY route_id, direction_id, stop_id, trip_id`,
+    )
+    .bind(asOf - LIVE_LOOKBACK_MS, asOf)
+    .all<{ route_id: string; direction_id: 0 | 1; stop_id: string; trip_id: string; at: number }>()
+  const firstSeen: FirstSeen[] = []
+  for (const r of rows.results ?? []) {
+    const line = lineOf(r.route_id)
+    if (line) firstSeen.push({ line, directionId: r.direction_id, stopId: r.stop_id, tripId: r.trip_id, at: r.at })
+  }
+  return { asOf, windowMinutes: LIVE_WINDOW_MS / 60_000, lines: liveGaps(firstSeen, asOf) }
+}
+
+let liveCache: { at: number; body: Awaited<ReturnType<typeof liveHeadways>> } | null = null
 
 const CORS = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' }
 
@@ -203,6 +233,18 @@ export default {
       return new Response(JSON.stringify(body), {
         status: body ? 200 : 404,
         headers: { ...CORS, 'Cache-Control': 'public, max-age=3600' },
+      })
+    }
+    if (request.method === 'GET' && url.pathname === '/live-headways') {
+      // One calculation per minute per Worker instance, however many readers.
+      if (!liveCache || Date.now() - liveCache.at > 60_000) {
+        liveCache = { at: Date.now(), body: await liveHeadways(env.DB) }
+      }
+      const body = liveCache.body
+      // New data arrives every minute.
+      return new Response(JSON.stringify(body), {
+        status: body ? 200 : 404,
+        headers: { ...CORS, 'Cache-Control': 'public, max-age=60' },
       })
     }
     return new Response(JSON.stringify({ error: 'Not found' }), { status: 404, headers: CORS })

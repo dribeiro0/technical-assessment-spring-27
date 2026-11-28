@@ -4,6 +4,8 @@ Related: 05_alerts_and_intelligence.txt, 07_analytics_and_data.txt,
          08_reliability_and_recovery.txt, 12_decision_log.txt DEC-006
 
 Delivery scope: Sprint 7, after Sprint 6 establishes historical observations. The Sprint 3 vehicle-count chart is independent of scoring.
+Shipped November 28, 2026 as model C-0.1, experimental: candidate C below with
+the weights unchanged (12, DEC-062; audit in 10, section 14).
 
 No weight, threshold, or band in this file is calibrated. Every number
 below is a [PROPOSED] starting point or a [MOCK] example. None of the

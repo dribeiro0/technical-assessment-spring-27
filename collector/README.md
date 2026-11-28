@@ -29,13 +29,19 @@ npx wrangler secret put MBTA_API_KEY                # the key is typed at the pr
 
 **Baselines from MBTA history (Sprint 7)**
 
-| File                            | What it does                                                                                                                                                |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/baselines.ts`              | The rules, with tests: reading LAMP rows, day types, typical and 90th-percentile gaps, reliability (within 2 minutes of schedule), typical trains mid-hour. |
-| `scripts/import-lamp.ts`        | Downloads the last N days of LAMP (cached in `.lamp-cache/`) and writes `baselines.sql`, which replaces all baselines.                                      |
-| `migrations/0002_baselines.sql` | `baseline_headways`, `baseline_trains`, `baseline_source`.                                                                                                  |
+| File                                 | What it does                                                                                                                                                |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/baselines.ts`                   | The rules, with tests: reading LAMP rows, day types, typical and 90th-percentile gaps, reliability (within 2 minutes of schedule), typical trains mid-hour. |
+| `src/live.ts`                        | Live gaps between trains at each stop over the last 30 minutes, from the collector's own positions, measured as the baselines are (step e, DEC-062).        |
+| `scripts/import-lamp.ts`             | Downloads the last N days of LAMP (cached in `.lamp-cache/`) and writes `baselines.sql`, which replaces all baselines.                                      |
+| `migrations/0002_baselines.sql`      | `baseline_headways`, `baseline_trains`, `baseline_source`.                                                                                                  |
+| `migrations/0003_wait_baselines.sql` | Mean gap and expected wait per slot; an index on `vehicle_obs (updated_at)` for live gaps.                                                                  |
 
 `GET /baselines` returns the source and all summaries (cached an hour).
+
+`GET /live-headways` returns, per line and direction, the gaps between trains that ended in the last 30 minutes and how long each stop has waited since its last train, timed against the last successful collection (worked out at most once a minute). The site turns these into the experimental Chaos Score (`web/src/domain/chaos.ts`).
+
+Both sides measure gaps the same way: passenger platforms only (terminal tracks such as `Alewife-01` each see every other train), never a trip's first stop (layover), and each gap capped at 3 times the usual 90th-percentile gap before the expected wait, E[H²] / 2E[H], is worked out. The import takes finished service days only.
 
 ```sh
 node scripts/import-lamp.ts 56                                     # 8 weeks

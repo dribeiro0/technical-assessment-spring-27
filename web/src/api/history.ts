@@ -1,4 +1,5 @@
 import type { Baselines } from '../domain/baselines'
+import type { LiveHeadways } from '../domain/chaos'
 
 // EnRoute's own collector (Sprint 6, collector/), not the MBTA: it records observations
 // every minute and reports how collection is going. A separate address, so reading it
@@ -41,4 +42,19 @@ export async function fetchBaselines(signal?: AbortSignal): Promise<Baselines | 
     throw new Error('Unreadable baselines')
   }
   return body as Baselines
+}
+
+/**
+ * Gaps between trains over the last 30 minutes, measured by the collector from its own
+ * minute-by-minute record (step e, DEC-062). Null before the collector's first run.
+ */
+export async function fetchLiveHeadways(signal?: AbortSignal): Promise<LiveHeadways | null> {
+  const response = await fetch(`${HISTORY_URL}/live-headways`, { signal })
+  if (response.status === 404) return null
+  if (!response.ok) throw new Error(`History service returned HTTP ${response.status}`)
+  const body = (await response.json()) as Partial<LiveHeadways> | null
+  if (typeof body?.asOf !== 'number' || !Array.isArray(body.lines)) {
+    throw new Error('Unreadable live headways')
+  }
+  return body as LiveHeadways
 }

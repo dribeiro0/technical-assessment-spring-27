@@ -18,6 +18,8 @@ import {
 const INDEX_URL = 'https://performancedata.mbta.com/lamp/subway-on-time-performance-v1/index.csv'
 const CACHE = '.lamp-cache'
 const days = Number(process.argv[2] ?? 56)
+/** Today's service date in Boston: its file is still being written, so it is left out. */
+const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York' }).format(Date.now())
 
 async function main() {
   mkdirSync(CACHE, { recursive: true })
@@ -30,6 +32,8 @@ async function main() {
     .map((line) => line.split(','))
     .map(([, , date, url]) => ({ date, url }))
     .filter((f) => /^\d{4}-\d{2}-\d{2}$/.test(f.date) && f.url?.startsWith('https://performancedata.mbta.com/'))
+    // Only finished service days: a partial day would pull the typical figures down.
+    .filter((f) => f.date < today)
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(-days)
 
@@ -66,7 +70,7 @@ async function main() {
     'DELETE FROM baseline_source;',
     ...headways.map(
       (h) =>
-        `INSERT INTO baseline_headways VALUES (${q(h.line)}, ${h.directionId}, ${q(h.dayType)}, ${h.hour}, ${h.samples}, ${h.medianSeconds}, ${h.p90Seconds}, ${h.scheduledMedianSeconds}, ${h.reliableShare.toFixed(4)});`,
+        `INSERT INTO baseline_headways (line, direction_id, day_type, hour, samples, median_seconds, p90_seconds, scheduled_median_seconds, reliable_share, mean_seconds, wait_seconds) VALUES (${q(h.line)}, ${h.directionId}, ${q(h.dayType)}, ${h.hour}, ${h.samples}, ${h.medianSeconds}, ${h.p90Seconds}, ${h.scheduledMedianSeconds}, ${h.reliableShare.toFixed(4)}, ${h.meanSeconds}, ${h.waitSeconds});`,
     ),
     ...trains.map(
       (t) =>

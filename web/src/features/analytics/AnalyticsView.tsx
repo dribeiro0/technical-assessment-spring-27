@@ -14,6 +14,7 @@ import { useLiveData } from '../../hooks/liveData'
 import { useBaselines } from '../../hooks/useHistoryStatus'
 import { useNow } from '../../hooks/useNow'
 import { MAP_PATH } from '../../hooks/useViewParams'
+import { ChaosPanel } from './ChaosPanel'
 import { HistoryPanel } from './HistoryPanel'
 import { ReliabilityChart } from './ReliabilityChart'
 import { VehiclesByLineChart } from './VehiclesByLineChart'
@@ -134,6 +135,8 @@ export function AnalyticsView() {
             </p>
           )}
         </section>
+
+        <ChaosPanel />
 
         <section
           aria-labelledby="alerts-title"

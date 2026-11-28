@@ -503,3 +503,88 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3
   - The 8 weeks include Thanksgiving and Black Friday, which ran holiday
     schedules; holidays are not yet separated from ordinary days.
   - The import is run by hand; a daily refresh is for later.
+
+======================================================================
+14. SPRINT 7 STEP E AUDIT (EXPERIMENTAL CHAOS SCORE), NOVEMBER 28, 2026
+======================================================================
+
+  Step e of DEC-059: model C-0.1 (DEC-062) for each line, the whole
+  subway and each saved commute. Personal app; R1-R10 do not depend on
+  it. Labelled experimental: 03 section 8 steps 4-6 are not done.
+
+  Steps a-d were found not deployed at the start of this work (the live
+  collector answered /baselines with HTTP 404). Migration 0002 applied,
+  baselines loaded (538 + 272 + 1 rows, as B1) and the collector
+  redeployed: /baselines HTTP 200, 113,774 bytes. VERIFIED (live)
+
+  S1  The collector serves live gaps between trains (/live-headways):
+      HTTP 200, about 5 KB, 0.27 s; every line and direction had 44-255
+      gaps in the last 30 minutes. VERIFIED (live)
+  S2  Live and historical waits agree on the same definition: Saturday
+      10 a.m., Red direction 0 expected wait 4.9 min live and 4.9 min in
+      LAMP; median gaps Blue 7.5 / 7.5 min. VERIFIED (live)
+  S3  Both sides measure the same stops: terminal tracks and each trip's
+      first stop are left out, live and in LAMP. Before, Orange read an
+      8.7 min wait against 4.3 usual (38, "Minor chaos") from 36-39 min
+      "gaps" at the Oak Grove and Forest Hills tracks; after, 4.1-4.3
+      against 4.3. In LAMP these were 1.6% (tracks) and 3.7% (first
+      stops) of headway rows: 538 -> 527 headway rows, usual waits moved
+      0.9% on average, train rows byte-identical. VERIFIED (live, tests)
+  S4  One stray gap cannot swing a line: gaps are capped at 3 times the
+      usual 90th-percentile gap on both sides (a 90-minute Green gap
+      among about 237 was seen live). VERIFIED (tests)
+  S5  03 section 12: with alerts unavailable the score is Unknown, never
+      Smooth; an active suspension holds 60 even with live gaps missing;
+      three alerts for one incident score as one; every score opens its
+      scope, factors (weight, value, status, what was seen), newest
+      input and computation time, confidence and model version, and is
+      labelled experimental. VERIFIED (tests, UI)
+  S6  03 section 9 behaviour: regular service Smooth; bunching with no
+      alert leaves Smooth; whole-line suspension High; one suspended
+      line does not make the network critical; closures on every line
+      do; gaps persisting after an alert ends are not Smooth; a
+      disruption elsewhere on a commute's line has limited impact; the
+      other direction does not raise a commute. VERIFIED (tests)
+  S7  Missing data: travel time is named as not measured and every score
+      is provisional over the 80% measured; under half measured is
+      Unknown; a collector silent over 5 minutes leaves the waiting
+      factors unmeasured, never good. VERIFIED (tests)
+  S8  The live query uses the new vehicle_obs_updated index (query plan:
+      SEARCH ... USING INDEX): about 15,000 rows per calculation, at
+      most once a minute per Worker instance, however much of the 14
+      days is stored. VERIFIED (live)
+  S9  Analytics shows the whole subway and each line; the commute card
+      shows its score collapsed under the departures. Bands are in words,
+      not colour alone. Live, Saturday 10:40 a.m.: whole subway 2, lines
+      0-4, all Smooth. VERIFIED (headless Chrome, 1280 and 520 px)
+  S10 31 collector and 142 site tests pass; build, oxlint and Prettier
+      clean. VERIFIED
+
+  Found and fixed during the audit
+  - Terminal tracks and layover at first stops read as 30-40 minute gaps
+    (S3).
+  - A single stray gap nearly doubled a line's expected wait (S4).
+  - A station closure counted as if the whole line were disrupted:
+    Symphony, closed until 2029, held Green at 18. Closures that trains
+    run through now count a quarter on a line, in full at a commute's
+    own station (03 section 2, coverage as an exposure modifier).
+  - The LAMP index already listed today's partial file (6,516 rows
+    against about 38,000), which would have shifted the window to Oct 4 -
+    Nov 28 and pulled figures down; the import now takes finished
+    service days only.
+
+  Known limits
+  - Every weight, scale (twice the usual wait = 100, half the trains =
+    100), the cap of 3, the floor of 60 and the station share of 1/4 are
+    proposals. Severe bunching with no alert reaches only "Minor chaos"
+    (wait +46% gives about 21): a calibration question, left as is.
+  - Excess travel time is not measured; a commute's availability uses
+    the whole line's train count.
+  - Gaps are timed to the minute of collection, and cover the last 30
+    minutes: a sudden stoppage shows once stops wait longer than their
+    usual 90th-percentile gap.
+  - Scores are computed in the browser and not stored, so there is no
+    score history to calibrate against yet.
+  - Not built from the Sprint 7 description: prediction-accuracy
+    evaluation and detected irregularities as their own feature.
+  - The baselines still include Thanksgiving and Black Friday.

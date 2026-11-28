@@ -22,6 +22,8 @@ const event = (over: Partial<StopEvent>): StopEvent => ({
   at: FRI_0830,
   headway: 400,
   scheduledHeadway: 360,
+  stopId: '70061',
+  origin: false,
   ...over,
 })
 
@@ -35,6 +37,8 @@ describe('toStopEvent', () => {
     service_date: 20261127,
     headway_trunk_seconds: 782,
     scheduled_headway_trunk: 720,
+    stop_id: '70063',
+    stop_sequence: 2,
   }
 
   it('reads a LAMP row, including BigInt times and boolean directions', () => {
@@ -47,7 +51,10 @@ describe('toStopEvent', () => {
       at: 1795775620,
       headway: 782,
       scheduledHeadway: 720,
+      stopId: '70063',
+      origin: false,
     })
+    expect(toStopEvent({ ...row, stop_sequence: 1 })?.origin).toBe(true)
   })
 
   it('skips non-revenue moves, Mattapan and rows without a stop time', () => {
@@ -93,6 +100,9 @@ describe('headwayBaselines (B1, B3)', () => {
         p90Seconds: 564,
         scheduledMedianSeconds: 360,
         reliableShare: 0.75,
+        // Sum 1800 over 4 gaps; squares 856,800 / (2 x 1800) = 238 s expected wait.
+        meanSeconds: 450,
+        waitSeconds: 238,
       },
     ])
   })
@@ -107,6 +117,26 @@ describe('headwayBaselines (B1, B3)', () => {
     ])
     expect(rows).toHaveLength(3)
     expect(rows.map((r) => r.samples)).toEqual([1, 1, 1])
+  })
+})
+
+describe('headwayBaselines: same stops as the live gaps (DEC-062)', () => {
+  it("leaves out terminal tracks and each trip's origin stop", () => {
+    const rows = headwayBaselines([
+      event({ headway: 400 }),
+      event({ headway: 2400, stopId: 'Alewife-01' }), // one track sees every other train
+      event({ headway: 2200, origin: true }), // layover at the first stop
+    ])
+    expect(rows[0].samples).toBe(1)
+    expect(rows[0].medianSeconds).toBe(400)
+  })
+
+  it('still counts trains at terminals: train baselines are unchanged', () => {
+    const rows = trainBaselines([
+      event({ vehicleId: 'a', stopId: 'Alewife-01', origin: true }),
+      event({ vehicleId: 'b' }),
+    ])
+    expect(rows[0].typicalTrains).toBe(2)
   })
 })
 

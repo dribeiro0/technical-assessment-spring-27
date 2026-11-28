@@ -124,16 +124,17 @@ Assessment IDs refer to the release criteria in file 10.
      d. Analytics: "is now worse than usual?" (live counts against the
         usual count for the hour), reliability by time of day, travel-time
         trends, each labelled with its source.
-     e. Scores built on those baselines.
+     e. Scores built on those baselines. [DONE Nov 28: model C-0.1,
+        experimental, DEC-062]
    The collector's own minute-by-minute record replaces imported
    summaries as it grows. "Collecting since" stays the collector's date.
 
-8. Active journey monitoring | personal app
+8. Active journey monitoring | future expansion (DEC-063)
    Confirm boarding, follow onboard progress and offer destination alerts
    when trip identity, data freshness and rider settings support them.
    Loss of reliable stop progress suppresses the approaching-destination alert.
 
-9. Expansion beyond subway | personal app
+9. Expansion beyond subway | future expansion (DEC-063)
    Extend validated features mode by mode. Check service patterns and
    coverage before reusing any reliability measure.
    Existing subway behavior remains a release criterion for each additional mode.
@@ -211,8 +212,14 @@ ACCEPTED RELEASE BEHAVIOR
   DEC-058). Sprint 7 starts from public MBTA history (DEC-059).
   Sprint 7 (November 28): baselines from 8 weeks of MBTA LAMP history;
   Analytics shows "usually" counts and reliability by hour, labelled with
-  their source (10, section 13; DEC-060, DEC-061). Scores (step e) next.
-  Not done: formal per-subsystem acceptance criteria for Sprints 8-9.
+  their source (10, section 13; DEC-060, DEC-061).
+  Sprint 7 step e (November 28): the experimental Chaos Score, model
+  C-0.1, for each line, the whole subway and saved commutes, built on
+  the LAMP baselines and the collector's live gaps between trains
+  (10, section 14; DEC-062). Not built from the Sprint 7 description:
+  prediction-accuracy evaluation and detected irregularities as their
+  own feature; score calibration (03 section 8 steps 4-6).
+  Sprints 8-9 are considered for future expansion (DEC-063).
 
 ======================================================================
 7. WHAT IS STILL OPEN
@@ -223,7 +230,8 @@ ACCEPTED RELEASE BEHAVIOR
     Streaming stays deferred: it needs an API key and a server relay.
   - Mapping library [DECIDED: React Leaflet, DEC-020]
   - Custom domain enroute.boston [OPEN: not bought yet]
-  - Final Chaos Score weights and thresholds [UNVALIDATED]
+  - Final Chaos Score weights and thresholds [UNVALIDATED: model C-0.1
+    ships labelled experimental, DEC-062]
   - Detailed acceptance criteria per subsystem beyond those recorded in
     files 03-10 [OPEN]
   - Engineering design: recorded in 13_engineering_handoff.txt and web/README.md.

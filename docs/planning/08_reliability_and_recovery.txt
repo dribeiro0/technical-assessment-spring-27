@@ -2,7 +2,7 @@ ENROUTE - 08 RELIABILITY AND RECOVERY
 Planning baseline 0.1 - November 24, 2026
 Related: 02, 03 (missing data), 04, 05, 06, 07
 
-Delivery scope: check missing and stale live data during Sprints 1-3. Add collector recovery in Sprint 6 and lost-trip handling in Sprint 8.
+Delivery scope: check missing and stale live data during Sprints 1-3. Add collector recovery in Sprint 6 and lost-trip handling in Sprint 8 (future expansion, DEC-063).
 
 Principle [ACCEPTED]: uncertainty is better than false certainty.
 Reliability and graceful degradation are release requirements, not

@@ -9,7 +9,7 @@ export type DayType = 'weekday' | 'saturday' | 'sunday'
 /** A gap counts as reliable when it is at most this much longer than scheduled (B3). */
 export const RELIABLE_SLACK_SECONDS = 120
 /** Gaps longer than this are overnight breaks or data errors, not service. */
-const MAX_HEADWAY_SECONDS = 2 * 3600
+export const MAX_HEADWAY_SECONDS = 2 * 3600
 /** The minute window used to count trains running "at" an hour, like a live snapshot. */
 const SNAPSHOT_FROM_MINUTE = 25
 const SNAPSHOT_TO_MINUTE = 35
@@ -27,6 +27,10 @@ export interface StopEvent {
   /** Seconds since the previous train on the same trunk at this stop, or null. */
   headway: number | null
   scheduledHeadway: number | null
+  /** Platform id, or a terminal track such as "Alewife-01". */
+  stopId: string
+  /** The trip's first stop, where it waits on layover. */
+  origin: boolean
 }
 
 export interface HeadwayBaseline {
@@ -41,6 +45,13 @@ export interface HeadwayBaseline {
   scheduledMedianSeconds: number
   /** Share of gaps no more than 2 minutes longer than scheduled (EnRoute's own measure). */
   reliableShare: number
+  /** Mean gap. */
+  meanSeconds: number
+  /**
+   * Expected wait for a rider arriving at random, E[H²] / (2 E[H]) (03 section 10): half
+   * the gap when service is regular, more when gaps are uneven. Live waits use the same.
+   */
+  waitSeconds: number
 }
 
 export interface TrainBaseline {
@@ -54,6 +65,8 @@ export interface TrainBaseline {
 }
 
 const LINE_SET = new Set<string>(LINES)
+/** Passenger platforms have numeric ids; terminal tracks are named ("Alewife-02"). */
+export const PLATFORM = /^\d+$/
 
 /** A raw LAMP row (subway-on-time-performance-v1) -> a stop event, or null to skip it. */
 export function toStopEvent(row: Record<string, unknown>): StopEvent | null {
@@ -74,6 +87,8 @@ export function toStopEvent(row: Record<string, unknown>): StopEvent | null {
     at: Number(at),
     headway: num(row.headway_trunk_seconds),
     scheduledHeadway: num(row.scheduled_headway_trunk),
+    stopId: String(row.stop_id ?? ''),
+    origin: Number(row.stop_sequence) === 1,
   }
 }
 
@@ -110,6 +125,33 @@ export function quantile(sorted: readonly number[], q: number): number {
 }
 
 /**
+ * Mean gap and the expected wait of a rider arriving at random, E[H²] / (2 E[H])
+ * (03 section 10). The same function serves the baselines and the live figures.
+ */
+export function waitFigures(
+  gaps: readonly number[],
+  cap = Infinity,
+): { mean: number; wait: number } {
+  if (gaps.length === 0) return { mean: NaN, wait: NaN }
+  let sum = 0
+  let squares = 0
+  for (const raw of gaps) {
+    const g = Math.min(raw, cap)
+    sum += g
+    squares += g * g
+  }
+  return { mean: sum / gaps.length, wait: squares / (2 * sum) }
+}
+
+/**
+ * Gaps are capped at this many times the usual 90th-percentile gap before the expected
+ * wait is worked out, here and on the site (DEC-062). E[H²] grows with the square of the
+ * longest gaps, so one stray 90-minute gap among 200 nearly doubled a line's live wait;
+ * capped, a long gap still counts as very long. [PROPOSED; uncalibrated]
+ */
+export const WAIT_GAP_CAP = 3
+
+/**
  * Headway figures per line, direction, day type and hour: typical and 90th-percentile
  * gap, the scheduled gap, and how often the real gap stayed within 2 minutes of schedule.
  */
@@ -117,6 +159,9 @@ export function headwayBaselines(events: Iterable<StopEvent>): HeadwayBaseline[]
   const groups = new Map<string, { actual: number[]; scheduled: number[]; reliable: number }>()
   for (const e of events) {
     if (e.headway === null || e.scheduledHeadway === null) continue
+    // As the live gaps (live.ts): terminal tracks each see every other train, and a trip's
+    // first stop is layover, not a gap a rider waits through.
+    if (e.origin || !PLATFORM.test(e.stopId)) continue
     if (e.headway <= 0 || e.headway > MAX_HEADWAY_SECONDS || e.scheduledHeadway <= 0) continue
     const { hour } = bostonTime(e.at)
     const key = `${e.line}|${e.directionId}|${dayType(e.serviceDate)}|${hour}`
@@ -130,6 +175,8 @@ export function headwayBaselines(events: Iterable<StopEvent>): HeadwayBaseline[]
     const [line, dir, type, hour] = key.split('|')
     const actual = g.actual.sort((a, b) => a - b)
     const scheduled = g.scheduled.sort((a, b) => a - b)
+    const p90 = quantile(actual, 0.9)
+    const { mean, wait } = waitFigures(actual, WAIT_GAP_CAP * p90)
     out.push({
       line: line as Line,
       directionId: Number(dir) as 0 | 1,
@@ -137,9 +184,11 @@ export function headwayBaselines(events: Iterable<StopEvent>): HeadwayBaseline[]
       hour: Number(hour),
       samples: actual.length,
       medianSeconds: Math.round(quantile(actual, 0.5)),
-      p90Seconds: Math.round(quantile(actual, 0.9)),
+      p90Seconds: Math.round(p90),
       scheduledMedianSeconds: Math.round(quantile(scheduled, 0.5)),
       reliableShare: g.reliable / actual.length,
+      meanSeconds: Math.round(mean),
+      waitSeconds: Math.round(wait),
     })
   }
   return out
