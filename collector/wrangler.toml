@@ -10,6 +10,6 @@ crons = ["* * * * *"]
 [[d1_databases]]
 binding = "DB"
 database_name = "enroute-history"
-# Filled in after `wrangler d1 create enroute-history` on the real account.
-database_id = "00000000-0000-0000-0000-000000000000"
+# Created on the EnRoute Cloudflare account (not a secret: access needs the account login).
+database_id = "eccbf719-1d6a-48ff-9054-d2c190fb4c98"
 migrations_dir = "migrations"

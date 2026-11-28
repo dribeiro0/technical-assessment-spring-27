@@ -1,4 +1,4 @@
-import { effectText, type LineAlert } from '../domain/lineStatus'
+import { alertWhen, effectText, type LineAlert } from '../domain/lineStatus'
 import { getLine } from '../domain/lines'
 import { StatusMark } from './StatusMark'
 
@@ -25,7 +25,13 @@ export function AlertList({ alerts, emptyText, unavailable = false }: Props) {
           className={`border-l-[3px] pl-2.5 ${alert.level === 'major' ? 'border-danger' : 'border-warn'}`}
         >
           <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs">
-            <StatusMark level={alert.level} />
+            {alert.timing === 'upcoming' ? (
+              <span className="text-fg-secondary font-semibold">
+                ◇ Upcoming · {alertWhen(alert)}
+              </span>
+            ) : (
+              <StatusMark level={alert.level} />
+            )}
             <span className="text-fg-secondary font-medium">{effectText(alert.effect)}</span>
             <span className="text-fg-muted">
               {alert.lines.map((id) => getLine(id).name).join(', ')}
