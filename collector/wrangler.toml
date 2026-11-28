@@ -1,0 +1,15 @@
+# EnRoute collector (Sprint 6). Deployed separately from the site in web/.
+name = "enroute-collector"
+main = "src/worker.ts"
+compatibility_date = "2026-11-01"
+
+# Every minute, whether or not anyone has the site open (DEC-012).
+[triggers]
+crons = ["* * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "enroute-history"
+# Filled in after `wrangler d1 create enroute-history` on the real account.
+database_id = "00000000-0000-0000-0000-000000000000"
+migrations_dir = "migrations"

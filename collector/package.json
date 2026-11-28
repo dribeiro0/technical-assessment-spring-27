@@ -15,5 +15,8 @@
     "typescript": "^7.0.2",
     "vitest": "^5.1.2",
     "wrangler": "^4.169.0"
+  },
+  "allowScripts": {
+    "workerd@1.20261127.1": true
   }
 }
