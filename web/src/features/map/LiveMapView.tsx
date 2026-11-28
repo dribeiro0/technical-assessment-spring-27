@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, ZoomControl, useMap, useMapEvents } from 'reac
 import { ErrorPanel, LoadingNotice, StaleBanner } from '../../components/FeedNotices'
 import { vehicleFreshness } from '../../domain/freshness'
 import { reachesDestination } from '../../domain/commute'
-import { commuteFocus, endsBeforeDestination, type CommuteFocus } from '../../domain/commuteRoute'
+import { alertFocus, commuteFocus, endsBeforeDestination } from '../../domain/commuteRoute'
 import { getLine, routeColor, type LineId } from '../../domain/lines'
 import type { Vehicle } from '../../domain/vehicle'
 import { useLiveData } from '../../hooks/liveData'
@@ -32,22 +32,48 @@ const TILE_ATTRIBUTION =
 
 /** Live Map view (R4): the interactive map with live vehicle markers. */
 export function LiveMapView() {
-  const { vehicles, status, freshnessReference } = useLiveData()
+  const { vehicles, status, freshnessReference, alerts } = useLiveData()
   const reducedMotion = useReducedMotion()
-  const { line, vehicleId, stationId, commuteId, selectVehicle, selectStation } = useViewParams()
+  const { line, vehicleId, stationId, commuteId, alertId, selectVehicle, selectStation } =
+    useViewParams()
   const { commutes } = useSavedCommutes()
   const { data: network } = useNetwork()
   const commute = commuteId ? commutes.find((c) => c.id === commuteId) : undefined
+  const alert = alertId ? alerts.find((a) => a.id === alertId) : undefined
   // An open commute rings its station on the map, as a selected station does.
   const ringedStation = stationId ?? commute?.stationId ?? null
 
-  // An open commute focuses the map on the stretch it rides, like the line filter does
-  // for a whole line: that stretch stays bright and everything else fades.
+  // An open commute focuses the map on the stretch it rides, and an open alert on what
+  // it affects, like the line filter does for a whole line: that part stays bright and
+  // everything else fades. Closed stations also get a warning ring.
   const focus = useMemo(() => {
-    if (!commute || !network) return null
-    const stretch = commuteFocus(network, commute)
-    return stretch ? { stretch, color: routeColor(commute.routeId) ?? '#1D2B44' } : null
-  }, [commute, network])
+    if (!network) return null
+    if (commute) {
+      const stretch = commuteFocus(network, commute)
+      return stretch ? { stretch, color: routeColor(commute.routeId) ?? '#1D2B44' } : null
+    }
+    if (alert) {
+      const stretch = alertFocus(network, alert)
+      if (!stretch) return null
+      const closed = alert.entities.filter((e) => !e.ride && e.stationId).map((e) => e.stationId!)
+      return {
+        stretch,
+        color: routeColor(alert.entities[0]?.routeId ?? '') ?? '#1D2B44',
+        marks: [...new Set(closed)],
+        markColor: alert.level === 'major' ? '#B42318' : '#9A520A',
+      }
+    }
+    return null
+  }, [commute, alert, network])
+  // Where to zoom for the focus: the lit track, plus lit stations (a closure has no track).
+  const focusPoints = useMemo(() => {
+    if (!focus || !network) return null
+    const stations = network.stations
+      .filter((s) => focus.stretch.stationIds.has(s.id))
+      .map((s): [number, number] => [s.lat, s.lon])
+    return [...focus.stretch.paths.flat(), ...stations]
+  }, [focus, network])
+  const alertRoutes = alert ? new Set(alert.entities.map((e) => e.routeId)) : null
 
   // With a commute open, only the trains the rider could catch: its route, its direction,
   // and (where the Red Line splits) its branch.
@@ -59,9 +85,11 @@ export function LiveMapView() {
           reachesDestination(v.headsign, commute) &&
           !(network && endsBeforeDestination(network, commute, v.headsign)),
       )
-    : line
-      ? vehicles.filter((v) => v.line === line)
-      : vehicles
+    : alertRoutes
+      ? vehicles.filter((v) => alertRoutes.has(v.routeId))
+      : line
+        ? vehicles.filter((v) => v.line === line)
+        : vehicles
   const onSelect = useCallback((v: Vehicle) => selectVehicle(v.id, v.line), [selectVehicle])
   // Only say a line has no trains when the data is current; otherwise the banner explains why.
   const dataIsCurrent = status === 'live' || status === 'refresh-failed'
@@ -92,11 +120,11 @@ export function LiveMapView() {
         <ZoomControl position="bottomright" />
         <TagVisibility />
         <FitToLine line={line} />
-        <FitToCommute commuteId={commuteId} stretch={focus?.stretch ?? null} />
+        <FitToFocus focusKey={commuteId ?? alertId} points={focusPoints} />
         <ShowStation stationId={stationId} />
-        {/* Clicking empty map closes whichever card is open (selectVehicle clears all three). */}
+        {/* Clicking empty map closes whichever card is open (selectVehicle clears them all). */}
         <ClearSelectionOnMapClick
-          onClear={() => (vehicleId || stationId || commuteId) && selectVehicle(null)}
+          onClear={() => (vehicleId || stationId || commuteId || alertId) && selectVehicle(null)}
         />
         <RouteLayer
           activeLine={line}
@@ -192,39 +220,39 @@ function FitToLine({ line }: { line: LineId | null }) {
 const CARD_FLOATS_QUERY = '(min-width: 1024px)'
 
 /**
- * Zooms to an open commute's stretch, as FitToLine does for a whole line, leaving room
- * for the commute card so it doesn't cover the route: on the right on desktop, at the
- * bottom (up to 60% of the map) on phones. Once per opened commute, so it never fights a
- * rider who pans around while the card is open.
+ * Zooms to an open commute's stretch or an open alert's affected area, as FitToLine does
+ * for a whole line, leaving room for the card so it doesn't cover them: on the right on
+ * desktop, at the bottom (up to 60% of the map) on phones. Once per opened item, so it
+ * never fights a rider who pans around while the card is open.
  */
-function FitToCommute({
-  commuteId,
-  stretch,
+function FitToFocus({
+  focusKey,
+  points,
 }: {
-  commuteId: string | null
-  stretch: CommuteFocus | null
+  focusKey: string | null
+  points: [number, number][] | null
 }) {
   const map = useMap()
   const reducedMotion = useReducedMotion()
   const fittedFor = useRef<string | null>(null)
 
   useEffect(() => {
-    if (!commuteId) {
+    if (!focusKey) {
       fittedFor.current = null
       return
     }
-    if (fittedFor.current === commuteId || !stretch) return // try again once loaded
+    if (fittedFor.current === focusKey || !points?.length) return // try again once loaded
     const floats = window.matchMedia?.(CARD_FLOATS_QUERY).matches ?? true
     const pad = 32
-    map.flyToBounds(L.latLngBounds(stretch.paths.flat()), {
+    map.flyToBounds(L.latLngBounds(points), {
       paddingTopLeft: [pad, pad],
       paddingBottomRight: floats ? [400 + 16 + pad, pad] : [pad, map.getSize().y * 0.6 + pad],
       maxZoom: 15,
       animate: !reducedMotion,
       duration: 0.8,
     })
-    fittedFor.current = commuteId
-  }, [commuteId, stretch, map, reducedMotion])
+    fittedFor.current = focusKey
+  }, [focusKey, points, map, reducedMotion])
 
   return null
 }

@@ -19,11 +19,13 @@ import { AlertList } from './AlertList'
 import { FloatingCard } from './FloatingCard'
 import { ChevronIcon } from './Icons'
 import { useSavedCommutes } from '../hooks/useSavedCommutes'
+import { AlertCard } from './AlertCard'
 import { CommuteCard } from './CommuteCard'
 import { StationCard } from './StationCard'
 
 /**
  * The card over the map. Shows, in order of priority:
+ * - the open official alert (?alert=): its details, with the affected places lit on the map,
  * - the open saved commute (?commute=): when to leave and its next departures,
  * - the selected station's departures (?stop=),
  * - the selected train (?vehicle=): a countdown to its next stop and a strip of the stops
@@ -31,12 +33,26 @@ import { StationCard } from './StationCard'
  * - with only a line filtered, that line's alerts if there are any.
  */
 export function TrainCard() {
-  const { vehicles, status, lineStatus } = useLiveData()
-  const { vehicleId, stationId, commuteId, line, selectVehicle, selectStation, selectCommute } =
-    useViewParams()
+  const { vehicles, status, lineStatus, alerts: allAlerts } = useLiveData()
+  const {
+    vehicleId,
+    stationId,
+    commuteId,
+    alertId,
+    line,
+    selectVehicle,
+    selectStation,
+    selectCommute,
+    selectAlert,
+  } = useViewParams()
+  // Every hook runs before any early return: React needs the same hooks on every render.
   const { commutes } = useSavedCommutes()
+  const alert = alertId ? allAlerts.find((a) => a.id === alertId) : undefined
   const commute = commuteId ? commutes.find((c) => c.id === commuteId) : undefined
 
+  if (alert) {
+    return <AlertCard key={alert.id} alert={alert} onClose={() => selectAlert(null)} />
+  }
   if (commute) {
     return <CommuteCard key={commute.id} commute={commute} onClose={() => selectCommute(null)} />
   }

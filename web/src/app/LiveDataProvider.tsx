@@ -93,6 +93,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
       paused,
       setPaused,
       alerts,
+      alertsState: alertsQuery.data ? 'ok' : alertsQuery.isError ? 'unavailable' : 'loading',
       lineStatus: alertsQuery.data ? lineStatuses(alerts) : null,
     }
   }, [
@@ -108,6 +109,7 @@ export function LiveDataProvider({ children }: { children: ReactNode }) {
     refresh,
     throttled,
     alertsQuery.data,
+    alertsQuery.isError,
   ])
 
   return <LiveDataContext.Provider value={value}>{children}</LiveDataContext.Provider>

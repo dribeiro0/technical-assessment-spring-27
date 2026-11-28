@@ -157,3 +157,35 @@ export function lineStatuses(alerts: readonly LineAlert[]): Record<LineId, LineS
   }
   return result
 }
+
+const dayFormat = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'America/New_York',
+  month: 'short',
+  day: 'numeric',
+})
+const hourFormat = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'America/New_York',
+  hour: 'numeric',
+  hourCycle: 'h23',
+})
+
+/**
+ * The last service day an alert covers. Service days run past midnight, so an alert the
+ * MBTA ends at 3 a.m. on Dec 21 covers through Dec 20, as its own header says.
+ */
+function lastServiceDay(end: number): string {
+  const hour = Number(hourFormat.format(end))
+  return dayFormat.format(hour < 4 ? end - 6 * 3600_000 : end)
+}
+
+/** When an alert applies, in words: "Until Dec 10", "Dec 12 – Dec 20", "From Dec 12". */
+export function alertWhen(alert: Pick<LineAlert, 'timing' | 'start' | 'end'>): string {
+  if (alert.timing === 'active') {
+    return alert.end === null ? 'Until further notice' : `Until ${lastServiceDay(alert.end)}`
+  }
+  if (alert.start === null) return 'Upcoming'
+  const from = dayFormat.format(alert.start)
+  if (alert.end === null) return `From ${from}`
+  const to = lastServiceDay(alert.end)
+  return from === to ? from : `${from} – ${to}`
+}

@@ -13,8 +13,11 @@ interface Props {
   activeLine: LineId | null
   selectedStation: string | null
   onSelectStation: (stationId: string) => void
-  /** An open commute: its stretch is drawn on top and everything else fades. */
-  focus?: { stretch: CommuteFocus; color: string } | null
+  /**
+   * An open commute or alert: its stretch is drawn on top and everything else fades.
+   * `marks` get a warning ring (stations an alert closes).
+   */
+  focus?: { stretch: CommuteFocus; color: string; marks?: string[]; markColor?: string } | null
 }
 
 /**
@@ -99,6 +102,24 @@ export const RouteLayer = memo(function RouteLayer({
               </Tooltip>
             </CircleMarker>
           )
+        })}
+        {focus?.marks?.map((id) => {
+          const marked = network.stations.find((s) => s.id === id)
+          return marked ? (
+            <CircleMarker
+              key={`mark-${id}`}
+              center={[marked.lat, marked.lon]}
+              radius={8}
+              renderer={stationRenderer}
+              interactive={false}
+              pathOptions={{
+                color: focus.markColor ?? SELECTED_RING,
+                weight: 2.5,
+                fill: false,
+                dashArray: '3 3',
+              }}
+            />
+          ) : null
         })}
         {selected && (
           <CircleMarker

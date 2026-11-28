@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { AlertsDocument } from '../api/mbtaTypes'
-import { effectText, lineStatuses, relevantAlerts } from './lineStatus'
+import { alertWhen, effectText, lineStatuses, relevantAlerts } from './lineStatus'
 import { decodePolyline } from './polyline'
 
 function alert(id: string, severity: number, effect: string, routes: string[]) {
@@ -149,5 +149,42 @@ describe('alert timing, ranking and places (Sprint 5)', () => {
     const [a] = relevantAlerts(doc, NOW).filter((x) => x.id === 'shuttle')
     expect(a.timing).toBe('active')
     expect(a.entities[0].stationId).toBeNull()
+  })
+})
+
+describe('alertWhen', () => {
+  const at = (iso: string) => Date.parse(iso)
+
+  it('reads like the MBTA’s own dates, with service days ending at 3 a.m.', () => {
+    expect(
+      alertWhen({
+        timing: 'upcoming',
+        start: at('2026-12-12T03:00:00-05:00'),
+        end: at('2026-12-21T03:00:00-05:00'),
+      }),
+    ).toBe('Dec 12 – Dec 20')
+    expect(alertWhen({ timing: 'active', start: null, end: at('2026-12-11T03:00:00-05:00') })).toBe(
+      'Until Dec 10',
+    )
+  })
+
+  it('handles open ends and one-day alerts', () => {
+    expect(alertWhen({ timing: 'active', start: null, end: null })).toBe('Until further notice')
+    expect(
+      alertWhen({ timing: 'upcoming', start: at('2026-12-04T03:00:00-05:00'), end: null }),
+    ).toBe('From Dec 4')
+    expect(
+      alertWhen({
+        timing: 'upcoming',
+        start: at('2026-12-06T05:00:00-05:00'),
+        end: at('2026-12-07T02:00:00-05:00'),
+      }),
+    ).toBe('Dec 6')
+  })
+
+  it('keeps an evening end on its own day', () => {
+    expect(alertWhen({ timing: 'active', start: null, end: at('2026-12-01T21:00:00-05:00') })).toBe(
+      'Until Dec 1',
+    )
   })
 })
