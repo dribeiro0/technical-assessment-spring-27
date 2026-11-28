@@ -4,7 +4,7 @@ import { MapContainer, TileLayer, ZoomControl, useMap, useMapEvents } from 'reac
 import { ErrorPanel, LoadingNotice, StaleBanner } from '../../components/FeedNotices'
 import { vehicleFreshness } from '../../domain/freshness'
 import { reachesDestination } from '../../domain/commute'
-import { commuteFocus, type CommuteFocus } from '../../domain/commuteRoute'
+import { commuteFocus, endsBeforeDestination, type CommuteFocus } from '../../domain/commuteRoute'
 import { getLine, routeColor, type LineId } from '../../domain/lines'
 import type { Vehicle } from '../../domain/vehicle'
 import { useLiveData } from '../../hooks/liveData'
@@ -56,7 +56,8 @@ export function LiveMapView() {
         (v) =>
           v.routeId === commute.routeId &&
           (v.directionId === null || v.directionId === commute.directionId) &&
-          reachesDestination(v.headsign, commute),
+          reachesDestination(v.headsign, commute) &&
+          !(network && endsBeforeDestination(network, commute, v.headsign)),
       )
     : line
       ? vehicles.filter((v) => v.line === line)

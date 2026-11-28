@@ -351,5 +351,21 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3
     Ashmont train. Departures now count only trains that reach the
     destination; the card says "toward Braintree".
   - 10 new unit tests (83 in total).
-  - Open: short-turn trips (e.g. a train ending at JFK/UMass) are not yet
-    excluded for destinations beyond where they end.
+  - Short trips are now excluded too (DEC-051); see the re-audit below.
+
+  Re-audit before merging Sprint 4, November 28
+  - C6 re-run on the commute card with the local stand-in API: timetable
+    fallback (SCHEDULED, one timetable request only when live was empty),
+    stale data after 45 s (clock times, no advice, failure named) and a
+    first-load failure (explained, commute kept). No page errors.
+  - C7 re-run on the real feed with three saved commutes and one card open:
+    17 requests in 62 s, including 5 one-time loads; steady state 9 a
+    minute; the closed commutes and the timetable cost nothing.
+  - Short trips: 8 cases on the real network (Red both ways, Green-C,
+    Orange) all correct; 4 new unit tests (87 in total).
+  - Fixed while checking: the out-of-date banner was hidden under the card
+    on desktop (now top-left, DEC-052); the card no longer shows a data
+    source when nothing has loaded; the station card says "Loading station…"
+    instead of "Station" while names load.
+  - Open (minor): at some window sizes the card overlaps a corner of the
+    first-load error panel; its message and Retry button stay visible.

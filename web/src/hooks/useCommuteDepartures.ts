@@ -9,8 +9,10 @@ import {
   type CommuteDeparture,
 } from '../domain/commute'
 import { parseDepartures, type Departure } from '../domain/departures'
+import { endsBeforeDestination } from '../domain/commuteRoute'
 import { FEED_STALE_AFTER_MS } from '../domain/freshness'
 import { useLiveData } from './liveData'
+import { useNetwork } from './useNetwork'
 import { PREDICTION_POLL_MS, pollEvery, retryUnlessRateLimited } from './polling'
 
 /** The timetable barely changes, so it is asked at most every 5 minutes. */
@@ -43,6 +45,7 @@ export interface CommuteDepartures {
  */
 export function useCommuteDepartures(commute: Commute | null, now: number): CommuteDepartures {
   const { paused } = useLiveData()
+  const { data: network } = useNetwork()
   const key = commute ? [commute.stationId, commute.routeId, commute.directionId] : []
 
   const live = useQuery({
@@ -62,9 +65,16 @@ export function useCommuteDepartures(commute: Commute | null, now: number): Comm
     staleTime: 10_000,
   })
 
-  // Only trains that reach the destination (where the Red Line splits, its branch).
+  // Only trains that reach the destination: on its branch where the Red Line splits, and
+  // not a short trip ending before it.
   const reaching = (list: Departure[] | undefined) =>
-    commute ? (list ?? []).filter((d) => reachesDestination(d.headsign, commute)) : []
+    commute
+      ? (list ?? []).filter(
+          (d) =>
+            reachesDestination(d.headsign, commute) &&
+            !(network && endsBeforeDestination(network, commute, d.headsign)),
+        )
+      : []
   const liveReaching = reaching(live.data)
   const liveAhead = chooseDepartures(liveReaching, [], now)
   const needTimetable =

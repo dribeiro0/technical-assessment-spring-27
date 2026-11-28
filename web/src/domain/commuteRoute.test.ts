@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { Commute } from './commute'
-import { commuteFocus } from './commuteRoute'
+import { commuteFocus, endsBeforeDestination } from './commuteRoute'
 import type { Network, Station } from './network'
 
 // A made-up line running due south from A to E (direction 0 = southbound), with a fork
@@ -163,5 +163,38 @@ describe('commuteFocus', () => {
     expect(focus.stationIds.has('OTHER')).toBe(false)
     expect(commuteFocus(network, commute({ stationId: 'nowhere' }))).toBeNull()
     expect(commuteFocus({ shapes: [], stations: network.stations }, commute({}))).toBeNull()
+  })
+})
+
+describe('endsBeforeDestination (short trips)', () => {
+  // The made-up line runs A -> E southbound (direction 0), forking to F after C.
+  const toE = commute({ stationId: 'A', destinationId: 'E', destinationName: 'E' })
+
+  it('drops a train that ends before the destination', () => {
+    expect(endsBeforeDestination(network, toE, 'C')).toBe(true)
+  })
+
+  it('keeps trains that reach or pass the destination', () => {
+    expect(endsBeforeDestination(network, toE, 'E')).toBe(false)
+    expect(
+      endsBeforeDestination(network, commute({ destinationId: 'D', destinationName: 'D' }), 'E'),
+    ).toBe(false)
+  })
+
+  it('works northbound too', () => {
+    const north = commute({
+      stationId: 'E',
+      directionId: 1,
+      destinationId: 'A',
+      destinationName: 'A',
+    })
+    expect(endsBeforeDestination(network, north, 'C')).toBe(true)
+    expect(endsBeforeDestination(network, north, 'A')).toBe(false)
+  })
+
+  it('counts the train when it cannot tell', () => {
+    expect(endsBeforeDestination(network, toE, 'Somewhere else')).toBe(false)
+    expect(endsBeforeDestination(network, toE, null)).toBe(false)
+    expect(endsBeforeDestination(network, commute({}), 'C')).toBe(false) // no destination
   })
 })

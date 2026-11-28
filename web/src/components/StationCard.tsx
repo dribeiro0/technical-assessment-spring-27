@@ -18,10 +18,11 @@ import { FloatingCard } from './FloatingCard'
  */
 export function StationCard({ stationId, onClose }: { stationId: string; onClose: () => void }) {
   const now = useNow(1000)
-  const { data: network } = useNetwork()
+  const { data: network, isPending: networkLoading } = useNetwork()
   const { data, isPending, isError, dataUpdatedAt } = useStationDepartures(stationId)
   const station = network?.stations.find((s) => s.id === stationId)
-  const name = station?.name ?? 'Station'
+  // Names come with the line data; until it loads, say so rather than show a blank title.
+  const name = station?.name ?? (networkLoading ? 'Loading station…' : 'Station')
   const groups = data ? groupDepartures(data, now) : []
   // A one-line station takes that line's colour; transfer stations stay navy.
   const color = station && station.lines.length === 1 ? getLine(station.lines[0]).color : undefined

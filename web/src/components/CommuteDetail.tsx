@@ -94,17 +94,20 @@ export function CommuteDetail({
         )}
       </div>
 
-      <p className="text-fg-muted border-border bg-main border-t px-4 py-2.5 font-mono text-[11px]">
-        {scheduled
-          ? 'From the MBTA timetable: no live predictions right now'
-          : 'From MBTA live predictions'}
-        {updatedAt ? ` · updated ${formatAgeLong(updatedAt, now)}` : ''}
-        {errorMessage && status === 'ok' && (
-          <span className="text-warn block font-sans font-semibold">
-            Latest refresh failed: {errorMessage}
-          </span>
-        )}
-      </p>
+      {/* The data source only means something once departures have loaded. */}
+      {(status === 'ok' || status === 'none') && (
+        <p className="text-fg-muted border-border bg-main border-t px-4 py-2.5 font-mono text-[11px]">
+          {scheduled
+            ? 'From the MBTA timetable: no live predictions right now'
+            : 'From MBTA live predictions'}
+          {updatedAt ? ` · updated ${formatAgeLong(updatedAt, now)}` : ''}
+          {errorMessage && status === 'ok' && (
+            <span className="text-warn block font-sans font-semibold">
+              Latest refresh failed: {errorMessage}
+            </span>
+          )}
+        </p>
+      )}
     </div>
   )
 }

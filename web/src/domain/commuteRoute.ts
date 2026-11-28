@@ -1,6 +1,6 @@
 import type { Commute } from './commute'
 import { BRANCH_ONLY_STATIONS } from './lines'
-import type { Network } from './network'
+import type { Network, Station } from './network'
 
 // The stretch of line a commute rides, cut out of the full line shapes, so the map can
 // zoom to it and fade everything else (as the line filter does for a whole line).
@@ -59,6 +59,43 @@ function cut(path: readonly LatLon[], from: LatLon, to: LatLon): LatLon[] {
   return [a.point, ...path.slice(a.segment + 1, b.segment + 1), b.point]
 }
 
+/** Stations sharing a line with the given one. */
+function stationsOnLineOf(network: Network, station: Station): Station[] {
+  return network.stations.filter((s) => s.lines.some((l) => station.lines.includes(l)))
+}
+
+/**
+ * The station a shape ends at (direction 0 runs toward its last point). On the Red Line
+ * that tells the two branches apart; see BRANCH_ONLY_STATIONS.
+ */
+function shapeTerminus(points: readonly LatLon[], stations: readonly Station[]): string {
+  const [lat, lon] = points.at(-1)!
+  let best = { id: '', distance: Infinity }
+  for (const s of stations) {
+    const d = Math.hypot((s.lat - lat) * M_PER_DEG_LAT, (s.lon - lon) * M_PER_DEG_LON)
+    if (d < best.distance) best = { id: s.id, distance: d }
+  }
+  return best.id
+}
+
+/** Whether trains on the shape ending at `terminus` stop at the station. */
+function serves(terminus: string, stationId: string): boolean {
+  return !(stationId in BRANCH_ONLY_STATIONS) || BRANCH_ONLY_STATIONS[stationId] === terminus
+}
+
+/** How far along a path a point is, in metres from the path's start. */
+function along(path: readonly LatLon[], p: LatLon): number {
+  const c = closestOnPath(path, p)
+  const metres = (a: LatLon, b: LatLon) => {
+    const [ax, ay] = toXY(a)
+    const [bx, by] = toXY(b)
+    return Math.hypot(bx - ax, by - ay)
+  }
+  let total = 0
+  for (let i = 0; i < c.segment; i++) total += metres(path[i], path[i + 1])
+  return total + metres(path[c.segment], c.point)
+}
+
 /**
  * The stretch of the commute's route between its station and destination. With no
  * destination, from the station to the end of the line in the commute's direction:
@@ -74,20 +111,8 @@ export function commuteFocus(network: Network, commute: Commute): CommuteFocus |
     : undefined
   const destination: LatLon | null = destStation ? [destStation.lat, destStation.lon] : null
 
-  // Each shape ends at a terminus (direction 0 runs toward its last point). On the Red
-  // Line that tells the two branches apart; see BRANCH_ONLY_STATIONS.
-  const sameLine = network.stations.filter((s) => s.lines.some((l) => station.lines.includes(l)))
-  const terminusOf = (points: readonly LatLon[]) => {
-    const [lat, lon] = points.at(-1)!
-    let best = { id: '', distance: Infinity }
-    for (const s of sameLine) {
-      const d = Math.hypot((s.lat - lat) * M_PER_DEG_LAT, (s.lon - lon) * M_PER_DEG_LON)
-      if (d < best.distance) best = { id: s.id, distance: d }
-    }
-    return best.id
-  }
-  const serves = (terminus: string, stationId: string) =>
-    !(stationId in BRANCH_ONLY_STATIONS) || BRANCH_ONLY_STATIONS[stationId] === terminus
+  const sameLine = stationsOnLineOf(network, station)
+  const terminusOf = (points: readonly LatLon[]) => shapeTerminus(points, sameLine)
 
   const stretches: { path: LatLon[]; terminus: string }[] = []
   const seen = new Set<string>()
@@ -124,4 +149,42 @@ export function commuteFocus(network: Network, commute: Commute): CommuteFocus |
   }
   const paths = stretches.map((s) => s.path)
   return { paths, stationIds }
+}
+
+/** A train ending this little before the destination still counts (station positions vary). */
+const END_TOLERANCE_M = 50
+
+/**
+ * Whether a train showing `headsign` ends its trip before the commute's destination:
+ * a short trip such as "JFK/UMass" is no use for a commute to North Quincy. The headsign
+ * names the last station; it ends too early when that station comes before the
+ * destination in the commute's direction. When the headsign is not a known station, or
+ * the two are on different branches (reachesDestination covers that), the train counts:
+ * hiding a real train would be worse than showing a doubtful one.
+ */
+export function endsBeforeDestination(
+  network: Network,
+  commute: Commute,
+  headsign: string | null,
+): boolean {
+  if (!headsign || !commute.destinationId) return false
+  const dest = network.stations.find((s) => s.id === commute.destinationId)
+  if (!dest) return false
+  const end = stationsOnLineOf(network, dest).find((s) => s.name === headsign)
+  if (!end || end.id === dest.id) return false
+  const destAt: LatLon = [dest.lat, dest.lon]
+  const endAt: LatLon = [end.lat, end.lon]
+  for (const shape of network.shapes) {
+    if (shape.routeId !== commute.routeId || shape.points.length < 2) continue
+    const terminus = shapeTerminus(shape.points, stationsOnLineOf(network, dest))
+    if (!serves(terminus, dest.id) || !serves(terminus, end.id)) continue
+    if (closestOnPath(shape.points, destAt).distance > ON_LINE_M) continue
+    if (closestOnPath(shape.points, endAt).distance > ON_LINE_M) continue
+    const destPos = along(shape.points, destAt)
+    const endPos = along(shape.points, endAt)
+    return commute.directionId === 0
+      ? endPos < destPos - END_TOLERANCE_M
+      : endPos > destPos + END_TOLERANCE_M
+  }
+  return false
 }
