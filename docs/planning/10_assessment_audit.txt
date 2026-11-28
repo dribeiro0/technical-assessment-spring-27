@@ -489,7 +489,7 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3
       "collecting since" stays the collector's date. VERIFIED
   B7  Baselines come from the collector (111 KB, cached an hour, read only
       by Analytics); no new MBTA requests from the browser. VERIFIED
-  B8  112 site tests and 17 collector tests pass; without baselines,
+  B8  113 site tests and 17 collector tests pass; without baselines,
       Analytics says so and the rest works. VERIFIED (by test and code)
 
   Found and fixed during the audit
