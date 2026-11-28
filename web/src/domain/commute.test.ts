@@ -9,6 +9,7 @@ import {
   recommendDeparture,
   reverseCommute,
   serializeCommutes,
+  serviceDayQuery,
   type Commute,
   type CommuteDeparture,
 } from './commute'
@@ -179,6 +180,41 @@ describe('chooseDepartures (C4: LIVE or SCHEDULED)', () => {
   it('limits how many are shown', () => {
     const many = [1, 2, 3, 4, 5].map((m) => departure(`t${m}`, m))
     expect(chooseDepartures(many, [], NOW, 3)).toHaveLength(3)
+  })
+})
+
+describe('serviceDayQuery (the timetable day runs past midnight)', () => {
+  it('uses today and the current Boston time during the day', () => {
+    expect(serviceDayQuery(Date.parse('2026-11-27T23:38:00-05:00'))).toEqual({
+      date: '2026-11-27',
+      minTime: '23:38',
+    })
+  })
+
+  it("asks for yesterday's timetable with the hour + 24 just after midnight", () => {
+    expect(serviceDayQuery(Date.parse('2026-11-28T00:40:00-05:00'))).toEqual({
+      date: '2026-11-27',
+      minTime: '24:40',
+    })
+  })
+
+  it('crosses a month boundary', () => {
+    expect(serviceDayQuery(Date.parse('2026-12-01T02:05:00-05:00'))).toEqual({
+      date: '2026-11-30',
+      minTime: '26:05',
+    })
+  })
+
+  it('switches to the new day at 3 a.m.', () => {
+    expect(serviceDayQuery(Date.parse('2026-11-28T03:00:00-05:00')).date).toBe('2026-11-28')
+  })
+
+  it('uses Boston time on the night the clocks go back', () => {
+    // 1:30 a.m. EDT on November 1, 2026, the night daylight saving time ends.
+    expect(serviceDayQuery(Date.parse('2026-11-01T01:30:00-04:00'))).toEqual({
+      date: '2026-10-31',
+      minTime: '25:30',
+    })
   })
 })
 

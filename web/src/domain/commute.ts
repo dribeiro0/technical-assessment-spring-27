@@ -166,6 +166,49 @@ export function parseScheduledDepartures(doc: SchedulesDocument): Departure[] {
   return departures
 }
 
+/** Before this hour (Boston time), trains still belong to the previous day's timetable. */
+const SERVICE_DAY_START_HOUR = 3
+
+/**
+ * The timetable day and earliest time to ask /schedules for, in Boston time.
+ * MBTA service days run past midnight: a train at 12:40 a.m. Saturday is in Friday's
+ * timetable as 24:40. So before 3 a.m. this asks for the previous day with the hour + 24,
+ * or late-night riders would be told there are no trains while trains are still running.
+ */
+export function serviceDayQuery(now: number): { date: string; minTime: string } {
+  const parts = bostonParts(now)
+  if (parts.hour >= SERVICE_DAY_START_HOUR) {
+    return { date: parts.date, minTime: `${pad(parts.hour)}:${pad(parts.minute)}` }
+  }
+  // Noon on the previous calendar day is safely inside that day whatever the clocks do.
+  const previous = bostonParts(Date.parse(`${parts.date}T12:00:00Z`) - 24 * 3600_000)
+  return { date: previous.date, minTime: `${pad(parts.hour + 24)}:${pad(parts.minute)}` }
+}
+
+const bostonFormat = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'America/New_York',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+})
+
+function bostonParts(at: number): { date: string; hour: number; minute: number } {
+  const get = (type: string) =>
+    bostonFormat.formatToParts(at).find((p) => p.type === type)?.value ?? '00'
+  return {
+    date: `${get('year')}-${get('month')}-${get('day')}`,
+    hour: Number(get('hour')),
+    minute: Number(get('minute')),
+  }
+}
+
+function pad(n: number): string {
+  return String(n).padStart(2, '0')
+}
+
 /** How long ago a departure may be and still be listed ("leaving now"). */
 const JUST_LEFT_MS = 30_000
 
