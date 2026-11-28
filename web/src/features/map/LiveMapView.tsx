@@ -1,13 +1,16 @@
 import L from 'leaflet'
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { MapContainer, TileLayer, ZoomControl, useMap, useMapEvents } from 'react-leaflet'
 import { ErrorPanel, LoadingNotice, StaleBanner } from '../../components/FeedNotices'
 import { vehicleFreshness } from '../../domain/freshness'
-import { getLine, type LineId } from '../../domain/lines'
+import { reachesDestination } from '../../domain/commute'
+import { commuteFocus, endsBeforeDestination, type CommuteFocus } from '../../domain/commuteRoute'
+import { getLine, routeColor, type LineId } from '../../domain/lines'
 import type { Vehicle } from '../../domain/vehicle'
 import { useLiveData } from '../../hooks/liveData'
 import { useNetwork } from '../../hooks/useNetwork'
 import { useReducedMotion } from '../../hooks/useReducedMotion'
+import { useSavedCommutes } from '../../hooks/useSavedCommutes'
 import { useViewParams } from '../../hooks/useViewParams'
 import { RouteLayer } from './RouteLayer'
 import { VehicleMarker } from './VehicleMarker'
@@ -31,9 +34,34 @@ const TILE_ATTRIBUTION =
 export function LiveMapView() {
   const { vehicles, status, freshnessReference } = useLiveData()
   const reducedMotion = useReducedMotion()
-  const { line, vehicleId, stationId, selectVehicle, selectStation } = useViewParams()
+  const { line, vehicleId, stationId, commuteId, selectVehicle, selectStation } = useViewParams()
+  const { commutes } = useSavedCommutes()
+  const { data: network } = useNetwork()
+  const commute = commuteId ? commutes.find((c) => c.id === commuteId) : undefined
+  // An open commute rings its station on the map, as a selected station does.
+  const ringedStation = stationId ?? commute?.stationId ?? null
 
-  const shown = line ? vehicles.filter((v) => v.line === line) : vehicles
+  // An open commute focuses the map on the stretch it rides, like the line filter does
+  // for a whole line: that stretch stays bright and everything else fades.
+  const focus = useMemo(() => {
+    if (!commute || !network) return null
+    const stretch = commuteFocus(network, commute)
+    return stretch ? { stretch, color: routeColor(commute.routeId) ?? '#1D2B44' } : null
+  }, [commute, network])
+
+  // With a commute open, only the trains the rider could catch: its route, its direction,
+  // and (where the Red Line splits) its branch.
+  const shown = commute
+    ? vehicles.filter(
+        (v) =>
+          v.routeId === commute.routeId &&
+          (v.directionId === null || v.directionId === commute.directionId) &&
+          reachesDestination(v.headsign, commute) &&
+          !(network && endsBeforeDestination(network, commute, v.headsign)),
+      )
+    : line
+      ? vehicles.filter((v) => v.line === line)
+      : vehicles
   const onSelect = useCallback((v: Vehicle) => selectVehicle(v.id, v.line), [selectVehicle])
   // Only say a line has no trains when the data is current; otherwise the banner explains why.
   const dataIsCurrent = status === 'live' || status === 'refresh-failed'
@@ -64,10 +92,18 @@ export function LiveMapView() {
         <ZoomControl position="bottomright" />
         <TagVisibility />
         <FitToLine line={line} />
+        <FitToCommute commuteId={commuteId} stretch={focus?.stretch ?? null} />
         <ShowStation stationId={stationId} />
-        {/* Clicking empty map closes whichever card is open (selectVehicle clears both). */}
-        <ClearSelectionOnMapClick onClear={() => (vehicleId || stationId) && selectVehicle(null)} />
-        <RouteLayer activeLine={line} selectedStation={stationId} onSelectStation={selectStation} />
+        {/* Clicking empty map closes whichever card is open (selectVehicle clears all three). */}
+        <ClearSelectionOnMapClick
+          onClear={() => (vehicleId || stationId || commuteId) && selectVehicle(null)}
+        />
+        <RouteLayer
+          activeLine={line}
+          selectedStation={ringedStation}
+          onSelectStation={selectStation}
+          focus={focus}
+        />
         {shown.map((v) => (
           <VehicleMarker
             key={v.id}
@@ -148,6 +184,47 @@ function FitToLine({ line }: { line: LineId | null }) {
     })
     fittedFor.current = line
   }, [line, network, map, reducedMotion])
+
+  return null
+}
+
+/** At this width and up the card floats top-right (400 px); below it is a bottom sheet. */
+const CARD_FLOATS_QUERY = '(min-width: 1024px)'
+
+/**
+ * Zooms to an open commute's stretch, as FitToLine does for a whole line, leaving room
+ * for the commute card so it doesn't cover the route: on the right on desktop, at the
+ * bottom (up to 60% of the map) on phones. Once per opened commute, so it never fights a
+ * rider who pans around while the card is open.
+ */
+function FitToCommute({
+  commuteId,
+  stretch,
+}: {
+  commuteId: string | null
+  stretch: CommuteFocus | null
+}) {
+  const map = useMap()
+  const reducedMotion = useReducedMotion()
+  const fittedFor = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (!commuteId) {
+      fittedFor.current = null
+      return
+    }
+    if (fittedFor.current === commuteId || !stretch) return // try again once loaded
+    const floats = window.matchMedia?.(CARD_FLOATS_QUERY).matches ?? true
+    const pad = 32
+    map.flyToBounds(L.latLngBounds(stretch.paths.flat()), {
+      paddingTopLeft: [pad, pad],
+      paddingBottomRight: floats ? [400 + 16 + pad, pad] : [pad, map.getSize().y * 0.6 + pad],
+      maxZoom: 15,
+      animate: !reducedMotion,
+      duration: 0.8,
+    })
+    fittedFor.current = commuteId
+  }, [commuteId, stretch, map, reducedMotion])
 
   return null
 }

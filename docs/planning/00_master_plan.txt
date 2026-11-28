@@ -183,9 +183,13 @@ ACCEPTED RELEASE BEHAVIOR
   DEC-028, 13), visual identity and layout (DEC-029 to DEC-039, 11).
   Implementation (November 25): Sprints 1-3 are built in web/ and live
   at https://enrouteboston.vercel.app. Sprint 3 polish (the redesign) and
-  the audit fixes are on branch sprint-3/polish. R1-R8 are verified (10,
-  section 9); R9 awaits the merge, R10 the PR and recording.
-  Not done: formal per-subsystem acceptance criteria for Sprints 4-9.
+  the audit fixes are merged. R1-R9 are verified (10, section 9); R10
+  awaits the PR and recording.
+  Sprint 4 (November 27-28): My Commute is built on branch
+  sprint-4/my-commute with criteria C1-C10, all verified (10, section 10;
+  DEC-041 to DEC-048). It lives on the map
+  as a card, not as a separate tab (DEC-047).
+  Not done: formal per-subsystem acceptance criteria for Sprints 5-9.
 
 ======================================================================
 7. WHAT IS STILL OPEN

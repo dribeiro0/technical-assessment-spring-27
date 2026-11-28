@@ -8,7 +8,7 @@ The Live Map, built with React Leaflet over Esri's light gray basemap, faded ont
 | `VehicleMarker.tsx` | One marker per train and its popup with line, direction, status and next stop (R5). Click or Enter on a focused marker selects the train; selecting from the list opens the popup. Keeps the marker's accessible title current.                                                       |
 | `glide.ts`          | Smooth movement: each marker glides to its new position over one polling interval (15 s), so trains keep moving between updates (DEC-034). Big jumps snap instead; reduced motion turns it off.                                                                                       |
 | `vehicleIcon.ts`    | The marker drawing: a line-coloured circle with an arrow rotated to the bearing when moving, a square when stopped, and the destination tag ("Alewife", "C · Cleveland Circle"). Feed text is HTML-escaped.                                                                           |
-| `RouteLayer.tsx`    | Line paths and hollow station dots beneath the trains, drawn on a canvas. Transfer stations are navy; other lines fade when a filter is on.                                                                                                                                           |
+| `RouteLayer.tsx`    | Line paths and hollow station dots beneath the trains, drawn on a canvas. Transfer stations are navy; other lines fade when a filter is on. With a commute open, its stretch is drawn bold and everything else fades (DEC-049).                                                       |
 
 **Marker states (never colour alone)**
 

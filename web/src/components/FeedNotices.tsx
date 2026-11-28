@@ -38,7 +38,7 @@ export function LoadingNotice() {
   const { status } = useLiveData()
   if (status !== 'loading') return null
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-3 z-[1000] flex justify-center">
+    <div className="pointer-events-none absolute inset-x-0 top-3 z-[1000] flex justify-center lg:justify-start lg:px-4">
       <p
         role="status"
         className="bg-card text-fg-secondary rounded-full px-4 py-1.5 text-xs shadow-[var(--shadow-float)]"
@@ -52,6 +52,10 @@ export function LoadingNotice() {
 /**
  * Explains why on-screen data may be old, while keeping it visible:
  * a failed refresh, stale data, a rate limit or a paused feed.
+ */
+/**
+ * On wide screens the notices sit top-left: the train, station and commute cards float
+ * top-right over the map and would otherwise cover them.
  */
 export function StaleBanner() {
   const { status, lastSuccessAt, retryAt, errorMessage } = useLiveData()
@@ -72,7 +76,7 @@ export function StaleBanner() {
   if (!message) return null
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-3 z-[1000] flex justify-center px-3">
+    <div className="pointer-events-none absolute inset-x-0 top-3 z-[1000] flex justify-center px-3 lg:justify-start lg:px-4">
       <p
         role="status"
         className="bg-card text-fg border-brand max-w-full rounded-full border px-4 py-1.5 text-center text-xs shadow-[var(--shadow-float)]"

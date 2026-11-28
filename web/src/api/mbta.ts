@@ -3,6 +3,8 @@ import type {
   AlertsDocument,
   PredictionsDocument,
   RoutePatternsDocument,
+  RoutesDocument,
+  SchedulesDocument,
   StopsDocument,
   VehiclesDocument,
 } from './mbtaTypes'
@@ -165,6 +167,55 @@ export function fetchStationPredictions(
   return getJson(
     `/predictions?filter[stop]=${encodeURIComponent(stationId)}&filter[route]=${routeFilter}&include=trip` +
       '&fields[prediction]=arrival_time,departure_time,schedule_relationship&fields[trip]=headsign',
+    signal,
+  )
+}
+
+/**
+ * Subway routes that stop at one station, e.g. Kenmore -> Green-B, Green-C, Green-D.
+ * Asked once when a station is picked in the commute form (the map only knows lines).
+ */
+export function fetchRoutesAtStation(stationId: string, signal?: AbortSignal) {
+  return getJson<RoutesDocument>(
+    `/routes?filter[stop]=${encodeURIComponent(stationId)}&filter[type]=0,1&fields[route]=type`,
+    signal,
+  )
+}
+
+/** Trains expected at one station on one route, going one way (My Commute). */
+export function fetchCommutePredictions(
+  stationId: string,
+  routeId: string,
+  directionId: 0 | 1,
+  signal?: AbortSignal,
+): Promise<PredictionsDocument> {
+  return getJson(
+    `/predictions?filter[stop]=${encodeURIComponent(stationId)}` +
+      `&filter[route]=${encodeURIComponent(routeId)}&filter[direction_id]=${directionId}` +
+      '&include=trip&fields[prediction]=arrival_time,departure_time,schedule_relationship' +
+      '&fields[trip]=headsign',
+    signal,
+  )
+}
+
+/**
+ * Timetable departures for the same station, route and direction, from a time onwards.
+ * Asked only when there is no live prediction, so a normal day spends no request on it.
+ * `date` and `minTime` come from serviceDayQuery (minTime can be past 24:00).
+ */
+export function fetchCommuteSchedules(
+  stationId: string,
+  routeId: string,
+  directionId: 0 | 1,
+  date: string,
+  minTime: string,
+  signal?: AbortSignal,
+): Promise<SchedulesDocument> {
+  return getJson(
+    `/schedules?filter[stop]=${encodeURIComponent(stationId)}` +
+      `&filter[route]=${encodeURIComponent(routeId)}&filter[direction_id]=${directionId}` +
+      `&filter[date]=${date}&filter[min_time]=${minTime}&sort=departure_time&page[limit]=6` +
+      '&include=trip&fields[schedule]=departure_time,pickup_type&fields[trip]=headsign',
     signal,
   )
 }

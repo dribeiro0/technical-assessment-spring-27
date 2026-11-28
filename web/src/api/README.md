@@ -15,6 +15,9 @@ The only place that talks to the MBTA V3 API (https://api-v3.mbta.com).
 | `/alerts?filter[route]=…&filter[datetime]=NOW`                               | Every 60 s                                  | Line status and alert text                                                                   |
 | `/predictions?filter[trip]=…&include=stop`                                   | When a train is selected, then every 15 s   | The countdown and the strip of stops ahead on the train card                                 |
 | `/predictions?filter[stop]=…&include=trip`                                   | When a station is selected, then every 15 s | The station card: next departures from every platform                                        |
+| `/predictions?filter[stop]=…&filter[route]=…&filter[direction_id]=…`         | While a commute is open, every 15 s         | My Commute: live departures going the rider's way                                            |
+| `/schedules?filter[stop]=…&filter[date]=…&filter[min_time]=…`                | Only when a commute has no live train       | My Commute: timetable fallback, labelled SCHEDULED                                           |
+| `/routes?filter[stop]=…`                                                     | Once per station picked in the commute form | Which lines and branches stop there                                                          |
 | `/route_patterns?…&filter[canonical]=true&include=representative_trip.shape` | Once a day (device cache)                   | Line paths                                                                                   |
 | `/stops?filter[route]=…` ×4                                                  | Once a day (device cache)                   | Station dots, asked per line so each stop's line is known                                    |
 

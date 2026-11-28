@@ -33,6 +33,26 @@ export const LINES: readonly LineInfo[] = [
   },
 ]
 
+/**
+ * Where each direction of a route goes: index 0 is direction_id 0, index 1 is direction_id 1.
+ * Copied from /routes (direction_destinations) on November 28, 2026. They change only when a
+ * terminus changes, so they are kept here instead of spending a request on them.
+ */
+export const DIRECTION_DESTINATIONS: Readonly<Record<string, readonly [string, string]>> = {
+  Red: ['Ashmont/Braintree', 'Alewife'],
+  Orange: ['Forest Hills', 'Oak Grove'],
+  Blue: ['Bowdoin', 'Wonderland'],
+  'Green-B': ['Boston College', 'Government Center'],
+  'Green-C': ['Cleveland Circle', 'Government Center'],
+  'Green-D': ['Riverside', 'Union Square'],
+  'Green-E': ['Heath Street', 'Medford/Tufts'],
+}
+
+/** "Alewife" for Red direction 1. Falls back to a neutral label for an unknown route. */
+export function directionDestination(routeId: string, directionId: 0 | 1): string {
+  return DIRECTION_DESTINATIONS[routeId]?.[directionId] ?? `Direction ${directionId}`
+}
+
 /** Every route ID the app requests from the API. */
 export const IN_SCOPE_ROUTE_IDS: readonly string[] = LINES.flatMap((line) => line.routeIds)
 
@@ -60,4 +80,42 @@ export function getLine(id: LineId): LineInfo {
   const line = LINES.find((l) => l.id === id)
   if (!line) throw new Error(`Unknown line: ${id}`)
   return line
+}
+
+/** "Red line", or "Green line · B branch" for a Green Line route. */
+export function routeLabel(routeId: string): string {
+  const line = lineForRoute(routeId)
+  if (!line) return routeId
+  const branch = branchForRoute(routeId)
+  return branch ? `${getLine(line).name} · ${branch} branch` : getLine(line).name
+}
+
+/** The line colour for a route, or undefined for a route that is out of scope. */
+export function routeColor(routeId: string): string | undefined {
+  const line = lineForRoute(routeId)
+  return line ? getLine(line).color : undefined
+}
+
+/**
+ * Red Line stations served by only one branch, keyed to that branch's terminus. The
+ * branches split after JFK/UMass, and Braintree trains run beside Savin Hill's platform
+ * without stopping, so the line shapes alone cannot say which branch serves a station.
+ * The API has no per-branch stop list (/stops rejects filter[route_pattern]).
+ */
+export const BRANCH_ONLY_STATIONS: Readonly<Record<string, string>> = {
+  'place-shmnl': 'place-asmnl', // Savin Hill
+  'place-fldcr': 'place-asmnl', // Fields Corner
+  'place-smmnl': 'place-asmnl', // Shawmut
+  'place-asmnl': 'place-asmnl', // Ashmont
+  'place-nqncy': 'place-brntn', // North Quincy
+  'place-wlsta': 'place-brntn', // Wollaston
+  'place-qnctr': 'place-brntn', // Quincy Center
+  'place-qamnl': 'place-brntn', // Quincy Adams
+  'place-brntn': 'place-brntn', // Braintree
+}
+
+/** The headsign of trains running to each branch terminus in BRANCH_ONLY_STATIONS. */
+export const BRANCH_TERMINUS_HEADSIGN: Readonly<Record<string, string>> = {
+  'place-asmnl': 'Ashmont',
+  'place-brntn': 'Braintree',
 }

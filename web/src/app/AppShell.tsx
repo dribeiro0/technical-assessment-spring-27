@@ -3,7 +3,9 @@ import { Outlet, useLocation } from 'react-router'
 import { CloseIcon } from '../components/Icons'
 import { LineStatusBadges } from '../components/LineStatusBadges'
 import { LineTree } from '../components/LineTree'
+import { MyCommutes } from '../components/MyCommutes'
 import { TrainCard } from '../components/TrainCard'
+import { useCommuteFirstOnPhone } from '../hooks/useCommuteFirstOnPhone'
 import { MAP_PATH } from '../hooks/useViewParams'
 import { Ribbon } from './Ribbon'
 import { StatusBar } from './StatusBar'
@@ -45,6 +47,7 @@ function SidebarContent({ onVehicleChosen }: { onVehicleChosen?: () => void }) {
   return (
     <>
       <LineStatusBadges />
+      <MyCommutes onChosen={onVehicleChosen} />
       <LineTree onVehicleChosen={onVehicleChosen} />
     </>
   )
@@ -60,6 +63,7 @@ export function AppShell() {
   const { pathname } = useLocation()
   const onMap = pathname === MAP_PATH
   const [drawerOpen, setDrawerOpen] = useState(false)
+  useCommuteFirstOnPhone()
 
   // Close the phone drawer with Escape.
   useEffect(() => {

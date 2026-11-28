@@ -18,6 +18,7 @@ export function useViewParams() {
   const line: LineId | null = isLineId(lineParam) ? lineParam : null
   const vehicleId = params.get('vehicle')
   const stationId = params.get('stop')
+  const commuteId = params.get('commute')
 
   /** Applies changes to the URL parameters, optionally moving to another view. */
   const update = useCallback(
@@ -42,7 +43,9 @@ export function useViewParams() {
    */
   const setLine = useCallback(
     (next: LineId | null, selectedVehicleLine?: LineId | null) => {
-      const changes: Record<string, string | null> = { line: next }
+      // Picking a line filter closes an open commute, so the two never compete over what
+      // the map highlights.
+      const changes: Record<string, string | null> = { line: next, commute: null }
       if (next && vehicleId && selectedVehicleLine && selectedVehicleLine !== next) {
         changes.vehicle = null
       }
@@ -57,8 +60,8 @@ export function useViewParams() {
    */
   const selectVehicle = useCallback(
     (id: string | null, vehicleLine?: LineId) => {
-      // A train and a station are never selected at the same time: one card at a time.
-      const changes: Record<string, string | null> = { vehicle: id, stop: null }
+      // A train, a station and a commute are never selected together: one card at a time.
+      const changes: Record<string, string | null> = { vehicle: id, stop: null, commute: null }
       if (id && vehicleLine && line && line !== vehicleLine) changes.line = vehicleLine
       update(changes, id ? MAP_PATH : location.pathname)
     },
@@ -67,7 +70,15 @@ export function useViewParams() {
 
   /** Selects a station (?stop=place-pktrm) to show when the next trains leave it. */
   const selectStation = useCallback(
-    (id: string | null) => update({ stop: id, vehicle: null }, id ? MAP_PATH : location.pathname),
+    (id: string | null) =>
+      update({ stop: id, vehicle: null, commute: null }, id ? MAP_PATH : location.pathname),
+    [update, location.pathname],
+  )
+
+  /** Opens a saved commute's card over the map (?commute=<id>). */
+  const selectCommute = useCallback(
+    (id: string | null) =>
+      update({ commute: id, vehicle: null, stop: null }, id ? MAP_PATH : location.pathname),
     [update, location.pathname],
   )
 
@@ -75,9 +86,11 @@ export function useViewParams() {
     line,
     vehicleId,
     stationId,
+    commuteId,
     setLine,
     selectVehicle,
     selectStation,
+    selectCommute,
     search: location.search,
   }
 }
