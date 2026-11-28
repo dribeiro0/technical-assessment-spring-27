@@ -2,7 +2,7 @@ ENROUTE - 04 TRANSIT AND PREDICTION
 Planning baseline 0.1 - November 24, 2026
 Related: 02_functional_architecture.txt, 05, 06_my_commute.txt, 08
 
-Delivery scope: map and vehicle details in Sprints 1-2, official departures in Sprint 4, historical evaluation in Sprint 7 and onboard tracking in Sprint 8.
+Delivery scope: map and vehicle details in Sprints 1-2, official departures in Sprint 4, historical evaluation in Sprint 7 and onboard tracking in Sprint 8 (future expansion, DEC-063).
 
 ======================================================================
 1. VEHICLES AS TRANSIT ENTITIES                            [ACCEPTED]

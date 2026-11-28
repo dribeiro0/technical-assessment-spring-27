@@ -3,11 +3,20 @@ import { AlertList } from '../../components/AlertList'
 import { ErrorPanel } from '../../components/FeedNotices'
 import { StatusMark } from '../../components/StatusMark'
 import { countByLine } from '../../domain/counts'
+import {
+  DAY_TYPE_TEXT,
+  MIN_TRAINS_TO_COMPARE,
+  dateRangeText,
+  usualTrains,
+} from '../../domain/baselines'
 import { formatAgeLong } from '../../domain/freshness'
 import { useLiveData } from '../../hooks/liveData'
+import { useBaselines } from '../../hooks/useHistoryStatus'
 import { useNow } from '../../hooks/useNow'
 import { MAP_PATH } from '../../hooks/useViewParams'
+import { ChaosPanel } from './ChaosPanel'
 import { HistoryPanel } from './HistoryPanel'
+import { ReliabilityChart } from './ReliabilityChart'
 import { VehiclesByLineChart } from './VehiclesByLineChart'
 
 /**
@@ -20,6 +29,12 @@ export function AnalyticsView() {
   const now = useNow(1000)
   const counts = countByLine(vehicles)
   const hasData = status !== 'loading' && status !== 'error'
+  // "Is now worse than usual?" (Sprint 7, B4): only when the live data is current.
+  const { data: baselines } = useBaselines()
+  const current = status === 'live' || status === 'refresh-failed'
+  const usual = (line: (typeof counts)[number]['line']) =>
+    baselines ? usualTrains(baselines, line, now) : null
+  const slot = baselines ? counts.map((c) => usual(c.line)).find((u) => u !== null) : null
 
   const openLine = (line: string) => navigate({ pathname: MAP_PATH, search: `?line=${line}` })
 
@@ -65,6 +80,9 @@ export function AnalyticsView() {
                 <th scope="col" className="px-4 py-2 font-medium">
                   Vehicles
                 </th>
+                <th scope="col" className="px-4 py-2 font-medium">
+                  Usually
+                </th>
                 <th scope="col" className="hidden px-4 py-2 font-medium sm:table-cell">
                   Branches
                 </th>
@@ -92,6 +110,7 @@ export function AnalyticsView() {
                     </button>
                   </th>
                   <td className="text-fg px-4 py-2 font-mono">{hasData ? c.count : '–'}</td>
+                  <UsualCell count={hasData && current ? c.count : null} usual={usual(c.line)} />
                   <td className="text-fg-muted hidden px-4 py-2 font-mono sm:table-cell">
                     {Object.keys(c.branches).length
                       ? Object.entries(c.branches)
@@ -107,7 +126,17 @@ export function AnalyticsView() {
               ))}
             </tbody>
           </table>
+          {baselines && (
+            <p className="text-fg-muted border-border border-t px-4 py-2 text-[11px]">
+              “Usually” is the typical number of trains running mid-hour
+              {slot ? ` on ${DAY_TYPE_TEXT[slot.dayType]} at this hour` : ''}, from MBTA LAMP data,{' '}
+              {dateRangeText(baselines.source.fromDate, baselines.source.toDate)}. “–” means there
+              is not enough history for this hour.
+            </p>
+          )}
         </section>
+
+        <ChaosPanel />
 
         <section
           aria-labelledby="alerts-title"
@@ -129,9 +158,40 @@ export function AnalyticsView() {
             />
           </div>
         </section>
+        <ReliabilityChart />
         <HistoryPanel />
       </div>
       <ErrorPanel />
     </div>
+  )
+}
+
+/** The typical count for this hour, flagging a line running well below it (B4). */
+function UsualCell({
+  count,
+  usual,
+}: {
+  count: number | null
+  usual: { typical: number; days: number } | null
+}) {
+  if (!usual) {
+    return (
+      <td className="text-fg-muted px-4 py-2 font-mono" title="Not enough history for this hour">
+        –
+      </td>
+    )
+  }
+  // Tiny counts (the last trains of the night) vary too much to flag.
+  const fewer =
+    count !== null && usual.typical >= MIN_TRAINS_TO_COMPARE && count < usual.typical * 0.75
+  return (
+    <td className="px-4 py-2 font-mono">
+      <span className="text-fg-secondary">{usual.typical}</span>
+      {fewer && (
+        <span className="text-warn ml-2 font-sans font-semibold">
+          <span aria-hidden="true">▼ </span>fewer than usual
+        </span>
+      )}
+    </td>
   )
 }

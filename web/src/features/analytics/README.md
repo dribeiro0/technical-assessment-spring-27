@@ -14,3 +14,7 @@ The Analytics view (R8).
 - Vehicle counts are not a Chaos Score.
 
 `HistoryPanel.tsx` shows EnRoute's own history collection (Sprint 6): collecting since, runs in the last 24 hours and gaps, or that history is unavailable. Trend charts come in Sprint 7.
+
+`ChaosPanel.tsx` shows the experimental Chaos Score (Sprint 7 step e, DEC-062) for the whole subway and each line. Every score opens to the factors behind it, and "How we measure chaos" explains the method.
+
+`ReliabilityChart.tsx` shows how reliable each line is by hour (Sprint 7), from MBTA LAMP history, for weekdays, Saturdays or Sundays. The line table's "Usually" column compares live counts with the typical count for the hour.

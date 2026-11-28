@@ -2,7 +2,7 @@ ENROUTE - 09 NONFUNCTIONAL REQUIREMENTS
 Planning baseline 0.1 - November 24, 2026
 Related: 06 (journey alerts), 08 (constrained networks), 11
 
-Delivery scope: test keyboard access, mobile layout and legible data states in Sprints 1-3. Recheck saved-data privacy in Sprint 4 and journey permissions in Sprint 8.
+Delivery scope: test keyboard access, mobile layout and legible data states in Sprints 1-3. Recheck saved-data privacy in Sprint 4 and journey permissions in Sprint 8 (future expansion, DEC-063).
 
 Requirements are proposed unless marked otherwise.
 
