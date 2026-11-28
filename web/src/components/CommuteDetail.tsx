@@ -1,11 +1,12 @@
 import {
+  commuteToward,
   recommendDeparture,
   type Commute,
   type CommuteDeparture,
   type LeaveAdvice,
 } from '../domain/commute'
 import { formatAgeLong } from '../domain/freshness'
-import { directionDestination, routeLabel } from '../domain/lines'
+import { routeLabel } from '../domain/lines'
 import { minutesAway } from '../domain/predictions'
 import { useCommuteDepartures } from '../hooks/useCommuteDepartures'
 import { useNow } from '../hooks/useNow'
@@ -41,7 +42,7 @@ export function CommuteDetail({
   const now = useNow(1000)
   const { status, departures, updatedAt, stale, errorMessage } = useCommuteDepartures(commute, now)
   const scheduled = departures[0]?.source === 'scheduled'
-  const toward = directionDestination(commute.routeId, commute.directionId)
+  const toward = commuteToward(commute)
 
   return (
     <div>

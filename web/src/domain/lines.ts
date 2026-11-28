@@ -95,3 +95,27 @@ export function routeColor(routeId: string): string | undefined {
   const line = lineForRoute(routeId)
   return line ? getLine(line).color : undefined
 }
+
+/**
+ * Red Line stations served by only one branch, keyed to that branch's terminus. The
+ * branches split after JFK/UMass, and Braintree trains run beside Savin Hill's platform
+ * without stopping, so the line shapes alone cannot say which branch serves a station.
+ * The API has no per-branch stop list (/stops rejects filter[route_pattern]).
+ */
+export const BRANCH_ONLY_STATIONS: Readonly<Record<string, string>> = {
+  'place-shmnl': 'place-asmnl', // Savin Hill
+  'place-fldcr': 'place-asmnl', // Fields Corner
+  'place-smmnl': 'place-asmnl', // Shawmut
+  'place-asmnl': 'place-asmnl', // Ashmont
+  'place-nqncy': 'place-brntn', // North Quincy
+  'place-wlsta': 'place-brntn', // Wollaston
+  'place-qnctr': 'place-brntn', // Quincy Center
+  'place-qamnl': 'place-brntn', // Quincy Adams
+  'place-brntn': 'place-brntn', // Braintree
+}
+
+/** The headsign of trains running to each branch terminus in BRANCH_ONLY_STATIONS. */
+export const BRANCH_TERMINUS_HEADSIGN: Readonly<Record<string, string>> = {
+  'place-asmnl': 'Ashmont',
+  'place-brntn': 'Braintree',
+}

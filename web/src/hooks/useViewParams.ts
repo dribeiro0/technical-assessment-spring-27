@@ -43,7 +43,9 @@ export function useViewParams() {
    */
   const setLine = useCallback(
     (next: LineId | null, selectedVehicleLine?: LineId | null) => {
-      const changes: Record<string, string | null> = { line: next }
+      // Picking a line filter closes an open commute, so the two never compete over what
+      // the map highlights.
+      const changes: Record<string, string | null> = { line: next, commute: null }
       if (next && vehicleId && selectedVehicleLine && selectedVehicleLine !== next) {
         changes.vehicle = null
       }

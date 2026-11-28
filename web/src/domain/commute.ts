@@ -5,7 +5,13 @@ import type {
   TripAttributes,
 } from '../api/mbtaTypes'
 import type { Departure } from './departures'
-import { branchForRoute, lineForRoute } from './lines'
+import {
+  BRANCH_ONLY_STATIONS,
+  BRANCH_TERMINUS_HEADSIGN,
+  branchForRoute,
+  directionDestination,
+  lineForRoute,
+} from './lines'
 
 // My Commute (Sprint 4, planning file 06): one saved stop and direction per commute,
 // with official departures and a "when to leave" recommendation.
@@ -253,6 +259,35 @@ export function walkFromHere(here: Point, station: Point): WalkEstimate {
     kind: 'walk',
     minutes: Math.max(1, Math.ceil((metres * WALK_DETOUR) / WALK_METRES_PER_MIN)),
   }
+}
+
+/**
+ * Whether a train with this headsign gets the rider to their destination. Matters where a
+ * line splits: an Ashmont train never reaches Quincy Center, though both leave Kendall
+ * southbound on the Red Line. Without a destination, or before a split, every train counts.
+ */
+export function reachesDestination(headsign: string | null, commute: Commute): boolean {
+  if (!commute.destinationId) return true
+  const terminus = BRANCH_ONLY_STATIONS[commute.destinationId]
+  // Branch-only stations are south of the split, so only southbound (direction 0) trains
+  // can miss them; northbound, every train from a branch runs up the shared trunk.
+  if (!terminus || commute.directionId !== 0) return true
+  return headsign === BRANCH_TERMINUS_HEADSIGN[terminus]
+}
+
+/**
+ * Where the commute's trains are headed, for labels: the branch terminus when the
+ * destination decides it ("Braintree" for Quincy Center), else the direction's usual
+ * label ("Ashmont/Braintree").
+ */
+export function commuteToward(commute: Commute): string {
+  const terminus =
+    commute.destinationId && commute.directionId === 0
+      ? BRANCH_ONLY_STATIONS[commute.destinationId]
+      : undefined
+  return terminus
+    ? BRANCH_TERMINUS_HEADSIGN[terminus]
+    : directionDestination(commute.routeId, commute.directionId)
 }
 
 /** How long ago a departure may be and still be listed ("leaving now"). */

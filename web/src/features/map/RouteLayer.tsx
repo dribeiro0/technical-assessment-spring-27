@@ -1,6 +1,7 @@
 import L from 'leaflet'
 import { memo, useMemo } from 'react'
 import { CircleMarker, Pane, Polyline, Tooltip } from 'react-leaflet'
+import type { CommuteFocus } from '../../domain/commuteRoute'
 import { getLine, type LineId } from '../../domain/lines'
 import { useNetwork } from '../../hooks/useNetwork'
 
@@ -12,13 +13,15 @@ interface Props {
   activeLine: LineId | null
   selectedStation: string | null
   onSelectStation: (stationId: string) => void
+  /** An open commute: its stretch is drawn on top and everything else fades. */
+  focus?: { stretch: CommuteFocus; color: string } | null
 }
 
 /**
  * Line paths and hollow station dots from /shapes and /stops (Sprint 3, DEC-027).
  * Drawn in their own panes so they always sit beneath the vehicles.
  * When a line filter is set, the other lines fade back: shapes are restyled in place
- * rather than rebuilt.
+ * rather than rebuilt. An open commute works the same way for just the stretch it rides.
  *
  * Tapping a station opens its departures. The dots are small, so they get their own
  * canvas renderer with a wide tolerance: a tap up to 10 px away still counts.
@@ -27,12 +30,14 @@ export const RouteLayer = memo(function RouteLayer({
   activeLine,
   selectedStation,
   onSelectStation,
+  focus = null,
 }: Props) {
   const { data: network } = useNetwork()
   const stationRenderer = useMemo(() => L.canvas({ pane: 'stations', tolerance: 10 }), [])
   if (!network) return null
 
-  const dimmed = (lines: LineId[]) => activeLine !== null && !lines.includes(activeLine)
+  const dimmed = (lines: LineId[]) =>
+    focus !== null || (activeLine !== null && !lines.includes(activeLine))
   const selected = selectedStation
     ? network.stations.find((s) => s.id === selectedStation)
     : undefined
@@ -54,11 +59,25 @@ export const RouteLayer = memo(function RouteLayer({
             }}
           />
         ))}
+        {focus?.stretch.paths.map((path, i) => (
+          <Polyline
+            key={`focus-${i}`}
+            positions={path}
+            interactive={false}
+            pathOptions={{
+              color: focus.color,
+              weight: 6,
+              opacity: 1,
+              lineCap: 'round',
+              lineJoin: 'round',
+            }}
+          />
+        ))}
       </Pane>
       <Pane name="stations" style={{ zIndex: 420 }}>
         {network.stations.map((station) => {
           const isTransfer = station.lines.length > 1
-          const faded = dimmed(station.lines)
+          const faded = focus ? !focus.stretch.stationIds.has(station.id) : dimmed(station.lines)
           return (
             <CircleMarker
               key={station.id}

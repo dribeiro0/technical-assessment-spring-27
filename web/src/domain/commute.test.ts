@@ -2,12 +2,14 @@ import { describe, expect, it } from 'vitest'
 import type { SchedulesDocument } from '../api/mbtaTypes'
 import {
   chooseDepartures,
+  commuteToward,
   createCommute,
   distanceMetres,
   leaveAdvice,
   walkFromHere,
   parseCommutes,
   parseScheduledDepartures,
+  reachesDestination,
   recommendDeparture,
   reverseCommute,
   serializeCommutes,
@@ -289,3 +291,32 @@ function schedule(id: string, trip: string, departure: string | null, pickup: nu
     },
   }
 }
+
+describe('reachesDestination (where the Red Line splits)', () => {
+  const toQuincy: Commute = {
+    ...work,
+    directionId: 0,
+    destinationId: 'place-qnctr',
+    destinationName: 'Quincy Center',
+  }
+
+  it('keeps only trains for the destination’s branch', () => {
+    expect(reachesDestination('Braintree', toQuincy)).toBe(true)
+    expect(reachesDestination('Ashmont', toQuincy)).toBe(false)
+    expect(reachesDestination(null, toQuincy)).toBe(false)
+  })
+
+  it('lets every train count on the shared trunk, northbound, or without a destination', () => {
+    expect(reachesDestination('Ashmont', work)).toBe(true) // Kendall -> Park Street
+    expect(reachesDestination('Alewife', { ...toQuincy, directionId: 1 })).toBe(true)
+    expect(reachesDestination('Ashmont', { ...work, destinationId: null })).toBe(true)
+  })
+})
+
+describe('commuteToward', () => {
+  it('names the branch when the destination decides it', () => {
+    expect(commuteToward({ ...work, destinationId: 'place-qnctr' })).toBe('Braintree')
+    expect(commuteToward(work)).toBe('Ashmont/Braintree') // Kendall -> Park Street
+    expect(commuteToward({ ...work, directionId: 1 })).toBe('Alewife')
+  })
+})

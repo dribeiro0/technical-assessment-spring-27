@@ -2,12 +2,13 @@ import { useQuery } from '@tanstack/react-query'
 import { describeError, fetchCommutePredictions, fetchCommuteSchedules } from '../api/mbta'
 import {
   chooseDepartures,
+  reachesDestination,
   parseScheduledDepartures,
   serviceDayQuery,
   type Commute,
   type CommuteDeparture,
 } from '../domain/commute'
-import { parseDepartures } from '../domain/departures'
+import { parseDepartures, type Departure } from '../domain/departures'
 import { FEED_STALE_AFTER_MS } from '../domain/freshness'
 import { useLiveData } from './liveData'
 import { PREDICTION_POLL_MS, pollEvery, retryUnlessRateLimited } from './polling'
@@ -61,7 +62,11 @@ export function useCommuteDepartures(commute: Commute | null, now: number): Comm
     staleTime: 10_000,
   })
 
-  const liveAhead = chooseDepartures(live.data ?? [], [], now)
+  // Only trains that reach the destination (where the Red Line splits, its branch).
+  const reaching = (list: Departure[] | undefined) =>
+    commute ? (list ?? []).filter((d) => reachesDestination(d.headsign, commute)) : []
+  const liveReaching = reaching(live.data)
+  const liveAhead = chooseDepartures(liveReaching, [], now)
   const needTimetable =
     commute !== null &&
     ((live.data === undefined && live.isError) ||
@@ -89,8 +94,8 @@ export function useCommuteDepartures(commute: Commute | null, now: number): Comm
   })
 
   const departures = chooseDepartures(
-    live.data ?? [],
-    needTimetable ? (timetable.data ?? []) : [],
+    liveReaching,
+    needTimetable ? reaching(timetable.data) : [],
     now,
   )
   const fromLive = departures[0]?.source !== 'scheduled'

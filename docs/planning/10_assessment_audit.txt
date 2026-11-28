@@ -337,3 +337,19 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3
   - Not checked in a browser: a granted location (the test browser cannot
     grant it). The estimate itself is unit tested; try it on a phone.
   - Open: on a phone the ringed station can sit under the bottom sheet.
+
+  Commute focus on the map, November 28 (DEC-049, DEC-050)
+  - Stretch cutting checked against the real MBTA network for eight
+    commutes, including both Red branches, a Green branch with no
+    destination, Orange and Blue. The first version wrongly put Savin Hill
+    on the Braintree branch (parallel tracks); fixed with the branch table
+    and a regression test.
+  - In the browser (desktop and 390 px phone): opening the commute from the
+    sidebar zooms to the stretch beside or above the card, fades the rest,
+    and shows only Braintree-bound trains for Kendall -> Quincy Center.
+  - Found while checking: the advice aimed a Quincy Center rider at an
+    Ashmont train. Departures now count only trains that reach the
+    destination; the card says "toward Braintree".
+  - 10 new unit tests (83 in total).
+  - Open: short-turn trips (e.g. a train ending at JFK/UMass) are not yet
+    excluded for destinations beyond where they end.

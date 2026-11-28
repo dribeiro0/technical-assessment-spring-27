@@ -1,4 +1,5 @@
-import { directionDestination, routeColor } from '../domain/lines'
+import { commuteToward } from '../domain/commute'
+import { routeColor } from '../domain/lines'
 import { useSavedCommutes } from '../hooks/useSavedCommutes'
 import { useViewParams } from '../hooks/useViewParams'
 
@@ -56,7 +57,7 @@ export function MyCommutes({ onChosen }: { onChosen?: () => void }) {
                       {c.name}
                     </span>
                     <span className="text-fg-muted block truncate text-[11px]">
-                      {c.stationName} · toward {directionDestination(c.routeId, c.directionId)}
+                      {c.stationName} · toward {commuteToward(c)}
                     </span>
                   </span>
                 </button>
