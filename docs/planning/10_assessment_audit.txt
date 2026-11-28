@@ -408,3 +408,11 @@ R10 Submission: fork, completed app, PR, screen recording, by deadline [Sprint 3
   - The status bar showed "0 alerts" when alerts were unavailable, and
     counted upcoming ones. It now shows alerts in effect now, or "-".
   - Alert summaries on the commute card were not clamped to two lines.
+
+  Layout change after review (DEC-056)
+  - Review: the sidebar was overcrowded, and the map showed nothing at
+    stations with alerts until one was opened.
+  - Checked in the browser on the real feed: the warning button shows "3";
+    it opens the list card (3 now, 2 upcoming); Hawes St, Summit Ave and
+    Symphony carry dashed rings with nothing open; Symphony's station card
+    lists its closure and the upcoming shutdown. No page errors.

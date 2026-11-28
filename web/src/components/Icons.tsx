@@ -55,6 +55,13 @@ export const PlayIcon = (p: IconProps) => (
   </Svg>
 )
 
+/** A warning triangle, for MBTA alerts. */
+export const AlertIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M8 2 14.5 13.5h-13z M8 6.5v3.5 M8 11.6v.4" />
+  </Svg>
+)
+
 export const ChevronIcon = (p: IconProps) => (
   <Svg {...p}>
     <path d="M6 4l4 4-4 4" />

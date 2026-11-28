@@ -3,6 +3,7 @@ import { formatAgeLong } from '../domain/freshness'
 import { alertWhen, effectText, type LineAlert } from '../domain/lineStatus'
 import { getLine } from '../domain/lines'
 import { useNetwork } from '../hooks/useNetwork'
+import { ALL_ALERTS, useViewParams } from '../hooks/useViewParams'
 import { useNow } from '../hooks/useNow'
 import { FloatingCard } from './FloatingCard'
 import { StatusMark } from './StatusMark'
@@ -19,6 +20,7 @@ export function AlertCard({ alert, onClose }: { alert: LineAlert; onClose: () =>
   const now = useNow(10_000)
   const { data: network } = useNetwork()
   const [expanded, setExpanded] = useState(false)
+  const { selectAlert } = useViewParams()
   const upcoming = alert.timing === 'upcoming'
 
   const name = (id: string) => network?.stations.find((s) => s.id === id)?.name ?? null
@@ -48,6 +50,13 @@ export function AlertCard({ alert, onClose }: { alert: LineAlert; onClose: () =>
       closeLabel="Close alert"
     >
       <div className="px-4 pt-3 pr-12 pb-3">
+        <button
+          type="button"
+          onClick={() => selectAlert(ALL_ALERTS)}
+          className="text-accent mb-1 text-xs font-semibold"
+        >
+          <span aria-hidden="true">‹ </span>All alerts
+        </button>
         <p className="flex flex-wrap items-center gap-x-2 text-xs">
           {upcoming ? (
             <span className="text-fg-secondary font-semibold">◇ Upcoming</span>

@@ -73,6 +73,18 @@ export function LiveMapView() {
       .map((s): [number, number] => [s.lat, s.lon])
     return [...focus.stretch.paths.flat(), ...stations]
   }, [focus, network])
+  // Stations named by an alert in effect now, with the worst level among them.
+  const alertStations = useMemo(() => {
+    const map = new Map<string, 'minor' | 'major'>()
+    for (const a of alerts) {
+      if (a.timing !== 'active') continue
+      for (const e of a.entities) {
+        if (!e.stationId || map.get(e.stationId) === 'major') continue
+        map.set(e.stationId, a.level)
+      }
+    }
+    return map
+  }, [alerts])
   const alertRoutes = alert ? new Set(alert.entities.map((e) => e.routeId)) : null
 
   // With a commute open, only the trains the rider could catch: its route, its direction,
@@ -131,6 +143,7 @@ export function LiveMapView() {
           selectedStation={ringedStation}
           onSelectStation={selectStation}
           focus={focus}
+          alertStations={alertStations}
         />
         {shown.map((v) => (
           <VehicleMarker

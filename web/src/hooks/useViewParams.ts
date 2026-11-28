@@ -4,6 +4,8 @@ import { isLineId, type LineId } from '../domain/lines'
 
 export const MAP_PATH = '/'
 export const ANALYTICS_PATH = '/analytics'
+/** The value of ?alert= that opens the list of every alert rather than one alert. */
+export const ALL_ALERTS = 'all'
 
 /**
  * The line filter (?line=Red) and selected vehicle (?vehicle=R-548CD8D6) live in the URL,

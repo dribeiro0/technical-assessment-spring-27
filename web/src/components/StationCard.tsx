@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import { alertWhen, effectText } from '../domain/lineStatus'
 import { groupDepartures, type DepartureGroup } from '../domain/departures'
 import { formatAgeLong } from '../domain/freshness'
 import { getLine } from '../domain/lines'
 import { minutesAway, shortEta } from '../domain/predictions'
 import { useNetwork } from '../hooks/useNetwork'
+import { useLiveData } from '../hooks/liveData'
 import { useNow } from '../hooks/useNow'
 import { useSavedCommutes } from '../hooks/useSavedCommutes'
 import { useStationDepartures } from '../hooks/useStationDepartures'
@@ -27,9 +29,12 @@ export function StationCard({ stationId, onClose }: { stationId: string; onClose
   // A one-line station takes that line's colour; transfer stations stay navy.
   const color = station && station.lines.length === 1 ? getLine(station.lines[0]).color : undefined
   const { commutes, add } = useSavedCommutes()
-  const { selectCommute } = useViewParams()
+  const { selectCommute, selectAlert } = useViewParams()
   const [saving, setSaving] = useState(false)
   const savedHere = commutes.filter((c) => c.stationId === stationId)
+  // Official alerts that name this station (closures, suspensions through it).
+  const { alerts } = useLiveData()
+  const stationAlerts = alerts.filter((a) => a.entities.some((e) => e.stationId === stationId))
 
   if (saving) {
     return (
@@ -106,6 +111,30 @@ export function StationCard({ stationId, onClose }: { stationId: string; onClose
           </button>
         </div>
       </div>
+
+      {stationAlerts.length > 0 && (
+        <section aria-label="MBTA alerts at this station" className="bg-chip mt-2.5 px-4 py-2">
+          {stationAlerts.map((alert) => (
+            <button
+              key={alert.id}
+              type="button"
+              onClick={() => selectAlert(alert.id)}
+              className="block w-full py-1 text-left text-xs"
+            >
+              <span
+                className={`font-semibold ${
+                  alert.timing === 'upcoming' ? 'text-fg-secondary' : 'text-warn'
+                }`}
+              >
+                <span aria-hidden="true">{alert.timing === 'upcoming' ? '◇ ' : '▲ '}</span>
+                {alert.timing === 'upcoming' ? 'Upcoming · ' : ''}
+                {effectText(alert.effect)} · {alertWhen(alert)}
+              </span>
+              <span className="text-fg line-clamp-2">{alert.header}</span>
+            </button>
+          ))}
+        </section>
+      )}
 
       <div className="mt-2.5">
         {isPending ? (

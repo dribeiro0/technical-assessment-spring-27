@@ -14,17 +14,19 @@ import type { Vehicle } from '../domain/vehicle'
 import { useLiveData } from '../hooks/liveData'
 import { useNow } from '../hooks/useNow'
 import { useTripPredictions } from '../hooks/useTripPredictions'
-import { useViewParams } from '../hooks/useViewParams'
+import { ALL_ALERTS, useViewParams } from '../hooks/useViewParams'
 import { AlertList } from './AlertList'
 import { FloatingCard } from './FloatingCard'
 import { ChevronIcon } from './Icons'
 import { useSavedCommutes } from '../hooks/useSavedCommutes'
 import { AlertCard } from './AlertCard'
+import { AlertsListCard } from './AlertsListCard'
 import { CommuteCard } from './CommuteCard'
 import { StationCard } from './StationCard'
 
 /**
  * The card over the map. Shows, in order of priority:
+ * - the list of every MBTA alert (?alert=all), from the alerts button,
  * - the open official alert (?alert=): its details, with the affected places lit on the map,
  * - the open saved commute (?commute=): when to leave and its next departures,
  * - the selected station's departures (?stop=),
@@ -50,6 +52,7 @@ export function TrainCard() {
   const alert = alertId ? allAlerts.find((a) => a.id === alertId) : undefined
   const commute = commuteId ? commutes.find((c) => c.id === commuteId) : undefined
 
+  if (alertId === ALL_ALERTS) return <AlertsListCard onClose={() => selectAlert(null)} />
   if (alert) {
     return <AlertCard key={alert.id} alert={alert} onClose={() => selectAlert(null)} />
   }

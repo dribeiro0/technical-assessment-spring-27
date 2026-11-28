@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router'
-import { AlertsPanel } from '../components/AlertsPanel'
 import { CloseIcon } from '../components/Icons'
 import { LineStatusBadges } from '../components/LineStatusBadges'
 import { LineTree } from '../components/LineTree'
@@ -48,7 +47,6 @@ function SidebarContent({ onVehicleChosen }: { onVehicleChosen?: () => void }) {
   return (
     <>
       <LineStatusBadges />
-      <AlertsPanel onChosen={onVehicleChosen} />
       <MyCommutes onChosen={onVehicleChosen} />
       <LineTree onVehicleChosen={onVehicleChosen} />
     </>

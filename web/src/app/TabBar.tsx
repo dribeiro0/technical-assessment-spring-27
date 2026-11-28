@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router'
 import { MenuIcon } from '../components/Icons'
 import { ANALYTICS_PATH, MAP_PATH, useViewParams } from '../hooks/useViewParams'
+import { AlertsButton } from './AlertsButton'
 import { RefreshButtons } from './RefreshButtons'
 
 // The active tab turns paper-white with an orange bar on top; the others sit on the navy frame.
@@ -52,6 +53,7 @@ export function TabBar({ onOpenMenu }: { onOpenMenu: () => void }) {
         </select>
         <div className="flex md:hidden">
           <RefreshButtons />
+          <AlertsButton />
         </div>
       </div>
     </div>

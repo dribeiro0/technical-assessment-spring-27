@@ -2,60 +2,55 @@ import { alertWhen, effectText, type LineAlert } from '../domain/lineStatus'
 import { getLine } from '../domain/lines'
 import { useLiveData } from '../hooks/liveData'
 import { useViewParams } from '../hooks/useViewParams'
+import { FloatingCard } from './FloatingCard'
 import { StatusMark } from './StatusMark'
 
 /**
- * Official MBTA alerts in the sidebar (Sprint 5): those in effect now, then upcoming ones,
- * ranked by passenger impact. Choosing one opens its card over the map (?alert=), which
- * lights up the affected stations or track.
+ * Every MBTA alert, as a card over the map (DEC-056): opened from the alerts button on the
+ * navy frame. In effect now first, then upcoming, ranked by passenger impact. Choosing one
+ * opens its own card (?alert=<id>), which lights up the affected stations or track.
  */
-export function AlertsPanel({ onChosen }: { onChosen?: () => void }) {
+export function AlertsListCard({ onClose }: { onClose: () => void }) {
   const { alerts, alertsState } = useLiveData()
-  const { alertId, selectAlert } = useViewParams()
+  const { selectAlert } = useViewParams()
   const active = alerts.filter((a) => a.timing === 'active')
   const upcoming = alerts.filter((a) => a.timing === 'upcoming')
 
-  const choose = (id: string) => {
-    selectAlert(alertId === id ? null : id)
-    onChosen?.()
-  }
-
   return (
-    <section aria-labelledby="alerts-title" className="px-4 pb-1">
-      <h2
-        id="alerts-title"
-        className="text-fg-muted flex items-baseline justify-between pt-3.5 pb-2 text-[10.5px] font-semibold tracking-[0.08em] uppercase"
-      >
-        <span>MBTA alerts</span>
+    <FloatingCard label="MBTA alerts" onClose={onClose} closeLabel="Close alerts">
+      <div className="px-4 pt-3 pr-12 pb-1">
+        <h2 className="text-base font-bold">MBTA alerts</h2>
         {alertsState === 'ok' && (
-          <span className="font-mono tracking-normal normal-case">
+          <p className="text-fg-muted font-mono text-[11px]">
             {active.length} now · {upcoming.length} upcoming
-          </span>
+          </p>
         )}
-      </h2>
-      {alertsState === 'loading' ? (
-        <p className="text-fg-muted pb-1 text-xs">Loading alerts…</p>
-      ) : alertsState === 'unavailable' ? (
-        // Never "no disruptions": we simply don't know (05, section 9).
-        <p role="status" className="text-warn pb-1 text-xs font-semibold">
-          Alerts are unavailable right now, so disruptions may not be shown.
-        </p>
-      ) : alerts.length === 0 ? (
-        <p className="text-fg-muted pb-1 text-xs">No disruptions reported by the MBTA.</p>
-      ) : (
-        <>
-          <AlertItems alerts={active} openId={alertId} onChoose={choose} />
-          {upcoming.length > 0 && (
-            <>
-              <h3 className="text-fg-muted pt-2.5 pb-1.5 text-[10.5px] font-semibold tracking-[0.08em] uppercase">
-                Upcoming
-              </h3>
-              <AlertItems alerts={upcoming} openId={alertId} onChoose={choose} />
-            </>
-          )}
-        </>
-      )}
-    </section>
+      </div>
+      <div className="px-4 pt-2 pb-4">
+        {alertsState === 'loading' ? (
+          <p className="text-fg-muted text-xs">Loading alerts…</p>
+        ) : alertsState === 'unavailable' ? (
+          // Never "no disruptions": we simply don't know (05, section 9).
+          <p role="status" className="text-warn text-xs font-semibold">
+            Alerts are unavailable right now, so disruptions may not be shown.
+          </p>
+        ) : alerts.length === 0 ? (
+          <p className="text-fg-muted text-xs">No disruptions reported by the MBTA.</p>
+        ) : (
+          <>
+            <AlertItems alerts={active} openId={null} onChoose={selectAlert} />
+            {upcoming.length > 0 && (
+              <>
+                <h3 className="text-fg-muted pt-3 pb-1.5 text-[10.5px] font-semibold tracking-[0.08em] uppercase">
+                  Upcoming
+                </h3>
+                <AlertItems alerts={upcoming} openId={null} onChoose={selectAlert} />
+              </>
+            )}
+          </>
+        )}
+      </div>
+    </FloatingCard>
   )
 }
 
